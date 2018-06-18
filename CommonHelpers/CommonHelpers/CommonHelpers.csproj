@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/LanceMcCarthy/CommonHelpers</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/LanceMcCarthy/CommonHelpers/blob/master/LICENSE</PackageLicenseUrl>
     <Copyright>Copyright 2018</Copyright>
-    <PackageIconUrl>https://github.com/LanceMcCarthy/CommonHelpers/CommonHelpers/NuGet/NuGetIcon.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/LanceMcCarthy/CommonHelpers/master/CommonHelpers/CommonHelpers/NuGet/NuGetIcon.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
     <PackageTags>NetStandard C#</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
