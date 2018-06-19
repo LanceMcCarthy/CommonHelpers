@@ -7,10 +7,10 @@ Nuget: [CommonHelpers on NuGet](https://www.nuget.org/packages/CommonHelpers/)
 
 #### Collections
 
-Special collection types (e.g. `ObservableQueue` and `ObservableRangeCollection`)
+Special collection types that help in special scenarios (e.g. `ObservableQueue` and `ObservableRangeCollection`).
 
 #### Common
-This folder has the frequently used base classe (i.e. `BindableBase`, `ViewModelBase`, `JsonHelper`).
+This folder has some of the most frequently used classes (i.e. `BindableBase`, `ViewModelBase`, `JsonHelper`).
 
 #### Models
 Common sample data model classes used to populate UI elements (Charts, ListViews, DataGrid, etc).
@@ -22,9 +22,29 @@ Extensions for commonly used objects like `string`, `DateTime`, `enum`. There ar
 Platform agnostic MVVM classes like `DelegateCommand` and `RelayCommand`
 
 #### Services
-To make testing UI controls with real-life API calls easier, I've added a few of my commonly used web endpoints (e.g. `XkcdApiService`). Most do not require an API key, just new up the service class and go. This is really useful for testing Load On Demand scenarios.
+To make testing UI controls easier by quickly providing well formatted data from offline sample data and online API endpoints. This is really useful for quickly testing *Load On Demand* scenarios.
 
-Example: `BingImageService`:
+* BingImageService
+* ComiceVineApiService**
+* SampleDataService
+* XkcdApiService
+
+** *Note: Most services do not require an API key, just new up the class and go. To prevent any confusion, any services that need an API key will require it in the constructor.**
+
+##### Example 1 - Sample Data Services
+`SampleDataService`:
+ 
+```C#
+var sampleDataService = new SampleDataService();
+
+listView.ItemsSource = sampleDataService.GeneratePeopleData();
+scatterLineSeries.ItemsSource = sampleDataService.GenerateScatterPointData();
+barSeries.ItemsSource = sampleDataService.GenerateCategoricalData();
+```
+
+
+##### Example 2 - Online API Services
+`BingImageService`:
 
 ```C#
 using (var bingImageService = new BingImageService())
@@ -35,3 +55,7 @@ using (var bingImageService = new BingImageService())
 ```
 
 ![image](https://user-images.githubusercontent.com/3520532/41568781-bbd0c9ee-7335-11e8-89a0-92b404ca1aa2.png)
+
+
+
+**Tip:** If you're looking for more public APIs to use for data sources, check out [Todd Motto's Public Apis on GitHub](https://github.com/toddmotto/public-apis). If you see any in there that you'd like me to create a C# service class for? Open an Issue and I'll add it.
