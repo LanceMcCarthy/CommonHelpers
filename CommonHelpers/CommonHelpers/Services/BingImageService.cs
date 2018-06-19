@@ -4,20 +4,26 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace CommonHelpers.Images
+namespace CommonHelpers.Services
 {
     public enum BingImageResolution { Unspecified, _800x600, _1024x768, _1366x768, _1920x1080, _1920x1200 }
 
-    public class OnlineImageSources : IDisposable
+    public class BingImageService : IDisposable
     {
-        private HttpClient client;
+        private readonly HttpClient client;
 
-        public OnlineImageSources()
+        public BingImageService()
         {
             client = new HttpClient();
         }
 
-        public async Task<Uri> GetBingImageOfTheDayAsync(BingImageResolution resolution = BingImageResolution.Unspecified, string market = "en-ww")
+        /// <summary>
+        /// Gets the Bing Image of The Day
+        /// </summary>
+        /// <param name="resolution">Sets the resolution of the image. The default is Unspecified, which usually returns 1366x768.</param>
+        /// <param name="market">Sets the market to retrieve that image of the day. The default is Worldwide ("ww")</param>
+        /// <returns>Image URL</returns>
+        public async Task<string> GetBingImageOfTheDayAsync(BingImageResolution resolution = BingImageResolution.Unspecified, string market = "en-ww")
         {
             var request = new Uri($"http://www.bing.com/hpimagearchive.aspx?n=1&mkt={market}");
 
@@ -29,11 +35,9 @@ namespace CommonHelpers.Images
 
             var resolutionString = resolution == BingImageResolution.Unspecified ? "" : $"{resolution}.jpg";
 
-            return new Uri($"http://www.bing.com{pathString}{resolutionString}");
+            return $"http://www.bing.com{pathString}{resolutionString}";
         }
-
-
-
+        
         public void Dispose()
         {
             client?.Dispose();

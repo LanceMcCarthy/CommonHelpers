@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CommonHelpers.Common
+namespace CommonHelpers.Extensions
 {
     public static class StringExtensions
     {

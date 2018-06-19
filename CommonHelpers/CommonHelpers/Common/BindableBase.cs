@@ -14,8 +14,7 @@ namespace CommonHelpers.Common
         {
             if (EqualityComparer<T>.Default.Equals(backingStore, value))
                 return false;
-
-            backingStore = value;
+            
             onChanged?.Invoke();
             OnPropertyChanged(propertyName);
             return true;

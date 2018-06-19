@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 
-namespace CommonHelpers.Common
+namespace CommonHelpers.Extensions
 {
     public static class ColorExtensions
     {

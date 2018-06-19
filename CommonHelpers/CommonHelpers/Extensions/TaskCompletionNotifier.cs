@@ -27,7 +27,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommonHelpers.TaskExtensions
+namespace CommonHelpers.Extensions
 {
     public sealed class TaskCompletionNotifier<TResult> : INotifyPropertyChanged
     {
