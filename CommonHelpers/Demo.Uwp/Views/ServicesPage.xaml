@@ -1,0 +1,200 @@
+﻿<Page x:Class="Demo.Uwp.Views.ServicesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:viewModels="using:Demo.Uwp.ViewModels"
+      xmlns:chart="using:Telerik.UI.Xaml.Controls.Chart"
+      Style="{StaticResource PageStyle}"
+      mc:Ignorable="d">
+
+    <Page.DataContext>
+        <viewModels:ServicesViewModel x:Name="ViewModel" />
+    </Page.DataContext>
+
+    <Grid x:Name="ContentArea">
+        <Pivot x:Name="Items">
+            <PivotItem Header="xkcd API Service"
+                       x:Uid="Services_PivotItem3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <ListView ItemsSource="{Binding XkcdComics}"
+                              ItemContainerStyle="{StaticResource StretchedListViewItemStyle}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
+                                      Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Orientation="Horizontal"
+                                                Margin="10">
+                                        <TextBlock Text="{Binding Num}"
+                                                   Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                        <TextBlock Text=" - "
+                                                   Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                        <TextBlock Text="{Binding Title}"
+                                                   Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                    </StackPanel>
+
+                                    <Image Source="{Binding Img}"
+                                           Grid.Row="1"
+                                           Margin="10" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <Button Content="Load Comic"
+                            Click="{x:Bind ViewModel.LoadXkcdComicButton_OnClick}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Margin="10"
+                            Grid.Row="1" />
+                </Grid>
+            </PivotItem>
+
+            <PivotItem Header="Comic Vine API Service"
+                       x:Uid="Services_PivotItem4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <Border x:Name="Header"
+                            VerticalAlignment="Top"
+                            Background="Black">
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center">
+                            <TextBlock Text="Characters Loaded:"
+                                       Foreground="White"
+                                       Margin="10" />
+                            <TextBlock Text="{Binding Characters.Count}"
+                                       Foreground="White"
+                                       Margin="10" />
+                            <ProgressRing IsActive="{Binding IsCharactersLoadOnDemandActive}"
+                                          Foreground="White" />
+                        </StackPanel>
+                    </Border>
+
+                    <ListView ItemsSource="{Binding Characters}"
+                              ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
+                              Grid.Row="1">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="85" />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Image Source="{Binding Image.ThumbUrl}"
+                                           Margin="5" />
+
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding Name}"
+                                                   Style="{ThemeResource TitleTextBlockStyle}"
+                                                   Margin="0,5,0,5" />
+                                        <TextBlock Text="{Binding Deck}"
+                                                   TextWrapping="WrapWholeWords" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <PivotItem Header="Bing Image Service"
+                       x:Uid="Services_PivotItem1">
+                <Grid>
+                    <Grid.Background>
+                        <ImageBrush>
+                            <ImageBrush.ImageSource>
+                                <BitmapImage UriSource="{Binding BingImageOfTheDayUri}"/>
+                            </ImageBrush.ImageSource>
+                        </ImageBrush>
+                    </Grid.Background>
+
+                    <Button Content="Get Bing Image"
+                            Click="{x:Bind ViewModel.GetBingImageButton_OnClick}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center" />
+                </Grid>
+            </PivotItem>
+
+            <PivotItem Header="Sample Data Service"
+                       x:Uid="Services_PivotItem2">
+                <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <chart:RadCartesianChart>
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:CategoricalAxis />
+                        </chart:RadCartesianChart.HorizontalAxis>
+
+                        <chart:BarSeries ItemsSource="{Binding BarSeriesData}">
+                            <chart:BarSeries.CategoryBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Title" />
+                            </chart:BarSeries.CategoryBinding>
+                            <chart:BarSeries.ValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Value" />
+                            </chart:BarSeries.ValueBinding>
+                        </chart:BarSeries>
+                    </chart:RadCartesianChart>
+
+                    <chart:RadCartesianChart Grid.Row="1"
+                                             Grid.Column="0">
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.HorizontalAxis>
+
+                        <chart:ScatterPointSeries ItemsSource="{Binding ScatterSeriesData}">
+                            <chart:ScatterPointSeries.XValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="XValue" />
+                            </chart:ScatterPointSeries.XValueBinding>
+                            <chart:ScatterPointSeries.YValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="YValue" />
+                            </chart:ScatterPointSeries.YValueBinding>
+                        </chart:ScatterPointSeries>
+                    </chart:RadCartesianChart>
+
+                    <ListView ItemsSource="{Binding People}"
+                              ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
+                              Grid.Column="1"
+                              Grid.Row="0"
+                              Grid.RowSpan="2">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding }"
+                                           Style="{ThemeResource TitleTextBlockStyle}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+        </Pivot>
+    </Grid>
+</Page>
