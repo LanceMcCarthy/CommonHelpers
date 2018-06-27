@@ -125,9 +125,9 @@
     <value>A demo app to show usage of CommonHelpers library</value>
     <comment>Application description</comment>
   </data>
-  <data name="PivotItem_Home.Header" xml:space="preserve">
-    <value>Home</value>
-    <comment>Pivot item header for Home</comment>
+  <data name="PivotItem_Collections.Header" xml:space="preserve">
+    <value>Collections</value>
+    <comment>Pivot item header for Collections</comment>
   </data>
   <data name="Services_PivotItem1.Header" xml:space="preserve">
     <value>Bing Image Service</value>

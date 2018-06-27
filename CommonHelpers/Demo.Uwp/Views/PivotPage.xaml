@@ -16,9 +16,9 @@
                     <views:ServicesPage/>
                 </Frame>
             </PivotItem>
-            <PivotItem x:Uid="PivotItem_Home">
+            <PivotItem x:Uid="PivotItem_Collections">
                 <Frame>
-                    <views:HomePage/>
+                    <views:CollectionsPage/>
                 </Frame>
             </PivotItem>
             <PivotItem x:Uid="PivotItem_Extensions">

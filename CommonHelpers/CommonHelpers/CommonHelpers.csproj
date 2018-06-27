@@ -4,8 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Lance McCarthy</Authors>
     <Company>Lancelot Software, LLC</Company>
-    <Description>A small library to help build demos. This saves time by preventing the need to rewrite the same code several times a day.</Description>
-    <PackageReleaseNotes>Sample data service maintenence.</PackageReleaseNotes>
+    <Description>A small library containing frequently reused classes, infrustructure and data services to help build reliable demo applications faster.</Description>
+    <PackageReleaseNotes>- Fixed BindableBase backing store setter
+- SampleDataServices fleshed out</PackageReleaseNotes>
     <RepositoryType>GitHub</RepositoryType>
     <PackageProjectUrl>https://github.com/LanceMcCarthy/CommonHelpers</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/LanceMcCarthy/CommonHelpers/blob/master/LICENSE</PackageLicenseUrl>
@@ -14,9 +15,9 @@
     <RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
     <PackageTags>NetStandard C#</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.6.0</AssemblyVersion>
-    <Version>1.0.6</Version>
-    <FileVersion>1.0.6.0</FileVersion>
+    <AssemblyVersion>1.0.7.0</AssemblyVersion>
+    <Version>1.0.7</Version>
+    <FileVersion>1.0.7.0</FileVersion>
   </PropertyGroup>
 
 </Project>

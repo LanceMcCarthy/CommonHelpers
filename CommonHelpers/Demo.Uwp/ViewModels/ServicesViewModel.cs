@@ -32,19 +32,18 @@ namespace Demo.Uwp.ViewModels
         
         public ServicesViewModel()
         {
-            bingImageService = new BingImageService();
-            xkcdService = new XkcdApiService();
-
-            sampleDataService = new SampleDataService();
-            BarSeriesData.AddRange(sampleDataService.GenerateCategoricalData());
-            ScatterSeriesData.AddRange(sampleDataService.GenerateScatterPointData());
-            People.AddRange(sampleDataService.GeneratePeopleNames());
-
+            // Not loading the onine API data while in design mode (although this does work in the deisgner in most cases)
             if (!DesignMode.DesignModeEnabled || !DesignMode.DesignMode2Enabled)
             {
                 comicVineService = new ComicVineApiService(ApiKeys.ComicVineApiKey, ApiKeys.UniqueUserAgentString);
                 Characters = new IncrementalLoadingCollection<Character>((cancellationToken, count) => Task.Run(FetchMoreCharacters, cancellationToken));
+
+                bingImageService = new BingImageService();
+                xkcdService = new XkcdApiService();
             }
+
+            sampleDataService = new SampleDataService();
+            LoadSampleData();
         }
 
         #region Bing Image Service Related
@@ -69,7 +68,24 @@ namespace Demo.Uwp.ViewModels
 
         public ObservableRangeCollection<ChartDataPoint> ScatterSeriesData { get; set; } = new ObservableRangeCollection<ChartDataPoint>();
 
-        public ObservableRangeCollection<string> People { get; set; } = new ObservableRangeCollection<string>();
+        public ObservableRangeCollection<ChartDataPoint> LineSeriesData { get; set; } = new ObservableRangeCollection<ChartDataPoint>();
+
+        public ObservableRangeCollection<ChartDataPoint> SplineAreaSeriesData { get; set; } = new ObservableRangeCollection<ChartDataPoint>();
+
+        public ObservableRangeCollection<Person> People { get; set; } = new ObservableRangeCollection<Person>();
+
+        private void LoadSampleData()
+        {
+            BarSeriesData.AddRange(sampleDataService.GenerateCategoricalData());
+
+            ScatterSeriesData.AddRange(sampleDataService.GenerateScatterPointData());
+
+            LineSeriesData.AddRange(sampleDataService.GenerateDateTimeMinuteData());
+
+            SplineAreaSeriesData.AddRange(sampleDataService.GenerateDateTimeDayData());
+
+            People.AddRange(sampleDataService.GeneratePeopleData());
+        }
         
         #endregion
 
