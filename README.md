@@ -1,7 +1,8 @@
 # CommonHelpers
 This is a small **NET Standard 2.0** helper library to reuse code that I write several times a day in demo projects.
 
-Nuget: [CommonHelpers on NuGet](https://www.nuget.org/packages/CommonHelpers/)
+NuGet [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) 
+
 
 ### Highlights
 
