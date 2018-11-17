@@ -3,16 +3,69 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:viewModels="using:Demo.Uwp.ViewModels"
+      xmlns:models="using:CommonHelpers.Models"
       Style="{StaticResource PageStyle}"
       mc:Ignorable="d">
+
+    <Page.DataContext>
+        <viewModels:CollectionsViewModel x:Name="ViewModel" />
+    </Page.DataContext>
 
     <Grid x:Name="ContentArea"
           Margin="{StaticResource MediumLeftRightMargin}">
         <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-            <TextBlock Text="Under Contruction"
-                       VerticalAlignment="Center"
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="ObservableQueue (LIFO)"
                        HorizontalAlignment="Center"
                        Style="{ThemeResource PageTitleStyle}" />
+
+            <TextBlock Text="ObservableRangeCollection"
+                       HorizontalAlignment="Center"
+                       Style="{ThemeResource PageTitleStyle}"
+                       Grid.Column="1" />
+
+            <ListView ItemsSource="{Binding Queue}"
+                      HorizontalAlignment="Center"
+                      Grid.Row="1">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}"
+                                   Style="{ThemeResource TitleTextBlockStyle}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <ListView ItemsSource="{Binding People}"
+                      HorizontalAlignment="Center"
+                      Grid.Row="1"
+                      Grid.Column="1">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"
+                                   Style="{ThemeResource TitleTextBlockStyle}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <CommandBar Grid.Row="2"
+                        Grid.ColumnSpan="2">
+                <AppBarButton Icon="Add"
+                              Label="Add Items"
+                              Click="{x:Bind ViewModel.AddButton_OnClick}" />
+                <AppBarButton Icon="Remove"
+                              Label="Remove Items"
+                              Click="{x:Bind ViewModel.RemoveButton_OnClick}" />
+            </CommandBar>
         </Grid>
     </Grid>
 </Page>
