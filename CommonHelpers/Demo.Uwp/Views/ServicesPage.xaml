@@ -14,6 +14,121 @@
 
     <Grid x:Name="ContentArea">
         <Pivot x:Name="Items">
+            <PivotItem Header="Sample Data Service"
+                       x:Uid="Services_PivotItem2">
+                <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <chart:RadCartesianChart>
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:CategoricalAxis />
+                        </chart:RadCartesianChart.HorizontalAxis>
+
+                        <chart:BarSeries ItemsSource="{Binding BarSeriesData}">
+                            <chart:BarSeries.CategoryBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Title" />
+                            </chart:BarSeries.CategoryBinding>
+                            <chart:BarSeries.ValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Value" />
+                            </chart:BarSeries.ValueBinding>
+                        </chart:BarSeries>
+                    </chart:RadCartesianChart>
+
+                    <chart:RadCartesianChart Grid.Row="1"
+                                             Grid.Column="0">
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.HorizontalAxis>
+
+                        <chart:ScatterPointSeries ItemsSource="{Binding ScatterSeriesData}">
+                            <chart:ScatterPointSeries.XValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="XValue" />
+                            </chart:ScatterPointSeries.XValueBinding>
+                            <chart:ScatterPointSeries.YValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="YValue" />
+                            </chart:ScatterPointSeries.YValueBinding>
+                        </chart:ScatterPointSeries>
+                    </chart:RadCartesianChart>
+
+                    <chart:RadCartesianChart Grid.Row="0"
+                                             Grid.Column="1">
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:DateTimeCategoricalAxis DateTimeComponent="Minute"
+                                                           LabelFormat="{}{0,0:t}" />
+                        </chart:RadCartesianChart.HorizontalAxis>
+
+                        <chart:LineSeries ItemsSource="{Binding LineSeriesData}">
+                            <chart:LineSeries.CategoryBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Date" />
+                            </chart:LineSeries.CategoryBinding>
+                            <chart:LineSeries.ValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Value" />
+                            </chart:LineSeries.ValueBinding>
+                        </chart:LineSeries>
+                    </chart:RadCartesianChart>
+
+                    <chart:RadCartesianChart Grid.Row="1"
+                                             Grid.Column="1">
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:DateTimeContinuousAxis MajorStepUnit="Day"
+                                                          LabelInterval="4"
+                                                          LabelFormat="{}{0,0:yyyy-dd-hh}" />
+                        </chart:RadCartesianChart.HorizontalAxis>
+
+                        <chart:SplineAreaSeries ItemsSource="{Binding SplineAreaSeriesData}">
+                            <chart:SplineAreaSeries.CategoryBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Date" />
+                            </chart:SplineAreaSeries.CategoryBinding>
+                            <chart:SplineAreaSeries.ValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="Value" />
+                            </chart:SplineAreaSeries.ValueBinding>
+                        </chart:SplineAreaSeries>
+                    </chart:RadCartesianChart>
+
+                    <ListView ItemsSource="{Binding People}"
+                              ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
+                              Grid.Column="2"
+                              Grid.Row="0"
+                              Grid.RowSpan="2">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5">
+                                    <TextBlock Text="{Binding Name}"
+                                               Style="{ThemeResource TitleTextBlockStyle}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Age:"
+                                                   Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                        <TextBlock Text="{Binding Age}"
+                                                   Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
             <PivotItem Header="xkcd API Service"
                        x:Uid="Services_PivotItem3">
                 <Grid>
@@ -119,7 +234,7 @@
                     <Grid.Background>
                         <ImageBrush>
                             <ImageBrush.ImageSource>
-                                <BitmapImage UriSource="{Binding BingImageOfTheDayUri}"/>
+                                <BitmapImage UriSource="{Binding BingImageOfTheDayUri}" />
                             </ImageBrush.ImageSource>
                         </ImageBrush>
                     </Grid.Background>
@@ -128,118 +243,6 @@
                             Click="{x:Bind ViewModel.GetBingImageButton_OnClick}"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center" />
-                </Grid>
-            </PivotItem>
-
-            <PivotItem Header="Sample Data Service"
-                       x:Uid="Services_PivotItem2">
-                <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="1*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-
-                    <chart:RadCartesianChart>
-                        <chart:RadCartesianChart.VerticalAxis>
-                            <chart:LinearAxis />
-                        </chart:RadCartesianChart.VerticalAxis>
-                        <chart:RadCartesianChart.HorizontalAxis>
-                            <chart:CategoricalAxis />
-                        </chart:RadCartesianChart.HorizontalAxis>
-
-                        <chart:BarSeries ItemsSource="{Binding BarSeriesData}">
-                            <chart:BarSeries.CategoryBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="Title" />
-                            </chart:BarSeries.CategoryBinding>
-                            <chart:BarSeries.ValueBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="Value" />
-                            </chart:BarSeries.ValueBinding>
-                        </chart:BarSeries>
-                    </chart:RadCartesianChart>
-
-                    <chart:RadCartesianChart Grid.Row="1"
-                                             Grid.Column="0">
-                        <chart:RadCartesianChart.VerticalAxis>
-                            <chart:LinearAxis />
-                        </chart:RadCartesianChart.VerticalAxis>
-                        <chart:RadCartesianChart.HorizontalAxis>
-                            <chart:LinearAxis />
-                        </chart:RadCartesianChart.HorizontalAxis>
-
-                        <chart:ScatterPointSeries ItemsSource="{Binding ScatterSeriesData}">
-                            <chart:ScatterPointSeries.XValueBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="XValue" />
-                            </chart:ScatterPointSeries.XValueBinding>
-                            <chart:ScatterPointSeries.YValueBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="YValue" />
-                            </chart:ScatterPointSeries.YValueBinding>
-                        </chart:ScatterPointSeries>
-                    </chart:RadCartesianChart>
-
-                    <chart:RadCartesianChart Grid.Row="0"
-                                             Grid.Column="1">
-                        <chart:RadCartesianChart.VerticalAxis>
-                            <chart:LinearAxis />
-                        </chart:RadCartesianChart.VerticalAxis>
-                        <chart:RadCartesianChart.HorizontalAxis>
-                            <chart:DateTimeCategoricalAxis DateTimeComponent="Minute" LabelFormat="{}{0,0:t}" />
-                        </chart:RadCartesianChart.HorizontalAxis>
-
-                        <chart:LineSeries ItemsSource="{Binding LineSeriesData}">
-                            <chart:LineSeries.CategoryBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="Date" />
-                            </chart:LineSeries.CategoryBinding>
-                            <chart:LineSeries.ValueBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="Value" />
-                            </chart:LineSeries.ValueBinding>
-                        </chart:LineSeries>
-                    </chart:RadCartesianChart>
-
-                    <chart:RadCartesianChart Grid.Row="1"
-                                             Grid.Column="1">
-                        <chart:RadCartesianChart.VerticalAxis>
-                            <chart:LinearAxis />
-                        </chart:RadCartesianChart.VerticalAxis>
-                        <chart:RadCartesianChart.HorizontalAxis>
-                            <chart:DateTimeContinuousAxis MajorStepUnit="Day" LabelInterval="4" LabelFormat="{}{0,0:yyyy-dd-hh}" />
-                        </chart:RadCartesianChart.HorizontalAxis>
-
-                        <chart:SplineAreaSeries ItemsSource="{Binding SplineAreaSeriesData}">
-                            <chart:SplineAreaSeries.CategoryBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="Date" />
-                            </chart:SplineAreaSeries.CategoryBinding>
-                            <chart:SplineAreaSeries.ValueBinding>
-                                <chart:PropertyNameDataPointBinding PropertyName="Value" />
-                            </chart:SplineAreaSeries.ValueBinding>
-                        </chart:SplineAreaSeries>
-                    </chart:RadCartesianChart>
-
-                    <ListView ItemsSource="{Binding People}"
-                              ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
-                              Grid.Column="2"
-                              Grid.Row="0"
-                              Grid.RowSpan="2">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="5">
-                                    <TextBlock Text="{Binding Name}"
-                                               Style="{ThemeResource TitleTextBlockStyle}"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Age:"
-                                                   Style="{ThemeResource SubtitleTextBlockStyle}"/>
-                                        <TextBlock Text="{Binding Age}"
-                                                   Style="{ThemeResource SubtitleTextBlockStyle}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
                 </Grid>
             </PivotItem>
         </Pivot>
