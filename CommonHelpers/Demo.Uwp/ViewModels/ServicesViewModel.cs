@@ -74,6 +74,8 @@ namespace Demo.Uwp.ViewModels
 
         public ObservableRangeCollection<Person> People { get; set; } = new ObservableRangeCollection<Person>();
 
+        public ObservableRangeCollection<Product> Products { get; set; } = new ObservableRangeCollection<Product>();
+
         private void LoadSampleData()
         {
             BarSeriesData.AddRange(sampleDataService.GenerateCategoricalData());
@@ -84,7 +86,9 @@ namespace Demo.Uwp.ViewModels
 
             SplineAreaSeriesData.AddRange(sampleDataService.GenerateDateTimeDayData());
 
-            People.AddRange(sampleDataService.GeneratePeopleData());
+            People.AddRange(sampleDataService.GeneratePeopleData(true));
+
+            Products.AddRange(sampleDataService.GenerateProductData());
         }
         
         #endregion

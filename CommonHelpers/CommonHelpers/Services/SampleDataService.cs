@@ -7,14 +7,55 @@ namespace CommonHelpers.Services
 {
     public class SampleDataService
     {
-        private readonly Random rand = new Random();
-        
+        private readonly Random _rand = new Random();
+
+        #region Product Data
+
+        public IEnumerable<Product> GenerateProductData(int count = 30)
+        {
+            return Enumerable.Range(1, count).Select(i => new Product
+            {
+                ProductId = i,
+                ProductName = $"Product {i}",
+                SupplierId = _rand.Next(1,5),
+                CategoryId = _rand.Next(1,5),
+                QuantityPerUnit = _rand.Next(0, i).ToString(),
+                UnitPrice = Convert.ToDecimal(_rand.NextDouble() * 100),
+                UnitsInStock = Convert.ToInt16(_rand.Next(1, 100)),
+                UnitsOnOrder = Convert.ToInt16(_rand.Next(1,100)),
+                ReorderLevel = Convert.ToInt16(_rand.Next(5, 30)),
+                Discontinued = i % 5 == 0,
+            });
+        }
+
+        public IEnumerable<Supplier> GenerateSupplierData()
+        {
+            return Enumerable.Range(1, 5).Select(i => new Supplier
+            {
+                SupplierId = i,
+                SupplierName = $"Supplier {i}"
+            });
+        }
+
+        public IEnumerable<Category> GenerateCategoryData()
+        {
+            return Enumerable.Range(1, 5).Select(i => new Category
+            {
+                CategoryId = i,
+                CategoryName = $"Category {i}"
+            });
+        }
+
+        #endregion
+
+        #region Chart Data
+
         public IEnumerable<ChartDataPoint> GenerateCategoricalData(int count = 5)
         {
             return Enumerable.Range(1, count).Select(i => new ChartDataPoint
             {
                 Title = $"Category {i}",
-                Value = rand.Next(0,i)
+                Value = _rand.Next(0,i)
             });
         }
 
@@ -24,7 +65,7 @@ namespace CommonHelpers.Services
             {
                 Title = $"Category {i}",
                 Date = DateTime.Now.AddDays(-i),
-                Value = rand.Next(0, i)
+                Value = _rand.Next(0, i)
             });
         }
 
@@ -34,7 +75,7 @@ namespace CommonHelpers.Services
             {
                 Title = $"Category {i}",
                 Date = DateTime.Now.AddMinutes(-i),
-                Value = rand.Next(0, i)
+                Value = _rand.Next(0, i)
             });
         }
 
@@ -42,20 +83,37 @@ namespace CommonHelpers.Services
         {
             return Enumerable.Range(1, count).Select(i => new ChartDataPoint
             {
-                XValue = rand.Next(0, i),
-                YValue = rand.Next(0, i)
+                XValue = _rand.Next(0, i),
+                YValue = _rand.Next(0, i)
             });
         }
 
-        public IEnumerable<Person> GeneratePeopleData()
+        #endregion
+
+        #region People Data
+
+        public IEnumerable<Person> GeneratePeopleData(bool useSampleNames = false)
         {
-            return Enumerable.Range(1, 43).Select(i => new Person
+            if (useSampleNames)
             {
-                Name = $"Person {i}",
-                Age = rand.Next(0,100),
-                Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
-                DateOfBirth = DateTime.Today.AddYears(-i)
-            });
+                return Enumerable.Range(1, 43).Select(i => new Person
+                {
+                    Name = peopleNames[i - 1],
+                    Age = _rand.Next(0, 100),
+                    Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
+                    DateOfBirth = DateTime.Today.AddYears(-i)
+                });
+            }
+            else
+            {
+                return Enumerable.Range(1, 40).Select(i => new Person
+                {
+                    Name = $"Person {i}",
+                    Age = _rand.Next(0, 100),
+                    Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
+                    DateOfBirth = DateTime.Today.AddYears(-i)
+                });
+            }
         }
 
         public IEnumerable<string> GeneratePeopleNames()
@@ -110,5 +168,7 @@ namespace CommonHelpers.Services
             "Jarvis Victorine",
             "Dane Gabor"
         };
+
+        #endregion
     }
 }
