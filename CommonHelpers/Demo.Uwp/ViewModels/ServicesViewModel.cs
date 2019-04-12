@@ -19,7 +19,6 @@ namespace Demo.Uwp.ViewModels
     {
         private readonly BingImageService bingImageService;
         private readonly XkcdApiService xkcdService;
-        private readonly SampleDataService sampleDataService;
         private readonly ComicVineApiService comicVineService;
 
         private Uri bingImageOfTheDayUri;
@@ -42,7 +41,6 @@ namespace Demo.Uwp.ViewModels
                 xkcdService = new XkcdApiService();
             }
 
-            sampleDataService = new SampleDataService();
             LoadSampleData();
         }
 
@@ -78,17 +76,17 @@ namespace Demo.Uwp.ViewModels
 
         private void LoadSampleData()
         {
-            BarSeriesData.AddRange(sampleDataService.GenerateCategoricalData());
+            BarSeriesData.AddRange(SampleDataService.Current.GenerateCategoricalData());
 
-            ScatterSeriesData.AddRange(sampleDataService.GenerateScatterPointData());
+            ScatterSeriesData.AddRange(SampleDataService.Current.GenerateScatterPointData());
 
-            LineSeriesData.AddRange(sampleDataService.GenerateDateTimeMinuteData());
+            LineSeriesData.AddRange(SampleDataService.Current.GenerateDateTimeMinuteData());
 
-            SplineAreaSeriesData.AddRange(sampleDataService.GenerateDateTimeDayData());
+            SplineAreaSeriesData.AddRange(SampleDataService.Current.GenerateDateTimeDayData());
 
-            People.AddRange(sampleDataService.GeneratePeopleData(true));
+            People.AddRange(SampleDataService.Current.GeneratePeopleData(true));
 
-            Products.AddRange(sampleDataService.GenerateProductData());
+            Products.AddRange(SampleDataService.Current.GenerateProductData());
         }
         
         #endregion
