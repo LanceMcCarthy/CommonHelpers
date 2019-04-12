@@ -7,7 +7,22 @@ namespace CommonHelpers.Services
 {
     public class SampleDataService
     {
-        private readonly Random _rand = new Random();
+        #region Singleton Members
+
+        private static SampleDataService _current;
+
+        public static SampleDataService Current => _current ?? (_current = new SampleDataService());
+
+        #endregion
+
+        #region Instance Members
+
+        private readonly Random _rand;
+
+        public SampleDataService()
+        {
+            _rand = new Random();
+        }
 
         #region Product Data
 
@@ -44,6 +59,16 @@ namespace CommonHelpers.Services
                 CategoryId = i,
                 CategoryName = $"Category {i}"
             });
+        }
+
+        public IEnumerable<Product> FindProductByCategory(int categoryId, int maximumResultCount = 30)
+        {
+            return GenerateProductData(maximumResultCount).Where(p => p.CategoryId == categoryId);
+        }
+
+        public IEnumerable<Product> FindProductBySupplier(int supplierId, int maximumResultCount = 30)
+        {
+            return GenerateProductData(maximumResultCount).Where(p => p.SupplierId == supplierId);
         }
 
         #endregion
@@ -168,6 +193,8 @@ namespace CommonHelpers.Services
             "Jarvis Victorine",
             "Dane Gabor"
         };
+
+        #endregion
 
         #endregion
     }
