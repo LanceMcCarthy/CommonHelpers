@@ -9,14 +9,14 @@
     <RepositoryType>GitHub</RepositoryType>
     <PackageProjectUrl>https://github.com/LanceMcCarthy/CommonHelpers</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/LanceMcCarthy/CommonHelpers/blob/master/LICENSE</PackageLicenseUrl>
-    <Copyright>Copyright 2018</Copyright>
+    <Copyright>Copyright 2018 - 2019</Copyright>
     <PackageIconUrl>https://raw.githubusercontent.com/LanceMcCarthy/CommonHelpers/master/CommonHelpers/CommonHelpers/NuGet/NuGetIcon.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
     <PackageTags>NetStandard C# netstandard2.0 netstandard netcore</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <Version>1.0.8</Version>
-    <FileVersion>1.0.8.0</FileVersion>
+    <AssemblyVersion>1.0.9.0</AssemblyVersion>
+    <Version>1.0.9</Version>
+    <FileVersion>1.0.9.0</FileVersion>
   </PropertyGroup>
 
 </Project>
