@@ -5,6 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:viewModels="using:Demo.Uwp.ViewModels"
       xmlns:chart="using:Telerik.UI.Xaml.Controls.Chart"
+      xmlns:controls="using:Microsoft.UI.Xaml.Controls"
       Style="{StaticResource PageStyle}"
       mc:Ignorable="d">
 
