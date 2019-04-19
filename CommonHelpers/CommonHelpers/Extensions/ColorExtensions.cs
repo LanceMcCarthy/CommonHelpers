@@ -9,7 +9,12 @@ namespace CommonHelpers.Extensions
 {
     public static class ColorExtensions
     {
-        public static Color ConvertHexToColor(string hex)
+        /// <summary>
+        /// Converts Hex string value to a Color object
+        /// </summary>
+        /// <param name="hex">Hex, supports alpha channel.</param>
+        /// <returns></returns>
+        public static Color ConvertHexStringToColor(string hex)
         {
             hex = hex.Remove(0, 1);
 
@@ -20,12 +25,24 @@ namespace CommonHelpers.Extensions
                 byte.Parse(hex.Substring(hex.Length - 2), NumberStyles.HexNumber));
         }
 
-        public static string ConvertColorToHex(Color color)
+        /// <summary>
+        /// Converts Color object to HEX string equivalent
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public static string ToHexString(this Color color)
         {
             return $"#{color.A:#0.##}{color.R:#0.##}{color.G:#0.##}{color.B:#0.##}"; 
         }
 
-        public static Tuple<double, double, double> RgbToHsv(double r, double g, double b)
+        /// <summary>
+        /// Converts an RGB values to HSV values
+        /// </summary>
+        /// <param name="r">Red value</param>
+        /// <param name="g">Green value</param>
+        /// <param name="b">Blue value</param>
+        /// <returns>An HSV value equivalent of the input RGB</returns>
+        public static Tuple<double, double, double> ConvertRgbToHsv(double r, double g, double b)
         {
             var hsv = new double[3]; 
 
@@ -68,8 +85,15 @@ namespace CommonHelpers.Extensions
             return new Tuple<double, double, double>(hsv[0], hsv[1], hsv[2]);
         }
 
+        /// <summary>
+        /// Generates a list of colors along the HSL gradient for the base color.
+        /// This is good for controls that need contrast between colors, for example a Pie Chart
+        /// </summary>
+        /// <param name="baseColor">Starting base color</param>
+        /// <param name="numberOfColors">List of colors</param>
+        /// <returns>List of colors</returns>
         // ReSharper disable once InconsistentNaming
-        public static List<Color> GenerateHSLGradient(Color baseColor, int numberOfColors = 12)
+        public static List<Color> GenerateHSLGradient(this Color baseColor, int numberOfColors = 12)
         {
             var baseHue = new HSLColor(baseColor).Hue;
 
@@ -90,7 +114,12 @@ namespace CommonHelpers.Extensions
             return colors;
         }
 
-        public static Color GetContrastingForegroundColor(this Color c)
+        /// <summary>
+        /// Returns contrasting color. If contrast is not strong enough, White or Black will be returned instead.
+        /// </summary>
+        /// <param name="c">Base Color</param>
+        /// <returns>Contrast color</returns>
+        public static Color GetContrastColor(this Color c)
         {
             return c.R * 0.3 + c.G * 0.59 + c.B * 0.11 > 127 ? Color.Black : Color.White;
         }

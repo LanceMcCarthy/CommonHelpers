@@ -73,7 +73,7 @@ namespace CommonHelpers.Common
         // ReSharper disable once InconsistentNaming
         public string ToRGBString()
         {
-            return ColorExtensions.ConvertColorToHex(this);
+            return ColorExtensions.ToHexString(this);
         }
 
         // ReSharper disable once InconsistentNaming
