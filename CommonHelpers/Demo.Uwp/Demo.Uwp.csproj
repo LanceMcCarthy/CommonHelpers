@@ -112,7 +112,6 @@
   <ItemGroup>
     <Compile Include="Activation\ActivationHandler.cs" />
     <Compile Include="Helpers\IncrementalLoadingCollection.cs" />
-    <Compile Include="Helpers\Observable.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\DispatcherExtensions.cs" />
     <Compile Include="Models\ApiKeys.cs" />
@@ -188,7 +187,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\ResourceExtensions.cs" />
-    <Compile Include="Helpers\Singleton.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

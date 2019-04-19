@@ -4,10 +4,10 @@ using System.Collections.Concurrent;
 namespace CommonHelpers.Common
 {
     /// <summary>
-    /// Example:  Singleton<MenuItem>.Instance.IconPath
+    /// Example:  Singleton<MyMenuItem>.Instance.IconPath
     /// </summary>
-    /// <typeparam name="T">TheType of the singleton</typeparam>
-    public static class Singleton<T>
+    /// <typeparam name="T">The Type of the singleton</typeparam>
+    public static class Singleton<T> 
         where T : new()
     {
         private static readonly ConcurrentDictionary<Type, T> Instances = new ConcurrentDictionary<Type, T>();
