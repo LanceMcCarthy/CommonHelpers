@@ -20,7 +20,7 @@ namespace CommonHelpers.Extensions
 
         public static string ConvertColorToHex(Color color)
         {
-            return $"#{color.A}{color.R}{color.G}{color.B}"; 
+            return $"#{color.A:#0.##}{color.R:#0.##}{color.G:#0.##}{color.B:#0.##}"; 
         }
 
         public static Tuple<double, double, double> RgbToHsv(double r, double g, double b)
