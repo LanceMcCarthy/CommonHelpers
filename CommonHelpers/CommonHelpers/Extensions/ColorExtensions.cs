@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using CommonHelpers.Common;
 
 namespace CommonHelpers.Extensions
 {
@@ -65,8 +67,32 @@ namespace CommonHelpers.Extensions
 
             return new Tuple<double, double, double>(hsv[0], hsv[1], hsv[2]);
         }
-        
-        public static Color GetContrastingForegroundColor(this Color c) =>
-            c.R * 0.3 + c.G * 0.59 + c.B * 0.11 > 127 ? Color.Black : Color.White;
+
+        // ReSharper disable once InconsistentNaming
+        public static List<Color> GenerateHSLGradient(Color baseColor, int numberOfColors = 12)
+        {
+            var baseHue = new HSLColor(baseColor).Hue;
+
+            var colors = new List<Color> { baseColor };
+
+            var step = 240.0 / (double)numberOfColors;
+
+            for (int i = 1; i < numberOfColors; ++i)
+            {
+                var nextColor = new HSLColor(baseColor)
+                {
+                    Hue = (baseHue + step * i) % 240.0
+                };
+
+                colors.Add((System.Drawing.Color)nextColor);
+            }
+
+            return colors;
+        }
+
+        public static Color GetContrastingForegroundColor(this Color c)
+        {
+            return c.R * 0.3 + c.G * 0.59 + c.B * 0.11 > 127 ? Color.Black : Color.White;
+        }
     }
 }
