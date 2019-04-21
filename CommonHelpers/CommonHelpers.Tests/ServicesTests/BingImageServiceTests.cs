@@ -1,22 +1,47 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Net.Http;
+using CommonHelpers.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommonHelpers.Tests.ServicesTests
 {
     [TestClass]
-    public class BingImageServiceTests
+    public class BingImageServiceTests : IDisposable
     {
-        [TestMethod]
-        public void GetTodaysImage()
+        private readonly BingImageService service;
+
+        public BingImageServiceTests()
         {
-            // Todo write test
-            Assert.Inconclusive("Test not written");
+            // Arrange
+            service = new BingImageService();
         }
 
         [TestMethod]
-        public void GetYesterdaysImage()
+        public void GetTodaysBingImage()
         {
-            // Todo write test
-            Assert.Inconclusive("Test not written");
+            // Arrange
+            string imageUrl;
+            byte[] imageBytes;
+
+            // Act
+            imageUrl = service.GetBingImageOfTheDayAsync().Result;
+
+            // Assert
+            using (var client = new HttpClient())
+            using (var response = client.GetAsync(imageUrl).Result)
+            {
+                imageBytes = response.Content.ReadAsByteArrayAsync().Result;
+            }
+
+            // Assert
+            var byteCount = imageBytes.Length;
+            Assert.IsTrue(byteCount > 0);
+        }
+
+        [TestCleanup]
+        public void Dispose()
+        {
+            service.Dispose();
         }
     }
 }
