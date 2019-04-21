@@ -32,7 +32,7 @@ namespace CommonHelpers.Extensions
         /// <returns></returns>
         public static string ToHexString(this Color color)
         {
-            return $"#{color.A:#0.##}{color.R:#0.##}{color.G:#0.##}{color.B:#0.##}"; 
+            return $"#{color.A:X}{color.R:X}{color.G:X}{color.B:X}"; 
         }
 
         /// <summary>
