@@ -1,10 +1,8 @@
-﻿using System;
-
-using Demo.Uwp.Helpers;
+﻿using CommonHelpers.Common;
 
 namespace Demo.Uwp.ViewModels
 {
-    public class HomeViewModel : Observable
+    public class HomeViewModel : ViewModelBase
     {
         public HomeViewModel()
         {
