@@ -3,17 +3,19 @@ This is a cross platform **NET Standard 2.0** helper library containing a bunch 
 
 By publishing this is as a signed NuGet package I save myself a lot of time, but more importantly, I get to share it with you. Enjoy!
  
-#### Install using NuGet
-
-| NuGet |
-|-------|  
-| [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) |
  
 #### DevOps Build Status
 
 | Dev | Master |Release |
 |---|---|---|
 | [![Build status](https://lance.visualstudio.com/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Dev)](https://lance.visualstudio.com/CommonHelpers/_build/latest?definitionId=9) | [![Build status](https://lance.visualstudio.com/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Master)](https://lance.visualstudio.com/CommonHelpers/_build/latest?definitionId=10) | [![Build status](https://lance.visualstudio.com/CommonHelpers/_apis/build/status/CommonHelpers%20Master%20Build)](https://lance.visualstudio.com/CommonHelpers/_build/latest?definitionId=4) |
+
+
+#### Install using NuGet
+
+| NuGet.org (stable) | Azure Feed (release preview) |
+|-----------|----------------------|
+| [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) |[![CommonHelpers package in MainFeed feed in Azure Artifacts](https://lance.feeds.visualstudio.com/_apis/public/Packaging/Feeds/a9cb29f3-008d-418f-a057-1c2925dbbaf2/Packages/9452e54a-48d2-409b-8644-3fa7ed784d85/Badge)](https://lance.visualstudio.com/CommonHelpers/_packaging?_a=package&feed=a9cb29f3-008d-418f-a057-1c2925dbbaf2&package=9452e54a-48d2-409b-8644-3fa7ed784d85&preferRelease=true) |
 
 ### Highlights
 
