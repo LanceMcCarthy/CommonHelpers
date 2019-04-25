@@ -6,6 +6,7 @@
       xmlns:viewModels="using:Demo.Uwp.ViewModels"
       xmlns:chart="using:Telerik.UI.Xaml.Controls.Chart"
       xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+      xmlns:dataVisualization="using:Telerik.UI.Xaml.Controls.DataVisualization"
       Style="{StaticResource PageStyle}"
       mc:Ignorable="d">
 
@@ -18,14 +19,16 @@
             <PivotItem Header="Sample Data Service"
                        x:Uid="Services_PivotItem2">
                 <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1.5*" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="1*" />
                     </Grid.ColumnDefinitions>
+
                     <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
@@ -69,8 +72,8 @@
                         </chart:RadCartesianChart.Series>
                     </chart:RadCartesianChart>
 
-                    <chart:RadCartesianChart Grid.Row="0"
-                                             Grid.Column="1">
+                    <chart:RadCartesianChart Grid.Row="2"
+                                             Grid.Column="0">
                         <chart:RadCartesianChart.VerticalAxis>
                             <chart:LinearAxis />
                         </chart:RadCartesianChart.VerticalAxis>
@@ -90,8 +93,8 @@
                         </chart:RadCartesianChart.Series>
                     </chart:RadCartesianChart>
 
-                    <chart:RadCartesianChart Grid.Row="1"
-                                             Grid.Column="1">
+                    <chart:RadCartesianChart Grid.Row="3"
+                                             Grid.Column="0">
                         <chart:RadCartesianChart.VerticalAxis>
                             <chart:LinearAxis />
                         </chart:RadCartesianChart.VerticalAxis>
@@ -112,27 +115,65 @@
                         </chart:RadCartesianChart.Series>
                     </chart:RadCartesianChart>
 
+                    <ListView ItemsSource="{Binding Employees}"
+                              ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
+                              Grid.Column="1"
+                              Grid.Row="0"
+                              Grid.RowSpan="4">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5">
+                                    <TextBlock Text="{Binding Name}"
+                                               Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Position:" />
+                                        <TextBlock Text="{Binding Position}"
+                                                   Margin="5,0,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Start Date:" />
+                                        <TextBlock Text="{Binding StartDate}"
+                                                   Margin="5,0,0,0" />
+                                    </StackPanel>
+                                    <TextBlock Text="Vacation Used" />
+                                    <dataVisualization:RadLinearGauge TickStep="10"
+                                                                      LabelStep="25"
+                                                                      MaxValue="{Binding VacationTotal}"
+                                                                      Height="30">
+                                        <dataVisualization:LinearBarGaugeIndicator Value="{Binding VacationUsed}"
+                                                                                   Brush="{Binding Converter={StaticResource VacationBalanceToBrushConverter}}"
+                                                                                   Thickness="5"
+                                                                                   dataVisualization:RadLinearGauge.IndicatorOffset="-10" />
+                                    </dataVisualization:RadLinearGauge>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
                     <ListView ItemsSource="{Binding Products}"
                               ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
                               Grid.Column="2"
                               Grid.Row="0"
-                              Grid.RowSpan="2">
+                              Grid.RowSpan="4">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="5">
                                     <TextBlock Text="{Binding ProductName}"
                                                Style="{ThemeResource TitleTextBlockStyle}" />
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="In Stock:" />
-                                        <TextBlock Text="{Binding UnitsInStock}" />
+                                        <TextBlock Text="In Stock:"/>
+                                        <TextBlock Text="{Binding UnitsInStock}"
+                                                   Margin="5,0,0,0" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="On Order:" />
-                                        <TextBlock Text="{Binding UnitsOnOrder}" />
+                                        <TextBlock Text="{Binding UnitsOnOrder}"
+                                                   Margin="5,0,0,0" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Discontinued:" />
-                                        <TextBlock Text="{Binding Discontinued}" />
+                                        <TextBlock Text="{Binding Discontinued}"
+                                                   Margin="5,0,0,0" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
@@ -143,7 +184,7 @@
                               ItemContainerStyle="{StaticResource StretchedListViewItemStyle}"
                               Grid.Column="3"
                               Grid.Row="0"
-                              Grid.RowSpan="2">
+                              Grid.RowSpan="4">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="5">

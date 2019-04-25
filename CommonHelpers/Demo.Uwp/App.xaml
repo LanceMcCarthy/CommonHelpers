@@ -1,6 +1,7 @@
 ﻿<Application x:Class="Demo.Uwp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:Demo.Uwp.Converters">
 
     <Application.Resources>
         <ResourceDictionary>
@@ -14,6 +15,8 @@
                 <ResourceDictionary Source="/Styles/TextBlock.xaml"/>
                 <ResourceDictionary Source="/Styles/Page.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <converters:VacationBalanceToBrushConverter x:Key="VacationBalanceToBrushConverter"/>
 
             <Style x:Key="StretchedListViewItemStyle"
                    TargetType="ListViewItem">
