@@ -11,6 +11,16 @@ namespace CommonHelpers.Services
     /// </summary>
     public class XkcdApiService : IDisposable
     {
+        #region Singleton Members
+
+        private static XkcdApiService _current;
+
+        public static XkcdApiService Current => _current ?? (_current = new XkcdApiService());
+
+        #endregion
+
+        #region Instance Members
+
         private readonly HttpClient client;
 
         public XkcdApiService()
@@ -55,7 +65,7 @@ namespace CommonHelpers.Services
                     return new XkcdComic { Title = "Whoops", Transcript = $"There was no comic to be found" };
 
                 var result = JsonHelper<XkcdComic>.Deserialize(jsonResult);
-                
+
                 return result ?? new XkcdComic { Title = "Json Schmason", Transcript = $"Someone didnt like the way the comic's json tasted and spit it back out" };
             }
         }
@@ -64,5 +74,7 @@ namespace CommonHelpers.Services
         {
             client?.Dispose();
         }
+
+        #endregion
     }
 }

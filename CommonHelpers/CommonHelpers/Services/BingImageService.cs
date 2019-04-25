@@ -10,6 +10,16 @@ namespace CommonHelpers.Services
 
     public class BingImageService : IDisposable
     {
+        #region Singleton members
+
+        private static BingImageService _current;
+
+        public static BingImageService Current => _current ?? (_current = new BingImageService());
+
+        #endregion
+
+        #region Instance members
+
         private readonly HttpClient client;
 
         public BingImageService()
@@ -37,10 +47,12 @@ namespace CommonHelpers.Services
 
             return $"http://www.bing.com{pathString}{resolutionString}";
         }
-        
+
         public void Dispose()
         {
             client?.Dispose();
         }
+
+        #endregion
     }
 }
