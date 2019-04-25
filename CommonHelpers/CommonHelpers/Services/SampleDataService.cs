@@ -24,7 +24,7 @@ namespace CommonHelpers.Services
             _rand = new Random();
         }
 
-        #region Product Data
+        #region Product, Category and Supplier Data
 
         public IEnumerable<Product> GenerateProductData(int count = 30)
         {
@@ -115,7 +115,26 @@ namespace CommonHelpers.Services
 
         #endregion
 
-        #region People Data
+        #region People and Employee Data
+
+        public IEnumerable<Employee> GenerateEmployeeData(bool useSampleNames = true)
+        {
+            var startDate = DateTime.Today.AddYears(-_rand.Next(1, 20)).AddDays(-_rand.Next(1, 350));
+            var position = roles[_rand.Next(0, roles.Length)];
+            var salary = _rand.Next(50000, 125000);
+            var vacationTotal = _rand.Next(80, 120);
+            var vacationUsed = vacationTotal - _rand.Next(40, 70);
+
+            return Enumerable.Range(1, 43).Select(i => new Employee
+            {
+                Name = useSampleNames ? peopleNames[i - 1] : $"Employee {i}",
+                StartDate = startDate,
+                Position = position,
+                Salary = salary,
+                VacationTotal = vacationTotal,
+                VacationUsed = vacationUsed
+            });
+        }
 
         public IEnumerable<Person> GeneratePeopleData(bool useSampleNames = false)
         {
@@ -146,7 +165,24 @@ namespace CommonHelpers.Services
             return new List<string>(peopleNames);
         }
 
-        private readonly string[] peopleNames = new string[]
+        #endregion
+
+        #region Supplementary Data
+
+        private readonly string[] roles =
+        {
+            "Developer",
+            "Technical Support Engineer",
+            "Sales Representative",
+            "Sales Engineer",
+            "Manager",
+            "Customer Advocate",
+            "IT Specialist",
+            "CEO",
+            "President",
+        };
+
+        private readonly string[] peopleNames = 
         {
             "Freda Curtis",
             "Jeffery Francis",
