@@ -119,45 +119,35 @@ namespace CommonHelpers.Services
 
         public IEnumerable<Employee> GenerateEmployeeData(bool useSampleNames = true)
         {
-            var startDate = DateTime.Today.AddYears(-_rand.Next(1, 20)).AddDays(-_rand.Next(1, 350));
-            var position = roles[_rand.Next(0, roles.Length)];
-            var salary = _rand.Next(50000, 125000);
-            var vacationTotal = _rand.Next(80, 120);
-            var vacationUsed = vacationTotal - _rand.Next(40, 70);
+            return Enumerable.Range(1, 43).Select(i => CreateEmployeeDetails(i, useSampleNames));
+        }
 
-            return Enumerable.Range(1, 43).Select(i => new Employee
+        private Employee CreateEmployeeDetails(int seed, bool usePeopleNames)
+        {
+            var vacationTotal = _rand.Next(80, 120);
+
+            var employee = new Employee
             {
-                Name = useSampleNames ? peopleNames[i - 1] : $"Employee {i}",
-                StartDate = startDate,
-                Position = position,
-                Salary = salary,
+                Name = usePeopleNames ? peopleNames[seed - 1] : $"Employee {seed}",
+                StartDate = DateTime.Today.AddYears(-_rand.Next(1, 20)).AddDays(-_rand.Next(1, 350)),
+                Position = roles[_rand.Next(0, roles.Length)],
+                Salary = _rand.Next(50000, 125000),
                 VacationTotal = vacationTotal,
-                VacationUsed = vacationUsed
-            });
+                VacationUsed = vacationTotal - _rand.Next(40, 70)
+            };
+
+            return employee;
         }
 
         public IEnumerable<Person> GeneratePeopleData(bool useSampleNames = false)
         {
-            if (useSampleNames)
+            return Enumerable.Range(1, 43).Select(i => new Person
             {
-                return Enumerable.Range(1, 43).Select(i => new Person
-                {
-                    Name = peopleNames[i - 1],
-                    Age = _rand.Next(0, 100),
-                    Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
-                    DateOfBirth = DateTime.Today.AddYears(-i)
-                });
-            }
-            else
-            {
-                return Enumerable.Range(1, 40).Select(i => new Person
-                {
-                    Name = $"Person {i}",
-                    Age = _rand.Next(0, 100),
-                    Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
-                    DateOfBirth = DateTime.Today.AddYears(-i)
-                });
-            }
+                Name = useSampleNames ? peopleNames[i - 1] : $"Person {i}",
+                Age = _rand.Next(0, 100),
+                Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
+                DateOfBirth = DateTime.Today.AddYears(-i)
+            });
         }
 
         public IEnumerable<string> GeneratePeopleNames()

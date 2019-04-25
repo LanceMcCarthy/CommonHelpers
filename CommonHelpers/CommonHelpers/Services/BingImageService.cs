@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+// ReSharper disable InconsistentNaming
 namespace CommonHelpers.Services
 {
     public enum BingImageResolution { Unspecified, _800x600, _1024x768, _1366x768, _1920x1080, _1920x1200 }
