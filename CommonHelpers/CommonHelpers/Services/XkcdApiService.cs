@@ -43,11 +43,11 @@ namespace CommonHelpers.Services
                 var jsonResult = await response.Content.ReadAsStringAsync();
 
                 if (string.IsNullOrEmpty(jsonResult))
-                    return new XkcdComic { Title = "Whoops", Transcript = $"There was no comic to be found" };
+                    return new XkcdComic { Title = "No Result", Transcript = $"There was no comic available for comic #${comicNumber} or the service has changed. If this continues to happen, please open an Issue on GitHub at http://bit.ly/CommonHelpers." };
 
                 var result = JsonHelper<XkcdComic>.Deserialize(jsonResult);
 
-                return result ?? new XkcdComic { Title = "Json Schmason", Transcript = $"Someone didnt like the way the comic's json tasted and spit it back out" };
+                return result ?? new XkcdComic { Title = "Bad Result", Transcript = "The returned comic data could not be deserialized properly. If this continues to happen, please open an Issue on GitHub at http://bit.ly/CommonHelpers" };
             }
         }
 
@@ -62,11 +62,11 @@ namespace CommonHelpers.Services
                 var jsonResult = await response.Content.ReadAsStringAsync();
 
                 if (string.IsNullOrEmpty(jsonResult))
-                    return new XkcdComic { Title = "Whoops", Transcript = $"There was no comic to be found" };
+                    return new XkcdComic { Title = "No Result", Transcript = $"There is no latest comic available or the service has changed. If this continues to happen, please open an Issue on GitHub at http://bit.ly/CommonHelpers." };
 
                 var result = JsonHelper<XkcdComic>.Deserialize(jsonResult);
 
-                return result ?? new XkcdComic { Title = "Json Schmason", Transcript = $"Someone didnt like the way the comic's json tasted and spit it back out" };
+                return result ?? new XkcdComic { Title = "Bad Result", Transcript = "The returned comic data could not be deserialized properly. If this continues to happen, please open an Issue on GitHub at http://bit.ly/CommonHelpers." };
             }
         }
 
