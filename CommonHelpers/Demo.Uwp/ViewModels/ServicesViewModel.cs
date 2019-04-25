@@ -17,8 +17,8 @@ namespace Demo.Uwp.ViewModels
     // Note the ViewModelBase is from CommonHelpers
     public class ServicesViewModel : ViewModelBase
     {
-        private readonly BingImageService bingImageService;
-        private readonly XkcdApiService xkcdService;
+        //private readonly BingImageService bingImageService;
+        //private readonly XkcdApiService xkcdService;
         private readonly ComicVineApiService comicVineService;
 
         private Uri bingImageOfTheDayUri;
@@ -36,9 +36,6 @@ namespace Demo.Uwp.ViewModels
             {
                 comicVineService = new ComicVineApiService(ApiKeys.ComicVineApiKey, ApiKeys.UniqueUserAgentString);
                 Characters = new IncrementalLoadingCollection<Character>((cancellationToken, count) => Task.Run(FetchMoreCharacters, cancellationToken));
-
-                bingImageService = new BingImageService();
-                xkcdService = new XkcdApiService();
             }
 
             LoadSampleData();
@@ -54,7 +51,8 @@ namespace Demo.Uwp.ViewModels
 
         public async void GetBingImageButton_OnClick(object sender, RoutedEventArgs e)
         {
-            var url = await bingImageService.GetBingImageOfTheDayAsync();
+            var url = await BingImageService.Current.GetBingImageOfTheDayAsync();
+
             BingImageOfTheDayUri = new Uri(url);
         }
 
@@ -74,6 +72,8 @@ namespace Demo.Uwp.ViewModels
 
         public ObservableRangeCollection<Product> Products { get; set; } = new ObservableRangeCollection<Product>();
 
+        public ObservableRangeCollection<Employee> Employees { get; set; } = new ObservableRangeCollection<Employee>();
+
         private void LoadSampleData()
         {
             BarSeriesData.AddRange(SampleDataService.Current.GenerateCategoricalData());
@@ -87,6 +87,8 @@ namespace Demo.Uwp.ViewModels
             People.AddRange(SampleDataService.Current.GeneratePeopleData(true));
 
             Products.AddRange(SampleDataService.Current.GenerateProductData());
+
+            Employees.AddRange(SampleDataService.Current.GenerateEmployeeData());
         }
         
         #endregion
@@ -108,11 +110,11 @@ namespace Demo.Uwp.ViewModels
 
                 if (lastXkcdComicNumber == 0)
                 {
-                    xkcdComic = await xkcdService.GetNewestComicAsync();
+                    xkcdComic = await XkcdApiService.Current.GetNewestComicAsync();
                 }
                 else
                 {
-                    xkcdComic = await xkcdService.GetComicAsync(lastXkcdComicNumber - 1);
+                    xkcdComic = await XkcdApiService.Current.GetComicAsync(lastXkcdComicNumber - 1);
                 }
 
                 lastXkcdComicNumber = xkcdComic.Num;

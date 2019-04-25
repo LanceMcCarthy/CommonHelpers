@@ -13,11 +13,11 @@ namespace CommonHelpers.Tests.ExtensionsTests
         public void ConvertToHex()
         {
             // Arrange
-            Color blue = Color.White;
+            Color white = Color.FromArgb(255, 255, 255, 255);
             string expectedValue = "#FFFFFFFF";
 
             // Act
-            var colorString = blue.ToHexString();
+            var colorString = white.ToHexString();
 
             // Assert
             Assert.AreEqual(expectedValue, colorString);
@@ -28,7 +28,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
         {
             // Arrange
             string colorString = "#FFFFFFFF";
-            Color expectedColor = Color.White;
+            Color expectedColor = Color.FromArgb(255,255,255,255);
 
             // Act
             var colorResult = ColorExtensions.ConvertHexStringToColor(colorString);
