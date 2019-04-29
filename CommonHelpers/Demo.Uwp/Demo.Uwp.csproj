@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activation\ActivationHandler.cs" />
+    <Compile Include="Converters\VacationBalanceToBrushConverter.cs" />
     <Compile Include="Helpers\IncrementalLoadingCollection.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\DispatcherExtensions.cs" />

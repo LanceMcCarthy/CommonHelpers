@@ -4,12 +4,23 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+// ReSharper disable InconsistentNaming
 namespace CommonHelpers.Services
 {
     public enum BingImageResolution { Unspecified, _800x600, _1024x768, _1366x768, _1920x1080, _1920x1200 }
 
     public class BingImageService : IDisposable
     {
+        #region Singleton members
+
+        private static BingImageService _current;
+
+        public static BingImageService Current => _current ?? (_current = new BingImageService());
+
+        #endregion
+
+        #region Instance members
+
         private readonly HttpClient client;
 
         public BingImageService()
@@ -37,10 +48,12 @@ namespace CommonHelpers.Services
 
             return $"http://www.bing.com{pathString}{resolutionString}";
         }
-        
+
         public void Dispose()
         {
             client?.Dispose();
         }
+
+        #endregion
     }
 }

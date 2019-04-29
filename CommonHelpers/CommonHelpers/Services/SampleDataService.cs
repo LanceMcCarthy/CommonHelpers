@@ -24,7 +24,7 @@ namespace CommonHelpers.Services
             _rand = new Random();
         }
 
-        #region Product Data
+        #region Product, Category and Supplier Data
 
         public IEnumerable<Product> GenerateProductData(int count = 30)
         {
@@ -115,30 +115,39 @@ namespace CommonHelpers.Services
 
         #endregion
 
-        #region People Data
+        #region People and Employee Data
+
+        public IEnumerable<Employee> GenerateEmployeeData(bool useSampleNames = true)
+        {
+            return Enumerable.Range(1, 43).Select(i => CreateEmployeeDetails(i, useSampleNames));
+        }
+
+        private Employee CreateEmployeeDetails(int seed, bool usePeopleNames)
+        {
+            var vacationTotal = _rand.Next(80, 120);
+
+            var employee = new Employee
+            {
+                Name = usePeopleNames ? peopleNames[seed - 1] : $"Employee {seed}",
+                StartDate = DateTime.Today.AddYears(-_rand.Next(1, 20)).AddDays(-_rand.Next(1, 350)),
+                Position = roles[_rand.Next(0, roles.Length)],
+                Salary = _rand.Next(50000, 125000),
+                VacationTotal = vacationTotal,
+                VacationUsed = vacationTotal - _rand.Next(40, 70)
+            };
+
+            return employee;
+        }
 
         public IEnumerable<Person> GeneratePeopleData(bool useSampleNames = false)
         {
-            if (useSampleNames)
+            return Enumerable.Range(1, 43).Select(i => new Person
             {
-                return Enumerable.Range(1, 43).Select(i => new Person
-                {
-                    Name = peopleNames[i - 1],
-                    Age = _rand.Next(0, 100),
-                    Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
-                    DateOfBirth = DateTime.Today.AddYears(-i)
-                });
-            }
-            else
-            {
-                return Enumerable.Range(1, 40).Select(i => new Person
-                {
-                    Name = $"Person {i}",
-                    Age = _rand.Next(0, 100),
-                    Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
-                    DateOfBirth = DateTime.Today.AddYears(-i)
-                });
-            }
+                Name = useSampleNames ? peopleNames[i - 1] : $"Person {i}",
+                Age = _rand.Next(0, 100),
+                Gender = i % 2 == 0 ? GenderType.Male : GenderType.Female,
+                DateOfBirth = DateTime.Today.AddYears(-i)
+            });
         }
 
         public IEnumerable<string> GeneratePeopleNames()
@@ -146,7 +155,24 @@ namespace CommonHelpers.Services
             return new List<string>(peopleNames);
         }
 
-        private readonly string[] peopleNames = new string[]
+        #endregion
+
+        #region Supplementary Data
+
+        private readonly string[] roles =
+        {
+            "Developer",
+            "Technical Support Engineer",
+            "Sales Representative",
+            "Sales Engineer",
+            "Manager",
+            "Customer Advocate",
+            "IT Specialist",
+            "CEO",
+            "President",
+        };
+
+        private readonly string[] peopleNames = 
         {
             "Freda Curtis",
             "Jeffery Francis",

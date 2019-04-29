@@ -19,11 +19,15 @@ namespace CommonHelpers.Tests.ServicesTests
         public void GeneratePeopleData()
         {
             // Act
-            var data = service.GeneratePeopleData();
+            var dataWithoutRealNames = service.GeneratePeopleData();
+            var dataWithRealNames = service.GeneratePeopleData(true);
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(dataWithoutRealNames);
+            Assert.IsNotNull(dataWithRealNames);
+
+            Assert.IsTrue(dataWithoutRealNames.Any());
+            Assert.IsTrue(dataWithRealNames.Any());
         }
 
         [TestMethod]
@@ -33,8 +37,8 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GeneratePeopleNames();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
         }
 
         [TestMethod]
@@ -44,8 +48,8 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GenerateCategoryData();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
         }
 
         [TestMethod]
@@ -55,8 +59,8 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GenerateSupplierData();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
         }
 
         [TestMethod]
@@ -66,8 +70,8 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GenerateProductData();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
         }
 
         [TestMethod]
@@ -97,8 +101,8 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GenerateCategoricalData();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
         }
 
         [TestMethod]
@@ -108,8 +112,8 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GenerateDateTimeDayData();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
         }
 
         [TestMethod]
@@ -119,8 +123,8 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GenerateDateTimeMinuteData();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
         }
 
         [TestMethod]
@@ -130,8 +134,23 @@ namespace CommonHelpers.Tests.ServicesTests
             var data = service.GenerateScatterPointData();
 
             // Assert
-            var count = data.Count();
-            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Any());
+        }
+
+        [TestMethod]
+        public void GenerateEmployeeData()
+        {
+            // Act
+            var dataWithoutRealNames = service.GenerateEmployeeData(false);
+            var dataWithRealNames = service.GenerateEmployeeData();
+
+            // Assert
+            Assert.IsNotNull(dataWithoutRealNames);
+            Assert.IsNotNull(dataWithRealNames);
+
+            Assert.IsTrue(dataWithoutRealNames.Any());
+            Assert.IsTrue(dataWithRealNames.Any());
         }
     }
 }
