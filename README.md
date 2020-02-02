@@ -112,3 +112,5 @@ var characters = apiResult.Results;
 ```
 ![ComicVine API Service](https://user-images.githubusercontent.com/3520532/41982141-a83cb3e2-79f8-11e8-8207-e6bbbe590d25.png)
 
+* Updating to be included in the Arctic Code Vault
+
