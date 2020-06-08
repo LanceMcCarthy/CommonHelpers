@@ -2,35 +2,38 @@
 This is a cross platform **NET Standard 2.0** helper library containing a bunch of helper code that I used to rewrite several times a day while creating sample apps for developers.
 
 By publishing this is as a signed NuGet package I save myself a lot of time, but more importantly, I get to share it with you. Enjoy!
+
+### Releases
+
+| NuGet.org (stable) | Azure Artifacts Feed (preview) |
+|-----------|----------------------|
+| [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [![CommonHelpers package in MainFeed feed in Azure Artifacts](https://feeds.dev.azure.com/lance/_apis/public/Packaging/Feeds/a9cb29f3-008d-418f-a057-1c2925dbbaf2/Packages/9452e54a-48d2-409b-8644-3fa7ed784d85/Badge)](https://dev.azure.com/lance/CommonHelpers/_packaging?_a=package&feed=a9cb29f3-008d-418f-a057-1c2925dbbaf2&package=9452e54a-48d2-409b-8644-3fa7ed784d85&preferRelease=true) |
  
-#### Install using NuGet
+### Pipelines
 
-| NuGet |
-|-------|  
-| [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) |
- 
-#### DevOps Build Status
 
-| Dev | Master |Release |
-|---|---|---|
-| [![Build status](https://lance.visualstudio.com/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Dev)](https://lance.visualstudio.com/CommonHelpers/_build/latest?definitionId=9) | [![Build status](https://lance.visualstudio.com/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Master)](https://lance.visualstudio.com/CommonHelpers/_build/latest?definitionId=10) | [![Build status](https://lance.visualstudio.com/CommonHelpers/_apis/build/status/CommonHelpers%20Master%20Build)](https://lance.visualstudio.com/CommonHelpers/_build/latest?definitionId=4) |
+| Branch                           | Status                                   |
+|----------------------------------|------------------------------------------|
+| dev                              | [![dev](https://dev.azure.com/lance/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Dev)](https://dev.azure.com/lance/CommonHelpers/_build/latest?definitionId=9) |
+| main (default)            | [![main](https://dev.azure.com/lance/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Main)](https://dev.azure.com/lance/CommonHelpers/_build/latest?definitionId=10) |
+| release | [![Build status](https://dev.azure.com/lance/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Release)](https://dev.azure.com/lance/CommonHelpers/_build/latest?definitionId=4) |
 
-### Highlights
+## Features
 
-#### Extensions
+### Extensions
 Extensions for commonly used objects like `string`, `DateTime`, `enum`. There are also some special extensions for `File`, `Exception` and `Color`. Finally, there's a unqiue helper, `HttpClientExtensions` which provides download progress insights and a helper method to POST image data.
 
-#### Collections
+### Collections
 
 Special collection types that help in special scenarios (e.g. `ObservableQueue` and `ObservableRangeCollection`).
 
-#### Common
+### Common
 This folder has some of the most frequently used classes (i.e. `BindableBase`, `ViewModelBase`, `JsonHelper`).
 
-#### MVVM
+### MVVM
 Platform agnostic MVVM classes like `DelegateCommand` and `RelayCommand`.
 
-#### Services
+### Services
 To make testing UI controls easier by quickly providing well formatted data from offline sample data and online API endpoints. This is really useful for quickly testing *Load On Demand* scenarios.
 
 * BingImageService
@@ -111,4 +114,6 @@ TotalCharactersCount = apiResult.NumberOfTotalResults;
 var characters = apiResult.Results;
 ```
 ![ComicVine API Service](https://user-images.githubusercontent.com/3520532/41982141-a83cb3e2-79f8-11e8-8207-e6bbbe590d25.png)
+
+* Updating to be included in the Arctic Code Vault
 
