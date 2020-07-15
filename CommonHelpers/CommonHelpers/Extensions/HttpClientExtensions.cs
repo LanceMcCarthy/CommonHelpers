@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using CommonHelpers.Common.Args;
 
@@ -31,79 +32,164 @@ namespace CommonHelpers.Extensions
             if (string.IsNullOrEmpty(parameterName))
                 throw new ArgumentNullException(nameof(parameterName), "You must set a parameter name for the image data");
 
-            try
-            {
-                byte[] fileBytes = File.ReadAllBytes(imageFilePath);
+            var fileBytes = File.ReadAllBytes(imageFilePath);
 
-                var multipartContent = new MultipartFormDataContent();
-                multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
-                return await client.PostAsync(new Uri(apiUrl), multipartContent);
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
+            return await client.PostAsync(new Uri(apiUrl), multipartContent);
+        }
 
-            }
-            catch (Exception ex)
-            {
-                throw ex; //do whatever make sense in your app (ie. log it, show it to the user, etc.)
-            }
+        /// <summary>
+        /// Helper method to POST binary image data to an API endpoint that expects the data to be accompanied by a parameter
+        /// </summary>
+        /// <param name="client">HttpClient instance</param>
+        /// <param name="imageFilePath">Valid File path of the image</param>
+        /// <param name="apiUrl">The API's http or https endpoint</param>
+        /// <param name="parameterName">The name of the parameter the API expects the image data in</param>
+        /// <param name="token">Cancellation Token</param>
+        /// <returns></returns>
+        public static async Task<HttpResponseMessage> PostImageDataAsync(this HttpClient client, string imageFilePath, string apiUrl, string parameterName, CancellationToken token)
+        {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "HttpClient was null");
+
+            if (string.IsNullOrEmpty(apiUrl))
+                throw new ArgumentNullException(nameof(apiUrl), "You must set a URL for the API endpoint");
+
+            if (imageFilePath == null)
+                throw new ArgumentNullException(nameof(imageFilePath), "You must have a valid StorageFile for this method to work");
+
+            if (string.IsNullOrEmpty(parameterName))
+                throw new ArgumentNullException(nameof(parameterName), "You must set a parameter name for the image data");
+
+            if (token == null)
+                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
+
+            var fileBytes = File.ReadAllBytes(imageFilePath);
+
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
+            return await client.PostAsync(new Uri(apiUrl), multipartContent, token);
         }
 
         /// <summary>
         /// Stand-in replacement for HttpClient.GetStreamAsync that can report download progress.
         /// IMPORTANT - The caller is responsible for disposing the returned Stream
         /// </summary>
+        /// <param name="client">HttpClient instance</param>
         /// <param name="url">Url of where to download the stream from</param>
         /// <param name="progessReporter">Args for reporting progress of the download operation</param>
         /// <returns>Stream content of the GET request result</returns>
-        public static async Task<Stream> DownloadStreamWithProgressAsync(string url, IProgress<DownloadProgressArgs> progessReporter)
+        public static async Task<Stream> DownloadStreamWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter)
         {
-            try
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
+
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
+
+            if (progessReporter == null)
+                throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+
+            client.DefaultRequestHeaders.ExpectContinue = false;
+
+            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+            //Important - this makes it possible to rewind and re-read the stream
+            await response.Content.LoadIntoBufferAsync();
+
+            //NOTE - This Stream will need to be closed by the caller
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            var receivedBytes = 0;
+            var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
+
+            while (true)
             {
-                using (var client = new HttpClient())
-                {
-                    client.DefaultRequestHeaders.ExpectContinue = false;
+                var buffer = new byte[4096];
+                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                    var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                if (bytesRead == 0) break;
 
-                    //Important - this makes it possible to rewind and re-read the stream
-                    await response.Content.LoadIntoBufferAsync();
+                receivedBytes += bytesRead;
 
-                    //NOTE - This Stream will need to be closed by the caller
-                    var stream = await response.Content.ReadAsStreamAsync();
+                progessReporter.Report(new DownloadProgressArgs(receivedBytes, receivedBytes));
 
-                    int receivedBytes = 0;
-                    var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
-
-                    while (true)
-                    {
-                        var buffer = new byte[4096];
-                        int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-
-                        //We're done reading, break out of the loop
-                        if (bytesRead == 0) break;
-
-                        receivedBytes += bytesRead;
-
-                        if (progessReporter != null)
-                        {
-                            var args = new DownloadProgressArgs(receivedBytes, receivedBytes);
-                            progessReporter.Report(args);
-                        }
-
-                        Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
-                    }
-
-                    stream.Position = 0;
-                    return stream;
-                }
+                Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"DownloadStreamWithProgressAsync Exception\r\n{ex}");
-                return null;
-            }
+
+            stream.Position = 0;
+            return stream;
         }
 
-        public static async Task<string> SendImageDataWithDownloadProgressAsync(string imageFilePath, string apiUrl, string parameterName, IProgress<DownloadProgressArgs> progessReporter)
+        /// <summary>
+        /// Stand-in replacement for HttpClient.GetStreamAsync that can report download progress.
+        /// IMPORTANT - The caller is responsible for disposing the returned Stream
+        /// </summary>
+        /// <param name="client">HttpClient instance</param>
+        /// <param name="url">Url of where to download the stream from</param>
+        /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+        /// <param name="token">Cancellation Token</param>
+        /// <returns>Stream content of the GET request result</returns>
+        public static async Task<Stream> DownloadStreamWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter, CancellationToken token)
         {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
+
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
+
+            if (progessReporter == null)
+                throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+
+            if (token == null)
+                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
+
+            client.DefaultRequestHeaders.ExpectContinue = false;
+
+            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
+
+            //Important - this makes it possible to rewind and re-read the stream
+            await response.Content.LoadIntoBufferAsync();
+
+            //NOTE - This Stream will need to be closed by the caller
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            var receivedBytes = 0;
+            var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
+
+            while (true)
+            {
+                var buffer = new byte[4096];
+                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token);
+
+                if (bytesRead == 0) break;
+
+                receivedBytes += bytesRead;
+
+                progessReporter.Report(new DownloadProgressArgs(receivedBytes, receivedBytes));
+
+                Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
+            }
+
+            stream.Position = 0;
+            return stream;
+        }
+
+        /// <summary>
+        /// Makes a POST request to an endpoint with image data that reports upload progress, with cancellation support.
+        /// </summary>
+        /// <param name="client">HttpClient instance</param>
+        /// <param name="imageFilePath">Url of where to download the stream from</param>
+        /// <param name="apiUrl">Endpoint URL</param>
+        /// <param name="parameterName">POST request parameter name</param>
+        /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+        /// <returns>String content of the GET request result</returns>
+        public static async Task<string> SendImageDataWithDownloadProgressAsync(this HttpClient client, string imageFilePath, string apiUrl, string parameterName, IProgress<DownloadProgressArgs> progessReporter)
+        {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
+
             if (string.IsNullOrEmpty(apiUrl))
                 throw new ArgumentNullException(nameof(apiUrl), "You must set a URL for the API endpoint");
 
@@ -116,35 +202,102 @@ namespace CommonHelpers.Extensions
             if (progessReporter == null)
                 throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
 
-            using (var client = new HttpClient())
+            client.DefaultRequestHeaders.ExpectContinue = false;
+
+            var fileBytes = File.ReadAllBytes(imageFilePath);
+
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
+
+            using (var response = await client.PostAsync(new Uri(apiUrl), multipartContent))
             {
-                client.DefaultRequestHeaders.ExpectContinue = false;
+                //Important - this makes it possible to rewind and re-read the stream
+                await response.Content.LoadIntoBufferAsync();
 
-                byte[] fileBytes = File.ReadAllBytes(imageFilePath);
+                //NOTE - This Stream will need to be closed by the caller
+                var stream = await response.Content.ReadAsStreamAsync();
 
-                var multipartContent = new MultipartFormDataContent();
-                multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
+                var receivedBytes = 0;
+                var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
 
-                using (var response = await client.PostAsync(new Uri(apiUrl), multipartContent))
+                while (true)
                 {
-                    //Important - this makes it possible to rewind and re-read the stream
-                    await response.Content.LoadIntoBufferAsync();
+                    var buffer = new byte[4096];
+                    var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                    //NOTE - This Stream will need to be closed by the caller
-                    var stream = await response.Content.ReadAsStreamAsync();
+                    if (bytesRead == 0)
+                    {
+                        break;
+                    }
 
-                    int receivedBytes = 0;
+                    receivedBytes += bytesRead;
+
+                    var args = new DownloadProgressArgs(receivedBytes, receivedBytes);
+                    progessReporter.Report(args);
+
+                    Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
+                }
+
+                stream.Position = 0;
+                var stringContent = new StreamReader(stream);
+                return await stringContent.ReadToEndAsync();
+            }
+        }
+
+        /// <summary>
+        /// Makes a POST request to an endpoint with image data that reports upload progress, with cancellation support.
+        /// </summary>
+        /// <param name="client">HttpClient instance</param>
+        /// <param name="imageFilePath">Url of where to download the stream from</param>
+        /// <param name="apiUrl">Endpoint URL</param>
+        /// <param name="parameterName">POST request parameter name</param>
+        /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>String content of the GET request result</returns>
+        public static async Task<string> SendImageDataWithDownloadProgressAsync(this HttpClient client, string imageFilePath, string apiUrl, string parameterName, IProgress<DownloadProgressArgs> progessReporter, CancellationToken token)
+        {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
+
+            if (string.IsNullOrEmpty(apiUrl))
+                throw new ArgumentNullException(nameof(apiUrl), "You must set a URL for the API endpoint");
+
+            if (imageFilePath == null)
+                throw new ArgumentNullException(nameof(imageFilePath), "You must have a valid file path");
+
+            if (string.IsNullOrEmpty(parameterName))
+                throw new ArgumentNullException(nameof(parameterName), "You must set a parameter name for the image data");
+
+            if (progessReporter == null)
+                throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+
+            if (token == null)
+                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
+
+            client.DefaultRequestHeaders.ExpectContinue = false;
+
+            var fileBytes = File.ReadAllBytes(imageFilePath);
+
+            var multipartContent = new MultipartFormDataContent();
+            multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
+
+            using (var response = await client.PostAsync(new Uri(apiUrl), multipartContent, token))
+            {
+                //Important - this makes it possible to rewind and re-read the stream
+                await response.Content.LoadIntoBufferAsync();
+
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                {
+                    var receivedBytes = 0;
                     var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
 
                     while (true)
                     {
                         var buffer = new byte[4096];
-                        int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                        var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token);
 
                         if (bytesRead == 0)
-                        {
                             break;
-                        }
 
                         receivedBytes += bytesRead;
 
@@ -155,29 +308,76 @@ namespace CommonHelpers.Extensions
                     }
 
                     stream.Position = 0;
-                    var stringContent = new StreamReader(stream);
-                    return stringContent.ReadToEnd();
+
+                    string result;
+
+                    using (var stringContent = new StreamReader(stream))
+                    {
+                        result = await stringContent.ReadToEndAsync();
+                    }
+
+                    return result;
                 }
             }
         }
 
-
         /// <summary>
-        /// Stand-in replacement for HttpClient.GetStringAsync that can report download progress.
-        /// IMPORTANT - The caller is responsible for disposing the Stream object
+        /// Replacement for HttpClient.GetStringAsync that can report download progress.
         /// </summary>
+        /// <param name="client">HttpClient instance</param>
         /// <param name="url">Url of where to download the stream from</param>
         /// <param name="progessReporter">Args for reporting progress of the download operation</param>
-        /// <returns>Stream content of the GET request result</returns>
-        public static async Task<string> DownloadStringWithProgressAsync(string url, IProgress<DownloadProgressArgs> progessReporter)
+        /// <returns>String content of the GET request result</returns>
+        public static async Task<string> DownloadStringWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter)
         {
-            using (var stream = await DownloadStreamWithProgressAsync(url, progessReporter))
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
+
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
+
+            if (progessReporter == null)
+                throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+
+            using (var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter))
             {
                 if (stream == null)
                     return null;
 
                 var stringContent = new StreamReader(stream);
-                return stringContent.ReadToEnd();
+                return await stringContent.ReadToEndAsync();
+            }
+        }
+
+        /// <summary>
+        /// Replacement for HttpClient.GetStringAsync that can report download progress.
+        /// </summary>
+        /// <param name="client">HttpClient instance</param>
+        /// <param name="url">Url of where to download the stream from</param>
+        /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+        /// <param name="token">Cancellation Token</param>
+        /// <returns>String content of the GET request result</returns>
+        public static async Task<string> DownloadStringWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter, CancellationToken token)
+        {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
+
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
+
+            if (progessReporter == null)
+                throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+
+            if (token == null)
+                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
+
+            using (var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter, token))
+            {
+                if (stream == null)
+                    return null;
+
+                var stringContent = new StreamReader(stream);
+                return await stringContent.ReadToEndAsync();
             }
         }
     }
