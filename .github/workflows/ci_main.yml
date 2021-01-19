@@ -25,16 +25,7 @@ jobs:
       id: nbgv
       uses: dotnet/nbgv@v0.3.1
       with:
-        path: src/CommonHelpers/CommonHelpers.csproj
-
-    - run: |
-        echo "Check Nerdbank.GitVersioning step output"
-        echo "SemVer2 ${{ steps.nbgv.outputs.SemVer2 }}"
-        echo "SimpleVersion ${{ steps.nbgv.outputs.SimpleVersion }}"
-        echo "VersionMajor ${{ steps.nbgv.outputs.VersionMajor }}"
-        echo "VersionMinor ${{ steps.nbgv.outputs.VersionMinor }}"
-        echo "BuildNumber ${{ steps.nbgv.outputs.BuildNumber }}"
-        echo "VersionRevision ${{ steps.nbgv.outputs.VersionRevision }}"
+        path: src/CommonHelpers/
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
