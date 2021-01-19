@@ -9,8 +9,7 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      Actions_Allow_Unsecure_Commands: true # Allows us to set environment varibles at the job level (normally they get wiped after each step)
-
+      Actions_Allow_Unsecure_Commands: true 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
