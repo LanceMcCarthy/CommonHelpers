@@ -1,0 +1,54 @@
+name: Release to NuGet.org
+
+on:
+  push:
+    branches:
+      - prerelease
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      Actions_Allow_Unsecure_Commands: true # Allows us to set environment varibles at the job level (normally they get wiped after each step)
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - uses: Amadevus/pwsh-script@v2
+      id: version-creator
+      with:
+        script: |
+          $buildDay = Get-Date -Format "yyyy.Mdd"
+          ${GITHUB_REF/refs\/tags\/v/}
+          $ver = $buildDay + "." + $env:GITHUB_RUN_NUMBER + ".0"
+
+          Set-ActionVariable VERSION $ver
+    
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v1.7.2
+      with:
+        dotnet-version: '5.0.x'
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+      with:
+        vs-version: '[16.8,16.9)'
+
+    - name: NuGet Restore
+      run: dotnet restore src\CommonHelpers.sln --configfile nuget.config --runtime any
+
+    - name: Build
+      run: dotnet restore src\CommonHelpers.sln --runtime any
+
+    - name: run Tests
+      run: dotnet test src\CommonHelpers.sln --runtime any
+
+      # Publishing NuGet package. Note this nuget.config is proving the authentication
+    - name: Publish Package to GitHub Registry
+      run: dotnet nuget push "bin/Release/OctocatApp.1.0.0.nupkg" --source "GitHubRegistry"
+      env: 
+        GITHUB_REGISTRY_USERNAME: 'LanceMcCarthy'
+        GITHUB_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
