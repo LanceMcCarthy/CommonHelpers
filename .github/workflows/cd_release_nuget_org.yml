@@ -25,13 +25,13 @@ jobs:
         vs-version: '[16.8,16.9)'
 
     - name: NuGet Restore
-      run: dotnet restore src\CommonHelpers.sln --configfile nuget.config --runtime any
+      run: dotnet restore src/CommonHelpers.sln --configfile src/nuget.config --runtime any
 
     - name: Build
-      run: dotnet restore src\CommonHelpers.sln --runtime any
+      run: dotnet restore src/CommonHelpers.sln --runtime any
 
     - name: run Tests
-      run: dotnet test src\CommonHelpers.sln --runtime any
+      run: dotnet test src/CommonHelpers.sln --runtime any
 
     - name: Nerdbank.GitVersioning
       id: nbgv
@@ -57,19 +57,16 @@ jobs:
         echo "NBGV_BuildNumber ${{ steps.nbgv.outputs.BuildNumber }}"
         echo "NBGV_VersionRevision ${{ steps.nbgv.outputs.VersionRevision }}"
 
-      # Publishing NuGet package. Note this nuget.config is proving the authentication
     - name: Publish Package to NuGet.org
-      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.SimpleVersion }}.nupkg" --source "GitHubRegistry"
-      env: 
-        GITHUB_REGISTRY_USERNAME: 'LanceMcCarthy'
-        GITHUB_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.SimpleVersion }}.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
-    - name: publish on version change
-      id: publish_nuget
-      uses: rohith/publish-nuget@v2
-      with:
-        PROJECT_FILE_PATH: src/CommonHelpers/CommonHelpers.csproj
-        PACKAGE_NAME: CommonHelpers
-        NUGET_KEY: ${{ secrets.GITHUB_TOKEN }}
-        NUGET_SOURCE: https://nuget.pkg.github.com/LanceMcCarthy/
-        VERSION_STATIC: ${{ env:NBGV_SimpleVersion }}
+    # https://github.com/marketplace/actions/publish-nuget
+    # - name: publish on version change
+    #   id: publish_nuget
+    #   uses: rohith/publish-nuget@v2
+    #   with:
+    #     PROJECT_FILE_PATH: src/CommonHelpers/CommonHelpers.csproj
+    #     PACKAGE_NAME: CommonHelpers
+    #     NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+    #     NUGET_SOURCE: https://nuget.pkg.github.com/LanceMcCarthy/
+    #     VERSION_STATIC: ${{ env:NBGV_SimpleVersion }}

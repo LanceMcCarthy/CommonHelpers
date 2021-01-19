@@ -17,38 +17,35 @@ jobs:
       with:
         fetch-depth: 0
 
-    - uses: Amadevus/pwsh-script@v2
-      id: version-creator
-      with:
-        script: |
-          $buildDay = Get-Date -Format "yyyy.Mdd"
-          ${GITHUB_REF/refs\/tags\/v/}
-          $ver = $buildDay + "." + $env:GITHUB_RUN_NUMBER + ".0"
-
-          Set-ActionVariable VERSION $ver
-    
     - name: Install .NET Core
       uses: actions/setup-dotnet@v1.7.2
       with:
         dotnet-version: '5.0.x'
-
+    
+    - name: Nerdbank.GitVersioning
+      id: nbgv
+      uses: dotnet/nbgv@v0.3.1
+      with:
+        path: src/CommonHelpers/CommonHelpers.csproj
+        setAllvars: true
+    
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         vs-version: '[16.8,16.9)'
 
     - name: NuGet Restore
-      run: dotnet restore src\CommonHelpers.sln --configfile nuget.config --runtime any
+      run: dotnet restore src/CommonHelpers.sln --configfile src/nuget.config --runtime any
 
     - name: Build
-      run: dotnet restore src\CommonHelpers.sln --runtime any
+      run: dotnet restore src/CommonHelpers.sln --runtime any
 
     - name: run Tests
-      run: dotnet test src\CommonHelpers.sln --runtime any
+      run: dotnet test src/CommonHelpers.sln --runtime any
 
       # Publishing NuGet package. Note this nuget.config is proving the authentication
     - name: Publish Package to GitHub Registry
-      run: dotnet nuget push "bin/Release/OctocatApp.1.0.0.nupkg" --source "GitHubRegistry"
+      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.SimpleVersion }}.nupkg" --source "GitHubRegistry" --configfile src\nuget.config
       env: 
         GITHUB_REGISTRY_USERNAME: 'LanceMcCarthy'
         GITHUB_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
