@@ -11,6 +11,8 @@ namespace CommonHelpers.Tests.ExtensionsTests
     [TestClass]
     public class HttpClientExtensionsTests
     {
+        private readonly HttpClient client = new();
+
         [TestMethod]
         public void DownloadStringWithProgress()
         {
@@ -26,13 +28,10 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            using (var client = new HttpClient())
-            { 
-                result = client.DownloadStringWithProgressAsync(url, reporter).Result;
-            }
+            result = client.DownloadStringWithProgressAsync(url, reporter).Result;
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented");
+            Assert.IsTrue(progress > 0, "DownloadStringWithProgress - progress was not incremented");
             Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null");
         }
 
@@ -52,13 +51,10 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            using (var client = new HttpClient())
-            {
-                result = client.DownloadStringWithProgressAsync(url, reporter, cts.Token).Result;
-            }
+            result = client.DownloadStringWithProgressAsync(url, reporter, cts.Token).Result;
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented.");
+            Assert.IsTrue(progress > 0, "DownloadStringWithProgressAndCancellation - progress was not incremented.");
             Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
             Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null.");
         }
@@ -78,13 +74,10 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            using (var client = new HttpClient())
-            {
-                result = client.DownloadStreamWithProgressAsync(url, reporter).Result;
-            }
+            result = client.DownloadStreamWithProgressAsync(url, reporter).Result;
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented");
+            Assert.IsTrue(progress > 0, "DownloadStreamWithProgress - progress was not incremented");
             Assert.IsTrue(result != null, "Stream is null");
 
             result.Dispose();
@@ -106,13 +99,10 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            using (var client = new HttpClient())
-            {
-                result = client.DownloadStreamWithProgressAsync(url, reporter, cts.Token).Result;
-            }
+            result = client.DownloadStreamWithProgressAsync(url, reporter, cts.Token).Result;
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented.");
+            Assert.IsTrue(progress > 0, "DownloadSteamWithProgressAndCancellation - progress was not incremented.");
             Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
             Assert.IsTrue(result != null, "Stream is null");
 
