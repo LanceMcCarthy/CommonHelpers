@@ -3,14 +3,22 @@ This is a cross platform **NET Standard 2.0** helper library containing a bunch 
 
 By publishing this is as a signed NuGet package I save myself a lot of time, but more importantly, I get to share it with you. Enjoy!
 
-### Releases
+## Releases
 
 | NuGet.org (stable) | Azure Artifacts Feed (preview) |
 |-----------|----------------------|
 | [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [![CommonHelpers package in MainFeed feed in Azure Artifacts](https://feeds.dev.azure.com/lance/_apis/public/Packaging/Feeds/a9cb29f3-008d-418f-a057-1c2925dbbaf2/Packages/9452e54a-48d2-409b-8644-3fa7ed784d85/Badge)](https://dev.azure.com/lance/CommonHelpers/_packaging?_a=package&feed=a9cb29f3-008d-418f-a057-1c2925dbbaf2&package=9452e54a-48d2-409b-8644-3fa7ed784d85&preferRelease=true) |
- 
-### Pipelines
 
+## CI-CD
+
+| Workflow     | Status                                   |
+|--------------|------------------------------------------|
+| `main`       | ![Main](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Main/badge.svg) |
+| `dev`        | ![Development](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Development/badge.svg) |
+| `prerelease` | ![Release to GitHub Packages](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Release%20to%20GitHub%20Packages/badge.svg) |
+| `release`    | ![Release to NuGet.org](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Release%20to%20NuGet.org/badge.svg) |
+
+### Azure Pipelines
 
 | Branch                           | Status                                   |
 |----------------------------------|------------------------------------------|

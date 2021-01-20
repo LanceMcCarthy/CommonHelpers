@@ -1,4 +1,4 @@
-name: Release to NuGet.org
+name: Release to GitHub Packages
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
       id: nbgv
       uses: dotnet/nbgv@v0.3.1
       with:
-        path: src/CommonHelpers/CommonHelpers.csproj
+        path: src/CommonHelpers/
         setAllvars: true
     
     - name: Setup MSBuild.exe
@@ -34,7 +34,7 @@ jobs:
         vs-version: '[16.8,16.9)'
 
     - name: NuGet Restore
-      run: dotnet restore src/CommonHelpers.sln --configfile src/nuget.config --runtime any
+      run: dotnet restore src/CommonHelpers.sln --runtime any
 
     - name: Build
       run: dotnet restore src/CommonHelpers.sln --runtime any
@@ -44,7 +44,4 @@ jobs:
 
       # Publishing NuGet package. Note this nuget.config is proving the authentication
     - name: Publish Package to GitHub Registry
-      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.SimpleVersion }}.nupkg" --source "GitHubRegistry" --configfile src\nuget.config
-      env: 
-        GITHUB_REGISTRY_USERNAME: 'LanceMcCarthy'
-        GITHUB_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.SimpleVersion }}.nupkg" --source "GitHubRegistry" --api-key ${{ secrets.GITHUB_TOKEN }}

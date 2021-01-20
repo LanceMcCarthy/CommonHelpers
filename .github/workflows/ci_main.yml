@@ -15,17 +15,18 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v1.7.2
-      with:
-        dotnet-version: '5.0.x'
 
     - name: Nerdbank.GitVersioning
       id: nbgv
       uses: dotnet/nbgv@v0.3.1
       with:
         path: src/CommonHelpers/
+        setAllvars: true
+    
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v1.7.2
+      with:
+        dotnet-version: '5.0.x'
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
@@ -33,7 +34,7 @@ jobs:
         vs-version: '[16.8,16.9)'
 
     - name: Restore Dependencies
-      run: dotnet restore src/CommonHelpers.sln --configfile src/nuget.config --runtime any
+      run: dotnet restore src/CommonHelpers.sln --runtime any
 
     - name: Build CommonHelpers.sln
       run: dotnet restore src/CommonHelpers.sln --runtime any
