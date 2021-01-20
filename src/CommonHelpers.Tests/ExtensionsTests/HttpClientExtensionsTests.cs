@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using CommonHelpers.Common.Args;
 using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,13 +15,12 @@ namespace CommonHelpers.Tests.ExtensionsTests
         private readonly HttpClient client = new();
 
         [TestMethod]
-        public void DownloadStringWithProgress()
+        public async Task DownloadStringWithProgress()
         {
             // Arrange
-            string result;
             var reporter = new Progress<DownloadProgressArgs>();
             float progress = 0;
-            var url = "https://httpbin.org/encoding/utf8";
+            const string url = "https://httpbin.org/encoding/utf8";
 
             // Act
             reporter.ProgressChanged += (s, e) =>
@@ -28,7 +28,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            result = client.DownloadStringWithProgressAsync(url, reporter).Result;
+            var result = await client.DownloadStringWithProgressAsync(url, reporter);
 
             // Assert
             Assert.IsTrue(progress > 0, "DownloadStringWithProgress - progress was not incremented");
@@ -36,13 +36,12 @@ namespace CommonHelpers.Tests.ExtensionsTests
         }
 
         [TestMethod]
-        public void DownloadStringWithProgressAndCancellation()
+        public async Task DownloadStringWithProgressAndCancellation()
         {
             // Arrange
-            string result;
             var cts = new CancellationTokenSource();
             float progress = 0;
-            var url = "https://httpbin.org/encoding/utf8";
+            const string url = "https://httpbin.org/encoding/utf8";
             var reporter = new Progress<DownloadProgressArgs>();
 
             // Act
@@ -51,7 +50,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            result = client.DownloadStringWithProgressAsync(url, reporter, cts.Token).Result;
+            var result = await client.DownloadStringWithProgressAsync(url, reporter, cts.Token);
 
             // Assert
             Assert.IsTrue(progress > 0, "DownloadStringWithProgressAndCancellation - progress was not incremented.");
@@ -60,12 +59,12 @@ namespace CommonHelpers.Tests.ExtensionsTests
         }
 
         [TestMethod]
-        public void DownloadStreamWithProgress()
+        public async Task DownloadStreamWithProgress()
         {
             // Arrange
             Stream result = null;
             float progress = 0;
-            var url = "https://progressdevsupport.blob.core.windows.net/sampledocs/pdfviewer-overview.pdf";
+            const string url = "https://progressdevsupport.blob.core.windows.net/sampledocs/pdfviewer-overview.pdf";
             var reporter = new Progress<DownloadProgressArgs>();
 
             // Act
@@ -74,23 +73,23 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            result = client.DownloadStreamWithProgressAsync(url, reporter).Result;
+            result = await client.DownloadStreamWithProgressAsync(url, reporter);
 
             // Assert
             Assert.IsTrue(progress > 0, "DownloadStreamWithProgress - progress was not incremented");
             Assert.IsTrue(result != null, "Stream is null");
 
-            result.Dispose();
+            await result.DisposeAsync();
         }
 
         [TestMethod]
-        public void DownloadSteamWithProgressAndCancellation()
+        public async Task DownloadSteamWithProgressAndCancellation()
         {
             // Arrange
             Stream result = null;
             var cts = new CancellationTokenSource();
             float progress = 0;
-            var url = "https://progressdevsupport.blob.core.windows.net/sampledocs/pdfviewer-overview.pdf";
+            const string url = "https://progressdevsupport.blob.core.windows.net/sampledocs/pdfviewer-overview.pdf";
             var reporter = new Progress<DownloadProgressArgs>();
 
             // Act
@@ -99,14 +98,14 @@ namespace CommonHelpers.Tests.ExtensionsTests
                 progress = e.PercentComplete;
             };
 
-            result = client.DownloadStreamWithProgressAsync(url, reporter, cts.Token).Result;
+            result = await client.DownloadStreamWithProgressAsync(url, reporter, cts.Token);
 
             // Assert
             Assert.IsTrue(progress > 0, "DownloadSteamWithProgressAndCancellation - progress was not incremented.");
             Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
             Assert.IsTrue(result != null, "Stream is null");
 
-            result.Dispose();
+            await result.DisposeAsync();
         }
     }
 }
