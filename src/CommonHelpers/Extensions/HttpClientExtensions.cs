@@ -61,10 +61,7 @@ namespace CommonHelpers.Extensions
 
             if (string.IsNullOrEmpty(parameterName))
                 throw new ArgumentNullException(nameof(parameterName), "You must set a parameter name for the image data");
-
-            if (token == null)
-                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
-
+            
             var fileBytes = File.ReadAllBytes(imageFilePath);
 
             var multipartContent = new MultipartFormDataContent();
@@ -141,10 +138,7 @@ namespace CommonHelpers.Extensions
 
             if (progessReporter == null)
                 throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
-
-            if (token == null)
-                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
-
+            
             client.DefaultRequestHeaders.ExpectContinue = false;
 
             var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
@@ -270,10 +264,7 @@ namespace CommonHelpers.Extensions
 
             if (progessReporter == null)
                 throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
-
-            if (token == null)
-                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
-
+            
             client.DefaultRequestHeaders.ExpectContinue = false;
 
             var fileBytes = File.ReadAllBytes(imageFilePath);
@@ -367,10 +358,7 @@ namespace CommonHelpers.Extensions
 
             if (progessReporter == null)
                 throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
-
-            if (token == null)
-                throw new ArgumentNullException(nameof(token), "CancellationToken was null");
-
+            
             using (var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter, token))
             {
                 if (stream == null)
