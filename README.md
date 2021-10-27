@@ -57,13 +57,16 @@ To make testing UI controls easier by quickly providing well formatted data from
 This is my most frequently used service. You can easily spin up data for Lists, Charts, DataGrids and more with a single method.
 
 ```C#
-var sampleDataService = new SampleDataService();
+BarSeriesData.AddRange(SampleDataService.Current.GenerateCategoricalData());
+ScatterSeriesData.AddRange(SampleDataService.Current.GenerateScatterPointData());
+LineSeriesData.AddRange(SampleDataService.Current.GenerateDateTimeMinuteData());
+SplineAreaSeriesData.AddRange(SampleDataService.Current.GenerateDateTimeDayData());
 
-BarSeriesData.AddRange(sampleDataService.GenerateCategoricalData());
-ScatterSeriesData.AddRange(sampleDataService.GenerateScatterPointData());
-LineSeriesData.AddRange(sampleDataService.GenerateDateTimeMinuteData());
-SplineAreaSeriesData.AddRange(sampleDataService.GenerateDateTimeDayData());
-People.AddRange(sampleDataService.GeneratePeopleData());
+People.AddRange(SampleDataService.Current.GeneratePeopleData());
+Employees.AddRange(SampleDataService.Current.GenerateEmployeeData(true));
+
+Products.AddRange(SampleDataService.Current.GenerateProductData());
+Categories.AddRange(SampleDataService.Current.GenerateCategoryData());
 ```
 ![Sample Data Service](https://user-images.githubusercontent.com/3520532/41983551-7254db84-79fc-11e8-89b0-347b25054fb3.png)
 
