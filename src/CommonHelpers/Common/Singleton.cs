@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 
 namespace CommonHelpers.Common
 {
@@ -7,17 +6,10 @@ namespace CommonHelpers.Common
     /// Example:  Singleton<MyMenuItem>.Instance.IconPath
     /// </summary>
     /// <typeparam name="T">The Type of the singleton</typeparam>
-    public static class Singleton<T> 
-        where T : new()
+    public static class Singleton<T> where T : new()
     {
-        private static readonly ConcurrentDictionary<Type, T> Instances = new ConcurrentDictionary<Type, T>();
+        private static readonly Lazy<T> instance = new Lazy<T>(() => new T());
 
-        public static T Instance
-        {
-            get
-            {
-                return Instances.GetOrAdd(typeof(T), (t) => new T());
-            }
-        }
+        public static T Instance => instance.Value;
     }
 }
