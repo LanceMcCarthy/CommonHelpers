@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    env:
-      Actions_Allow_Unsecure_Commands: true 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -18,18 +16,35 @@ jobs:
     
     - name: Nerdbank.GitVersioning
       id: nbgv
-      uses: dotnet/nbgv@v0.3.1
+      uses: dotnet/nbgv@v0.4.0
       with:
         path: src/CommonHelpers/
         setAllvars: true
+    
+    - run: |
+        echo "Environment vars"
+        echo "NBGV_SemVer2 $env:NBGV_SemVer2"
+        echo "NBGV_SimpleVersion $env:NBGV_SimpleVersion"
+        echo "NBGV_VersionMajor $env:NBGV_VersionMajor"
+        echo "NBGV_VersionMinor $env:NBGV_VersionMinor"
+        echo "NBGV_BuildNumber $env:NBGV_BuildNumber"
+        echo "NBGV_VersionRevision $env:NBGV_VersionRevision"
 
+        echo "step output"
+        echo "NBGV_SemVer2 ${{ steps.nbgv.outputs.SemVer2 }}"
+        echo "NBGV_SimpleVersion ${{ steps.nbgv.outputs.SimpleVersion }}"
+        echo "NBGV_VersionMajor ${{ steps.nbgv.outputs.VersionMajor }}"
+        echo "NBGV_VersionMinor ${{ steps.nbgv.outputs.VersionMinor }}"
+        echo "NBGV_BuildNumber ${{ steps.nbgv.outputs.BuildNumber }}"
+        echo "NBGV_VersionRevision ${{ steps.nbgv.outputs.VersionRevision }}"
+    
     - name: Install .NET Core
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.x'
+        dotnet-version: '5.0'
 
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.0.3
 
     - name: Restore Dependencies
       run: dotnet restore src/CommonHelpers.sln --runtime any
