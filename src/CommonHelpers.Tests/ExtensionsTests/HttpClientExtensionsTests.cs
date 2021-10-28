@@ -53,30 +53,5 @@ namespace CommonHelpers.Tests.ExtensionsTests
             Assert.IsFalse(string.IsNullOrEmpty(stringResult), "String download was null or empty.");
             Assert.IsTrue(streamResult.Length > 0, "Stream download does not contain any data.");
         }
-        
-        //[TestMethod]
-        //public async Task DownloadStreamWithProgress()
-        //{
-        //    // Arrange
-        //    int streamDownloadProgress = 0;
-        //    const string url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
-        //    var streamDownloadReporter = new Progress<DownloadProgressArgs>();
-
-        //    // Act
-        //    streamDownloadReporter.ProgressChanged += (s, e) =>
-        //    {
-        //        streamDownloadProgress = Convert.ToInt32(e.PercentComplete);
-        //    };
-
-        //    using var client = new HttpClient();
-
-        //    await using var streamResult = await client.DownloadStreamWithProgressAsync(url, streamDownloadReporter);
-
-        //    Trace.WriteLine($"Progress After Completion: {streamDownloadProgress}");
-
-        //    // Assert
-        //    Assert.IsTrue(streamDownloadProgress == 100, "DownloadStreamWithProgress - progress did not reach 100% completion");
-        //    Assert.IsTrue(streamResult != null, "Stream is null");
-        //}
     }
 }
