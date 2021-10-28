@@ -3,6 +3,7 @@ using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -12,54 +13,70 @@ namespace CommonHelpers.Tests.ExtensionsTests
     public class HttpClientExtensionsTests
     {
         [TestMethod]
-        public async Task DownloadStringWithProgress()
+        public async Task DownloadWithProgressTests()
         {
             // Arrange
-            var reporter = new Progress<DownloadProgressArgs>();
-            string stringResult = string.Empty;
-            int progress = 0;
             const string url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
 
-            // Act
-            reporter.ProgressChanged += (s, e) =>
-            {
-                progress = Convert.ToInt32(e.PercentComplete);
-            };
+            string stringResult = string.Empty;
+            Stream streamResult = null;
+            int stringDownloadProgress = 0;
+            int streamDownloadProgress = 0;
 
+            var stringDownloadReporter = new Progress<DownloadProgressArgs>();
+            var streamDownloadReporter = new Progress<DownloadProgressArgs>();
             using var client = new HttpClient();
 
-            stringResult = await client.DownloadStringWithProgressAsync(url, reporter);
+            // Act
+            stringDownloadReporter.ProgressChanged += (s, e) =>
+            {
+                stringDownloadProgress = Convert.ToInt32(e.PercentComplete);
+            };
+            
+            stringResult = await client.DownloadStringWithProgressAsync(url, stringDownloadReporter);
 
-            Trace.WriteLine($"Progress After Completion: {progress}");
+            Trace.WriteLine($"String Progress After Completion: {stringDownloadProgress}");
+
+            streamDownloadReporter.ProgressChanged += (s, e) =>
+            {
+                streamDownloadProgress = Convert.ToInt32(e.PercentComplete);
+            };
+
+            streamResult = await client.DownloadStreamWithProgressAsync(url, streamDownloadReporter);
+
+            Trace.WriteLine($"Stream Progress After Completion: {streamDownloadProgress}");
 
             // Assert
-            Assert.IsTrue(progress == 100, "DownloadStringWithProgress - progress did not reach 100% completion");
-            Assert.IsFalse(string.IsNullOrEmpty(stringResult), "String result was null");
+            Assert.IsTrue(stringDownloadProgress == 100, "Download String - progress did not reach 100% completion");
+            Assert.IsTrue(streamDownloadProgress == 100, "Download Stream - progress did not reach 100% completion");
+
+            Assert.IsFalse(string.IsNullOrEmpty(stringResult), "String download was null or empty.");
+            Assert.IsTrue(streamResult.Length > 0, "Stream download does not contain any data.");
         }
         
-        [TestMethod]
-        public async Task DownloadStreamWithProgress()
-        {
-            // Arrange
-            int progress = 0;
-            const string url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
-            var reporter = new Progress<DownloadProgressArgs>();
+        //[TestMethod]
+        //public async Task DownloadStreamWithProgress()
+        //{
+        //    // Arrange
+        //    int streamDownloadProgress = 0;
+        //    const string url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
+        //    var streamDownloadReporter = new Progress<DownloadProgressArgs>();
 
-            // Act
-            reporter.ProgressChanged += (s, e) =>
-            {
-                progress = Convert.ToInt32(e.PercentComplete);
-            };
+        //    // Act
+        //    streamDownloadReporter.ProgressChanged += (s, e) =>
+        //    {
+        //        streamDownloadProgress = Convert.ToInt32(e.PercentComplete);
+        //    };
 
-            using var client = new HttpClient();
+        //    using var client = new HttpClient();
 
-            await using var streamResult = await client.DownloadStreamWithProgressAsync(url, reporter);
+        //    await using var streamResult = await client.DownloadStreamWithProgressAsync(url, streamDownloadReporter);
 
-            Trace.WriteLine($"Progress After Completion: {progress}");
+        //    Trace.WriteLine($"Progress After Completion: {streamDownloadProgress}");
 
-            // Assert
-            Assert.IsTrue(progress == 100, "DownloadStreamWithProgress - progress did not reach 100% completion");
-            Assert.IsTrue(streamResult != null, "Stream is null");
-        }
+        //    // Assert
+        //    Assert.IsTrue(streamDownloadProgress == 100, "DownloadStreamWithProgress - progress did not reach 100% completion");
+        //    Assert.IsTrue(streamResult != null, "Stream is null");
+        //}
     }
 }
