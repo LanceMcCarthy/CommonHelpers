@@ -24,29 +24,33 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
 
-    - uses: kzrnm/get-net-sdk-project-versions-action@v1
+    - name: Get Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v1
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
-    - run: |
-        echo version "${{steps.get-version.outputs.version}}"
-        echo version-prefix "${{steps.get-version.outputs.version-prefix}}" 
-        echo version-suffix "${{steps.get-version.outputs.version-suffix}}" 
-        echo package-version "${{steps.get-version.outputs.package-version}}" 
-        echo assembly-version "${{steps.get-version.outputs.assembly-version}}" 
-        echo file-version "${{steps.get-version.outputs.file-version}}" 
-        echo informational-version "${{steps.get-version.outputs.informational-version}}"
+    - name: Verify version
+      run: echo version "${{steps.get-version.outputs.package-version}}"
 
     - name: NuGet Restore
       run: dotnet restore src/CommonHelpers.sln --runtime any
 
     - name: Build
       run: dotnet restore src/CommonHelpers.sln --runtime any
-
-    - name: run Tests
+    
+    - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
+    
+    - name: Decode Base64 and save PFX file
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LancelotSoftwareCert_Base64 }}")
+        $currentDirectory = Get-Location
+        $certificatePath = Join-Path -Path $currentDirectory -ChildPath src\CommonHelpers -AdditionalChildPath "LancelotSoftware.pfx"
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
-    # Publishing NuGet package. Note this nuget.config is proving the authentication
+    - name: Sign NuGet package
+      run: dotnet nuget sign "bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --certificate-path $(signingCert.secureFilePath) --certificate-password "${{ secrets.CertSigningPassword }}"
+    
     - name: Publish Package to GitHub Registry
-      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.get-version.outputs.version }}.nupkg" --source "GitHubRegistry" --api-key ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --source "GitHubRegistry" --api-key ${{ secrets.GITHUB_TOKEN }}

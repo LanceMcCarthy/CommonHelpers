@@ -24,11 +24,13 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
 
-    - uses: kzrnm/get-net-sdk-project-versions-action@v1
+    - name: Get Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v1
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
+    - name: Verify version
     - run: |
         echo version "${{steps.get-version.outputs.version}}"
         echo version-prefix "${{steps.get-version.outputs.version-prefix}}" 
@@ -46,3 +48,13 @@ jobs:
 
     - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
+    
+    - name: Decode Base64 and save PFX file
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LancelotSoftwareCert_Base64 }}")
+        $currentDirectory = Get-Location
+        $certificatePath = Join-Path -Path $currentDirectory -ChildPath src\CommonHelpers -AdditionalChildPath "LancelotSoftware.pfx"
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+
+    - name: Sign NuGet package
+      run: dotnet nuget sign "bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --certificate-path $(signingCert.secureFilePath) --certificate-password "${{ secrets.CertSigningPassword }}"
