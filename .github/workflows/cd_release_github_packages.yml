@@ -3,11 +3,13 @@ name: Release to GitHub Packages
 on:
   push:
     branches:
-      - prerelease
+      - release-github-packages
 
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      Actions_Allow_Unsecure_Commands: true
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -18,6 +20,18 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '5.0'
+    
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: NuGet Restore
+      run: dotnet restore src/CommonHelpers.sln --runtime any
+
+    - name: Build
+      run: dotnet restore src/CommonHelpers.sln --runtime any
+
+    - name: run Tests
+      run: dotnet test src/CommonHelpers.sln --runtime any
     
     - name: Nerdbank.GitVersioning
       id: nbgv
@@ -34,7 +48,8 @@ jobs:
         echo "NBGV_VersionMinor $env:NBGV_VersionMinor"
         echo "NBGV_BuildNumber $env:NBGV_BuildNumber"
         echo "NBGV_VersionRevision $env:NBGV_VersionRevision"
-
+        echo "NBGV_NuGetPackageVersion $env:NBGV_NuGetPackageVersion"
+        
         echo "step output"
         echo "NBGV_SemVer2 ${{ steps.nbgv.outputs.SemVer2 }}"
         echo "NBGV_SimpleVersion ${{ steps.nbgv.outputs.SimpleVersion }}"
@@ -42,19 +57,8 @@ jobs:
         echo "NBGV_VersionMinor ${{ steps.nbgv.outputs.VersionMinor }}"
         echo "NBGV_BuildNumber ${{ steps.nbgv.outputs.BuildNumber }}"
         echo "NBGV_VersionRevision ${{ steps.nbgv.outputs.VersionRevision }}"
-    
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.3
-
-    - name: NuGet Restore
-      run: dotnet restore src/CommonHelpers.sln --runtime any
-
-    - name: Build
-      run: dotnet restore src/CommonHelpers.sln --runtime any
-
-    - name: run Tests
-      run: dotnet test src/CommonHelpers.sln --runtime any
-
-      # Publishing NuGet package. Note this nuget.config is proving the authentication
+        echo "NBGV_NuGetPackageVersion ${{ steps.nbgv.outputs.NuGetPackageVersion }}"
+      
+    # Publishing NuGet package. Note this nuget.config is proving the authentication
     - name: Publish Package to GitHub Registry
-      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.SimpleVersion }}.nupkg" --source "GitHubRegistry" --api-key ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.NuGetPackageVersion }}.nupkg" --source "GitHubRegistry" --api-key ${{ secrets.GITHUB_TOKEN }}

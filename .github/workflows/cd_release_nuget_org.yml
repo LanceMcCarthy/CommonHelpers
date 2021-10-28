@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      Actions_Allow_Unsecure_Commands: true
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -35,7 +37,7 @@ jobs:
       id: nbgv
       uses: dotnet/nbgv@v0.4.0
       with:
-        path: src/CommonHelpers/CommonHelpers.csproj
+        path: src/CommonHelpers/
         setAllvars: true
 
     - run: |
@@ -46,7 +48,8 @@ jobs:
         echo "NBGV_VersionMinor $env:NBGV_VersionMinor"
         echo "NBGV_BuildNumber $env:NBGV_BuildNumber"
         echo "NBGV_VersionRevision $env:NBGV_VersionRevision"
-
+        echo "NBGV_NuGetPackageVersion $env:NBGV_NuGetPackageVersion"
+        
         echo "step output"
         echo "NBGV_SemVer2 ${{ steps.nbgv.outputs.SemVer2 }}"
         echo "NBGV_SimpleVersion ${{ steps.nbgv.outputs.SimpleVersion }}"
@@ -54,9 +57,10 @@ jobs:
         echo "NBGV_VersionMinor ${{ steps.nbgv.outputs.VersionMinor }}"
         echo "NBGV_BuildNumber ${{ steps.nbgv.outputs.BuildNumber }}"
         echo "NBGV_VersionRevision ${{ steps.nbgv.outputs.VersionRevision }}"
+        echo "NBGV_NuGetPackageVersion ${{ steps.nbgv.outputs.NuGetPackageVersion }}"
 
     - name: Publish Package to NuGet.org
-      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.SimpleVersion }}.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push "bin/Release/CommonHelpers.${{ steps.nbgv.outputs.NuGetPackageVersion }}.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
     # https://github.com/marketplace/actions/publish-nuget
     # - name: publish on version change
