@@ -1,0 +1,85 @@
+name: Prerelease
+
+on:
+  push:
+    branches:
+      - prerelease
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      Actions_Allow_Unsecure_Commands: true
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0'
+    
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: Get Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v1
+      id: get-version
+      with:
+        proj-path: src/CommonHelpers/CommonHelpers.csproj
+
+    - name: Verify version
+      run: echo version "${{steps.get-version.outputs.package-version}}"
+
+    - name: NuGet Restore
+      run: dotnet restore src/CommonHelpers.sln --runtime any
+
+    - name: Build
+      run: dotnet restore src/CommonHelpers.sln --runtime any
+    
+    - name: Run Tests
+      run: dotnet test src/CommonHelpers.sln --runtime any
+    
+    - name: Rename package file with '-rc' suffix
+      run : |
+        $currentDirectory = Get-Location
+        $oldFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        $newFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
+        Rename-Item $oldFilePath $newFilePath
+
+    - name: Decode Base64 and save PFX file
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LancelotSoftwareCert_Base64 }}")
+        $currentDirectory = Get-Location
+        $certificatePath = Join-Path -Path $currentDirectory -ChildPath "src\CommonHelpers\LancelotSoftware.pfx"
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+
+    - name: Sign NuGet package
+      run: dotnet nuget sign "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
+    
+    # - name: Publish Package to NuGet.org
+    #   run: dotnet nuget push "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v.${{ steps.get-version.outputs.package-version }}-rc
+        release_name: "Prelease ${{ steps.get-version.outputs.package-version }}-rc"
+        draft: false
+        prerelease: true
+
+    - name: Publish preview
+      id: upload-sideload-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
+        asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
+        asset_content_type: application/zip
