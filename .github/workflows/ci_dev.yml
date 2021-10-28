@@ -30,7 +30,8 @@ jobs:
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
-    - run: |
+    - name: Echo version numbers
+      run: |
         echo version "${{steps.get-version.outputs.version}}"
         echo version-prefix "${{steps.get-version.outputs.version-prefix}}" 
         echo version-suffix "${{steps.get-version.outputs.version-suffix}}" 

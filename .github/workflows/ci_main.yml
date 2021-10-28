@@ -30,8 +30,8 @@ jobs:
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
-    - name: Verify version
-    - run: |
+    - name: Echo version numbers
+      run: |
         echo version "${{steps.get-version.outputs.version}}"
         echo version-prefix "${{steps.get-version.outputs.version-prefix}}" 
         echo version-suffix "${{steps.get-version.outputs.version-suffix}}" 
@@ -53,8 +53,8 @@ jobs:
       run: |
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LancelotSoftwareCert_Base64 }}")
         $currentDirectory = Get-Location
-        $certificatePath = Join-Path -Path $currentDirectory -ChildPath src\CommonHelpers -AdditionalChildPath "LancelotSoftware.pfx"
+        $certificatePath = Join-Path -Path $currentDirectory -ChildPath "src\CommonHelpers\LancelotSoftware.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
     - name: Sign NuGet package
-      run: dotnet nuget sign "bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --certificate-path $(signingCert.secureFilePath) --certificate-password "${{ secrets.CertSigningPassword }}"
+      run: dotnet nuget sign "bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
