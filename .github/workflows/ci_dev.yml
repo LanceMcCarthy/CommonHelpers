@@ -46,11 +46,3 @@ jobs:
 
     - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
-
-    - name: Nerdbank.GitVersioning
-      id: nbgv
-      uses: dotnet/nbgv@v0.4.0
-      with:
-        path: src/CommonHelpers/
-        setAllvars: true
-    
