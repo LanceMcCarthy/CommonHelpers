@@ -2,10 +2,9 @@
 using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace CommonHelpers.Tests.ExtensionsTests
 {
@@ -13,28 +12,107 @@ namespace CommonHelpers.Tests.ExtensionsTests
     public class HttpClientExtensionsTests
     {
         [TestMethod]
-        public async Task DownloadWithProgressTests()
+        public void DownloadStringWithProgress()
         {
             // Arrange
-            const string url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
-            string stringResult = string.Empty;
-            int stringDownloadProgress = 0;
-            var stringDownloadReporter = new Progress<DownloadProgressArgs>();
-            using var client = new HttpClient();
+            string result;
+            var reporter = new Progress<DownloadProgressArgs>();
+            float progress = 0;
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
 
             // Act
-            stringDownloadReporter.ProgressChanged += (s, e) =>
+            reporter.ProgressChanged += (s, e) =>
             {
-                stringDownloadProgress = Convert.ToInt32(e.PercentComplete);
+                progress = e.PercentComplete;
             };
-            
-            stringResult = await client.DownloadStringWithProgressAsync(url, stringDownloadReporter);
 
-            Trace.WriteLine($"String Progress After Completion: {stringDownloadProgress}");
-            
+            using (var client = new HttpClient())
+            {
+                result = client.DownloadStringWithProgressAsync(url, reporter).Result;
+            }
+
             // Assert
-            Assert.IsTrue(stringDownloadProgress == 100, "Download String - progress did not reach 100% completion");
-            Assert.IsFalse(string.IsNullOrEmpty(stringResult), "String download was null or empty.");
+            Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null");
+        }
+
+        [TestMethod]
+        public void DownloadStringWithProgressAndCancellation()
+        {
+            // Arrange
+            string result;
+            var cts = new CancellationTokenSource();
+            float progress = 0;
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
+            var reporter = new Progress<DownloadProgressArgs>();
+
+            // Act
+            reporter.ProgressChanged += (s, e) =>
+            {
+                progress = e.PercentComplete;
+            };
+
+            using (var client = new HttpClient())
+            {
+                result = client.DownloadStringWithProgressAsync(url, reporter, cts.Token).Result;
+            }
+
+            // Assert
+            Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
+            Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null.");
+        }
+
+        [TestMethod]
+        public void DownloadStreamWithProgress()
+        {
+            // Arrange
+            Stream result = null;
+            float progress = 0;
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
+            var reporter = new Progress<DownloadProgressArgs>();
+
+            // Act
+            reporter.ProgressChanged += (s, e) =>
+            {
+                progress = e.PercentComplete;
+            };
+
+            using (var client = new HttpClient())
+            {
+                result = client.DownloadStreamWithProgressAsync(url, reporter).Result;
+            }
+
+            // Assert
+            Assert.IsTrue(result.Length > 0, "Stream is empty");
+
+            result.Dispose();
+        }
+
+        [TestMethod]
+        public void DownloadSteamWithProgressAndCancellation()
+        {
+            // Arrange
+            Stream result = null;
+            var cts = new CancellationTokenSource();
+            float progress = 0;
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
+            var reporter = new Progress<DownloadProgressArgs>();
+
+            // Act
+            reporter.ProgressChanged += (s, e) =>
+            {
+                progress = e.PercentComplete;
+            };
+
+            using (var client = new HttpClient())
+            {
+                result = client.DownloadStreamWithProgressAsync(url, reporter, cts.Token).Result;
+            }
+
+            // Assert
+            Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
+            Assert.IsTrue(result.Length > 0, "Stream is empty");
+
+            result.Dispose();
         }
     }
 }
