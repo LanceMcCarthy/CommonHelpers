@@ -5,30 +5,23 @@ By publishing this is as a signed NuGet package I save myself a lot of time, but
 
 ## Releases
 
-| NuGet.org (stable) | Azure Artifacts Feed (preview) |
+| NuGet.org (recommended) | GitHub Releases (all releases) |
 |-----------|----------------------|
-| [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [![CommonHelpers package in MainFeed feed in Azure Artifacts](https://feeds.dev.azure.com/lance/_apis/public/Packaging/Feeds/a9cb29f3-008d-418f-a057-1c2925dbbaf2/Packages/9452e54a-48d2-409b-8644-3fa7ed784d85/Badge)](https://dev.azure.com/lance/CommonHelpers/_packaging?_a=package&feed=a9cb29f3-008d-418f-a057-1c2925dbbaf2&package=9452e54a-48d2-409b-8644-3fa7ed784d85&preferRelease=true) |
+| [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [Releases Page](https://github.com/LanceMcCarthy/CommonHelpers/releases/) |
 
-## CI-CD
+## DevOps
 
 | Workflow     | Status                                   |
 |--------------|------------------------------------------|
-| `main`       | ![Main](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Main/badge.svg) |
 | `dev`        | ![Development](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Development/badge.svg) |
-| `prerelease` | ![Release to GitHub Packages](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Release%20to%20GitHub%20Packages/badge.svg) |
-| `release`    | ![Release to NuGet.org](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Release%20to%20NuGet.org/badge.svg) |
-
-### Azure Pipelines
-
-| Branch                           | Status                                   |
-|----------------------------------|------------------------------------------|
-| dev                              | [![dev](https://dev.azure.com/lance/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Dev)](https://dev.azure.com/lance/CommonHelpers/_build/latest?definitionId=9) |
-| main (default)            | [![main](https://dev.azure.com/lance/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Main)](https://dev.azure.com/lance/CommonHelpers/_build/latest?definitionId=10) |
-| release | [![Build status](https://dev.azure.com/lance/CommonHelpers/_apis/build/status/CommonHelpers%20-%20Release)](https://dev.azure.com/lance/CommonHelpers/_build/latest?definitionId=4) |
+| `main`       | ![Main](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Main/badge.svg) |
+| `prerelease` | ![Release to GitHub Packages](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Prerelease/badge.svg) |
+| `release`    | ![Release to NuGet.org](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Release/badge.svg) |
 
 ## Features
 
 ### Extensions
+
 Extensions for commonly used objects like `string`, `DateTime`, `enum`. There are also some special extensions for `File`, `Exception` and `Color`. Finally, there's a unqiue helper, `HttpClientExtensions` which provides download progress insights and a helper method to POST image data.
 
 ### Collections
@@ -36,12 +29,15 @@ Extensions for commonly used objects like `string`, `DateTime`, `enum`. There ar
 Special collection types that help in special scenarios (e.g. `ObservableQueue` and `ObservableRangeCollection`).
 
 ### Common
+
 This folder has some of the most frequently used classes (i.e. `BindableBase`, `ViewModelBase`, `JsonHelper`).
 
 ### MVVM
+
 Platform agnostic MVVM classes like `DelegateCommand` and `RelayCommand`.
 
 ### Services
+
 To make testing UI controls easier by quickly providing well formatted data from offline sample data and online API endpoints. This is really useful for quickly testing *Load On Demand* scenarios.
 
 * BingImageService
@@ -125,6 +121,3 @@ TotalCharactersCount = apiResult.NumberOfTotalResults;
 var characters = apiResult.Results;
 ```
 ![ComicVine API Service](https://user-images.githubusercontent.com/3520532/41982141-a83cb3e2-79f8-11e8-8207-e6bbbe590d25.png)
-
-* Updating to be included in the Arctic Code Vault
-
