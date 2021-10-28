@@ -58,10 +58,10 @@ jobs:
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
     - name: Sign NuGet package
-      run: dotnet nuget sign "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
+      run: dotnet nuget sign "D:\a\CommonHelpers\src\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
     
     # - name: Publish Package to NuGet.org
-    #   run: dotnet nuget push "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    #   run: dotnet nuget push "D:\a\CommonHelpers\src\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
     
     - name: Create GitHub Release
       id: create_release
@@ -81,6 +81,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
+        asset_path: D:\a\CommonHelpers\src\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
         asset_content_type: application/zip
