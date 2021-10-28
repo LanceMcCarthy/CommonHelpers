@@ -58,4 +58,4 @@ jobs:
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
     - name: Sign NuGet package
-      run: dotnet nuget sign "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
+      run: dotnet nuget sign "D:\a\CommonHelpers\src\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
