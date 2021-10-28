@@ -23,7 +23,21 @@ jobs:
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
-      
+
+    - uses: kzrnm/get-net-sdk-project-versions-action@v1
+      id: get-version
+      with:
+        proj-path: src/CommonHelpers/CommonHelpers.csproj
+
+    - run: |
+        echo version "${{steps.get-version.outputs.version}}"
+        echo version-prefix "${{steps.get-version.outputs.version-prefix}}" 
+        echo version-suffix "${{steps.get-version.outputs.version-suffix}}" 
+        echo package-version "${{steps.get-version.outputs.package-version}}" 
+        echo assembly-version "${{steps.get-version.outputs.assembly-version}}" 
+        echo file-version "${{steps.get-version.outputs.file-version}}" 
+        echo informational-version "${{steps.get-version.outputs.informational-version}}"
+    
     - name: Restore Dependencies
       run: dotnet restore src/CommonHelpers.sln --runtime any
 
@@ -32,29 +46,3 @@ jobs:
 
     - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
-    
-    - name: Nerdbank.GitVersioning
-      id: nbgv
-      uses: dotnet/nbgv@v0.4.0
-      with:
-        path: src/CommonHelpers/
-        setAllvars: true
-    
-    - run: |
-        echo "Environment vars"
-        echo "NBGV_SemVer2 $env:NBGV_SemVer2"
-        echo "NBGV_SimpleVersion $env:NBGV_SimpleVersion"
-        echo "NBGV_VersionMajor $env:NBGV_VersionMajor"
-        echo "NBGV_VersionMinor $env:NBGV_VersionMinor"
-        echo "NBGV_BuildNumber $env:NBGV_BuildNumber"
-        echo "NBGV_VersionRevision $env:NBGV_VersionRevision"
-        echo "NBGV_NuGetPackageVersion $env:NBGV_NuGetPackageVersion"
-        
-        echo "step output"
-        echo "NBGV_SemVer2 ${{ steps.nbgv.outputs.SemVer2 }}"
-        echo "NBGV_SimpleVersion ${{ steps.nbgv.outputs.SimpleVersion }}"
-        echo "NBGV_VersionMajor ${{ steps.nbgv.outputs.VersionMajor }}"
-        echo "NBGV_VersionMinor ${{ steps.nbgv.outputs.VersionMinor }}"
-        echo "NBGV_BuildNumber ${{ steps.nbgv.outputs.BuildNumber }}"
-        echo "NBGV_VersionRevision ${{ steps.nbgv.outputs.VersionRevision }}"
-        echo "NBGV_NuGetPackageVersion ${{ steps.nbgv.outputs.NuGetPackageVersion }}"

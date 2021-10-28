@@ -30,13 +30,13 @@ jobs:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
     - run: |
-        echo "${{steps.get-version.outputs.version}}"
-        echo "${{steps.get-version.outputs.version-prefix}}" 
-        echo "${{steps.get-version.outputs.version-suffix}}" 
-        echo "${{steps.get-version.outputs.package-version}}" 
-        echo "${{steps.get-version.outputs.assembly-version}}" 
-        echo "${{steps.get-version.outputs.file-version}}" 
-        echo "${{steps.get-version.outputs.informational-version}}" 
+        echo version "${{steps.get-version.outputs.version}}"
+        echo version-prefix "${{steps.get-version.outputs.version-prefix}}" 
+        echo version-suffix "${{steps.get-version.outputs.version-suffix}}" 
+        echo package-version "${{steps.get-version.outputs.package-version}}" 
+        echo assembly-version "${{steps.get-version.outputs.assembly-version}}" 
+        echo file-version "${{steps.get-version.outputs.file-version}}" 
+        echo informational-version "${{steps.get-version.outputs.informational-version}}"
 
     - name: Restore Dependencies
       run: dotnet restore src/CommonHelpers.sln --runtime any
