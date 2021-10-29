@@ -43,12 +43,9 @@ jobs:
     - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
     
-    - name: Rename package file with '-rc' suffix
+    - name: Rename NuGet Package file(s) with '-rc' Release Candidatde suffix
       run : |
-        $currentDirectory = Get-Location
-        $oldFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        $newFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
-        Rename-Item $oldFilePath $newFilePath
+        Get-ChildItem *.nupkg -Recurse | Rename-Item -NewName { $_.Name -replace '.nupkg','-rc.nupkg' }
 
     - name: Decode Base64 and save PFX file
       run: |
