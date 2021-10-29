@@ -45,17 +45,13 @@ jobs:
     
     - name: Rename NuGet Package file(s) with '-rc' Release Candidatde suffix
       run : |
-        $packageFiles = Get-ChildItem *.nupkg -Recurse
-        foreach ($packageFile in $packageFiles){
-          Rename-Item -NewName  { $packageFile.Name -replace '.nupkg','-rc.nupkg' }
-          echo "NUGET_PACKAGE_PATH=$packageFile.Path" >> $GITHUB_ENV
-        }
-
-        # Get-ChildItem *.nupkg -Recurse | Rename-Item -NewName 
-        # { 
-        #   $_.Name -replace '.nupkg','-rc.nupkg'
-        #   echo "NUGET_PACKAGE_PATH=$_.Path" >> $GITHUB_ENV
+        # $packageFiles = Get-ChildItem *.nupkg -Recurse
+        # foreach ($packageFile in $packageFiles){
+        #   Rename-Item -NewName  { $packageFile.Name -replace '.nupkg','-rc.nupkg' }
+        #   echo "NUGET_PACKAGE_PATH=$packageFile.Path" >> $GITHUB_ENV
         # }
+
+        Get-ChildItem *.nupkg -Recurse | Rename-Item -NewName { $_.Name -replace '.nupkg','-rc.nupkg' } echo "NUGET_PACKAGE_PATH=$_.Path" >> $GITHUB_ENV
 
     - name: Decode Base64 and save PFX file
       run: |
