@@ -19,7 +19,8 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0'
+        dotnet-version: '6.0.x'
+        include-prerelease: true
 
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
@@ -30,7 +31,8 @@ jobs:
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
-    - run: |
+    - name: Echo version numbers
+      run: |
         echo version "${{steps.get-version.outputs.version}}"
         echo version-prefix "${{steps.get-version.outputs.version-prefix}}" 
         echo version-suffix "${{steps.get-version.outputs.version-suffix}}" 
