@@ -45,7 +45,11 @@ jobs:
     
     - name: Rename NuGet Package file(s) with '-rc' Release Candidatde suffix
       run : |
-        Get-ChildItem *.nupkg -Recurse | Rename-Item -NewName { $_.Name -replace '.nupkg','-rc.nupkg' }
+        Get-ChildItem *.nupkg -Recurse | Rename-Item -NewName 
+        { 
+          $_.Name -replace '.nupkg','-rc.nupkg'
+          echo "NUGET_PACKAGE_PATH=$_.Path" >> $GITHUB_ENV
+        }
 
     - name: Decode Base64 and save PFX file
       run: |
@@ -55,7 +59,7 @@ jobs:
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
     - name: Sign NuGet package
-      run: dotnet nuget sign "**\CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
+      run: dotnet nuget sign ${{ env.NUGET_PACKAGE_PATH }} --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
     
     # - name: Publish Package to NuGet.org
     #   run: dotnet nuget push "**\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
@@ -78,6 +82,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: "**/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
+        asset_path: ${{ env.NUGET_PACKAGE_PATH }}
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
         asset_content_type: application/zip
