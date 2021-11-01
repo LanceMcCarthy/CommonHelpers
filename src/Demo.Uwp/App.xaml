@@ -17,6 +17,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <converters:VacationBalanceToBrushConverter x:Key="VacationBalanceToBrushConverter"/>
+            <converters:InvertBoolConverter x:Key="InvertBoolConv"/>
 
             <Style x:Key="StretchedListViewItemStyle"
                    TargetType="ListViewItem">

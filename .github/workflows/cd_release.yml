@@ -62,7 +62,7 @@ jobs:
         Write-Output "::set-output name=certificate-path::$certificatePath"
 
     - name: Sign NuGet package
-      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path "${{ env.CERT_PATH }}" --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
     
     - name: Create GitHub Release
       id: create_release
@@ -75,7 +75,7 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Publish preview
+    - name: Publish To GitHub Releases
       id: upload-sideload-asset
       uses: actions/upload-release-asset@v1
       env:
@@ -86,5 +86,5 @@ jobs:
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         asset_content_type: application/zip
 
-    - name: Publish Package to NuGet.org
+    - name: Publish to NuGet.org
       run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
