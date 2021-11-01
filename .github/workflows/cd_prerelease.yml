@@ -49,7 +49,7 @@ jobs:
         $oldFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         $newFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
         Rename-Item $oldFilePath $newFilePath
-		    echo "NUGET_PACKAGE_PATH=$newFilePath" >> $GITHUB_ENV
+        echo "NUGET_PACKAGE_PATH=$newFilePath" >> $GITHUB_ENV
         
     - name: Decode Base64 and save PFX file
       run: |
