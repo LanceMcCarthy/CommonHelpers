@@ -38,21 +38,19 @@ jobs:
       run: dotnet restore src/CommonHelpers.sln --runtime any
 
     - name: Build
-      run: dotnet restore src/CommonHelpers.sln --runtime any
+      run: dotnet build src/CommonHelpers.sln --configuration Release
     
     - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
     
     - name: Rename NuGet Package file(s) with '-rc' Release Candidatde suffix
       run : |
-        # $packageFiles = Get-ChildItem *.nupkg -Recurse
-        # foreach ($packageFile in $packageFiles){
-        #   Rename-Item -NewName  { $packageFile.Name -replace '.nupkg','-rc.nupkg' }
-        #   echo "NUGET_PACKAGE_PATH=$packageFile.Path" >> $GITHUB_ENV
-        # }
-
-        Get-ChildItem *.nupkg -Recurse | Rename-Item -NewName { $_.Name -replace '.nupkg','-rc.nupkg' } echo "NUGET_PACKAGE_PATH=$_.Path" >> $GITHUB_ENV
-
+        $currentDirectory = Get-Location
+        $oldFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        $newFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
+        Rename-Item $oldFilePath $newFilePath
+		echo "NUGET_PACKAGE_PATH=$newFilePath" >> $GITHUB_ENV
+        
     - name: Decode Base64 and save PFX file
       run: |
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LancelotSoftwareCert_Base64 }}")
