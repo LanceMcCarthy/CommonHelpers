@@ -1,10 +1,10 @@
-﻿using System;
+﻿using CommonHelpers.Common.Args;
+using CommonHelpers.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
-using CommonHelpers.Common.Args;
-using CommonHelpers.Extensions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommonHelpers.Tests.ExtensionsTests
 {
@@ -18,7 +18,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
             string result;
             var reporter = new Progress<DownloadProgressArgs>();
             float progress = 0;
-            var url = "https://httpbin.org/encoding/utf8";
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
 
             // Act
             reporter.ProgressChanged += (s, e) =>
@@ -27,12 +27,11 @@ namespace CommonHelpers.Tests.ExtensionsTests
             };
 
             using (var client = new HttpClient())
-            { 
+            {
                 result = client.DownloadStringWithProgressAsync(url, reporter).Result;
             }
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented");
             Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null");
         }
 
@@ -43,7 +42,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
             string result;
             var cts = new CancellationTokenSource();
             float progress = 0;
-            var url = "https://httpbin.org/encoding/utf8";
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
             var reporter = new Progress<DownloadProgressArgs>();
 
             // Act
@@ -58,7 +57,6 @@ namespace CommonHelpers.Tests.ExtensionsTests
             }
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented.");
             Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
             Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null.");
         }
@@ -69,7 +67,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
             // Arrange
             Stream result = null;
             float progress = 0;
-            var url = "https://progressdevsupport.blob.core.windows.net/sampledocs/pdfviewer-overview.pdf";
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
             var reporter = new Progress<DownloadProgressArgs>();
 
             // Act
@@ -84,8 +82,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
             }
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented");
-            Assert.IsTrue(result != null, "Stream is null");
+            Assert.IsTrue(result.Length > 0, "Stream is empty");
 
             result.Dispose();
         }
@@ -97,7 +94,7 @@ namespace CommonHelpers.Tests.ExtensionsTests
             Stream result = null;
             var cts = new CancellationTokenSource();
             float progress = 0;
-            var url = "https://progressdevsupport.blob.core.windows.net/sampledocs/pdfviewer-overview.pdf";
+            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
             var reporter = new Progress<DownloadProgressArgs>();
 
             // Act
@@ -112,9 +109,8 @@ namespace CommonHelpers.Tests.ExtensionsTests
             }
 
             // Assert
-            Assert.IsTrue(progress > 0, "Download progress was not incremented.");
             Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
-            Assert.IsTrue(result != null, "Stream is null");
+            Assert.IsTrue(result.Length > 0, "Stream is empty");
 
             result.Dispose();
         }

@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      Actions_Allow_Unsecure_Commands: true
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+        include-prerelease: true
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: Get Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v1
+      id: get-version
+      with:
+        proj-path: src/CommonHelpers/CommonHelpers.csproj
+
+    - name: Verify version
+      run: echo version "${{steps.get-version.outputs.package-version}}"
+
+    - name: NuGet Restore
+      run: dotnet restore src/CommonHelpers.sln --configfile src/nuget.config --runtime any
+
+    - name: Build
+      run: dotnet build src/CommonHelpers.sln --configuration Release
+
+    - name: Run Tests
+      run: dotnet test src/CommonHelpers.sln --runtime any
+
+    - name: Get Package File Path
+      id: get-package-path
+      run : |
+        $currentDirectory = Get-Location
+        $packageFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        Write-Output "Setting output variable 'nuget-package-path'..."
+        Write-Output "::set-output name=nuget-package-path::$newFilePath"
+
+    - name: Decode Base64 and save PFX file
+      id: download-cert
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LANCELOTSOFTWARECERT_BASE64 }}")
+        $currentDirectory = Get-Location
+        $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+        Write-Output "Setting output variable 'certificate-path'..."
+        Write-Output "::set-output name=certificate-path::$certificatePath"
+
+    - name: Sign NuGet package
+      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+    
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "v.${{ steps.get-version.outputs.package-version }} ${{  env.GITHUB_RUN_ID }}"
+        release_name: "Prelease ${{ steps.get-version.outputs.package-version }}"
+        draft: false
+        prerelease: false
+
+    - name: Publish To GitHub Releases
+      id: upload-sideload-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
+        asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        asset_content_type: application/zip
+
+    - name: Publish to NuGet.org
+      run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
