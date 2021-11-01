@@ -49,7 +49,7 @@ jobs:
         $oldFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         $newFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
         Rename-Item $oldFilePath $newFilePath
-		echo "NUGET_PACKAGE_PATH=$newFilePath" >> $GITHUB_ENV
+		    echo "NUGET_PACKAGE_PATH=$newFilePath" >> $GITHUB_ENV
         
     - name: Decode Base64 and save PFX file
       run: |
@@ -57,9 +57,10 @@ jobs:
         $currentDirectory = Get-Location
         $certificatePath = Join-Path -Path $currentDirectory -ChildPath "src\CommonHelpers\LancelotSoftware.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+        echo "CERT_PATH=$certificatePath" >> $GITHUB_ENV
 
     - name: Sign NuGet package
-      run: dotnet nuget sign ${{ env.NUGET_PACKAGE_PATH }} --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
+      run: dotnet nuget sign "${{ env.NUGET_PACKAGE_PATH }}" --certificate-path "${{ env.CERT_PATH }}" --certificate-password "${{ secrets.CertSigningPassword }}"
     
     # - name: Publish Package to NuGet.org
     #   run: dotnet nuget push "**\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}

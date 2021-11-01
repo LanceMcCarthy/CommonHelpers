@@ -43,21 +43,22 @@ jobs:
     - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
 
+    - name: Rename NuGet Package file(s) with '-rc' Release Candidatde suffix
+      run : |
+        $currentDirectory = Get-Location
+        $packageFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+		    echo "NUGET_PACKAGE_PATH=$packageFilePath" >> $GITHUB_ENV
+
     - name: Decode Base64 and save PFX file
       run: |
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LancelotSoftwareCert_Base64 }}")
         $currentDirectory = Get-Location
         $certificatePath = Join-Path -Path $currentDirectory -ChildPath "src\CommonHelpers\LancelotSoftware.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        
-    - name: Rename NuGet Package file(s) with '-rc' Release Candidatde suffix
-      run : |
-        $currentDirectory = Get-Location
-        $packageFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-		echo "NUGET_PACKAGE_PATH=$packageFilePath" >> $GITHUB_ENV
+        echo "CERT_PATH=$certificatePath" >> $GITHUB_ENV
 
     - name: Sign NuGet package
-      run: dotnet nuget sign "**\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --certificate-path "src\CommonHelpers\LancelotSoftware.pfx" --certificate-password "${{ secrets.CertSigningPassword }}"
+      run: dotnet nuget sign "${{ env.NUGET_PACKAGE_PATH }}" --certificate-path "${{ env.CERT_PATH }}" --certificate-password "${{ secrets.CertSigningPassword }}"
     
     - name: Create GitHub Release
       id: create_release
@@ -77,9 +78,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: "**/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        asset_path: "${{ env.NUGET_PACKAGE_PATH }}"
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         asset_content_type: application/zip
 
     - name: Publish Package to NuGet.org
-      run: dotnet nuget push "D:\a\CommonHelpers\src\CommonHelpers\bin\Release\CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push "${{ env.NUGET_PACKAGE_PATH }}" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
