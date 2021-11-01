@@ -47,7 +47,7 @@ jobs:
       run : |
         $currentDirectory = Get-Location
         $packageFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        echo "NUGET_PACKAGE_PATH=$packageFilePath" >> $GITHUB_ENV
+        "NUGET_PACKAGE_PATH=$packageFilePath" >> $GITHUB_ENV
 
     - name: Decode Base64 and save PFX file
       run: |
@@ -55,7 +55,7 @@ jobs:
         $currentDirectory = Get-Location
         $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        echo "CERT_PATH=$certificatePath" >> $GITHUB_ENV
+        "CERT_PATH=$certificatePath" >> $GITHUB_ENV
 
     - name: Sign NuGet package
       run: dotnet nuget sign "${{ env.NUGET_PACKAGE_PATH }}" --certificate-path "${{ env.CERT_PATH }}" --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "https://timestamp.digicert.com"
