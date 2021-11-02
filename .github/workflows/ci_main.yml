@@ -8,8 +8,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     env:
       Actions_Allow_Unsecure_Commands: true
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -25,17 +27,57 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
 
+    - name: Add Alpha (-alpha) suffix to Version Number
+      run : |
+        [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
+        $projXml.Project.PropertyGroup.Version = $manifest.Project.PropertyGroup.Version + "-alpha"
+        $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
+
+    - name: Restore Dependencies
+      run: dotnet restore src/CommonHelpers.sln --runtime any
+
+    - name: Build CommonHelpers.sln
+      run: dotnet build src/CommonHelpers.sln --configuration Release
+
+    - name: Run Tests
+      run: dotnet test src/CommonHelpers.sln --runtime any
+
+
+    # ***** Package Path Identification ***** #
+
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v1
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
-    - name: Restore Dependencies
-      run: dotnet restore src/CommonHelpers.sln --runtime any
+    - name: Verify version
+      run: echo version "${{steps.get-version.outputs.package-version}}"
 
-    - name: Build CommonHelpers.sln
-      run: dotnet build src/CommonHelpers.sln --configuration debug
+    - name: Get Package File Path
+      id: get-package-path
+      run : |
+        $currentDirectory = Get-Location
+        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
+        $matches = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
+        Write-Output "Setting output variable 'nuget-package-path' to $matches[0].FullName"
+        Write-Output "::set-output name=nuget-package-path::$matches[0].FullName"
 
-    - name: Run Tests
-      run: dotnet test src/CommonHelpers.sln --runtime any
+    - name: Verify Package Path
+      run: Write-Output Package path is "${{steps.get-package-path.outputs.nuget-package-path}}"
+
+
+    # ***** Package Signing ***** #
+
+    - name: Decode Base64 and save PFX file
+      id: download-cert
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LANCELOTSOFTWARECERT_BASE64 }}")
+        $currentDirectory = Get-Location
+        $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+        Write-Output "Setting output variable 'certificate-path'..."
+        Write-Output "::set-output name=certificate-path::$certificatePath"
+
+    - name: Sign NuGet package
+      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
