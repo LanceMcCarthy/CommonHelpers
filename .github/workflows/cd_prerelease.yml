@@ -33,7 +33,7 @@ jobs:
     - name: Add Release Candidate (-rc) suffix to Version Number
       run : |
         [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
-        $projXml.Project.PropertyGroup.Version = $manifest.Project.PropertyGroup.Version + "-rc"
+        $projXml.Project.PropertyGroup.Version = "$manifest.Project.PropertyGroup.Version-rc"
         $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
 
     - name: Build

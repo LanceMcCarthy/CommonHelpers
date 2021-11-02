@@ -30,11 +30,11 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore src/CommonHelpers.sln --runtime any
 
-    - name: Add Alpha (-beta) suffix to Version Number
+    - name: Add Alpha (-alpha) suffix to Version Number
       run : |
         [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
         Write-Output "Before: " $projXml.Project.PropertyGroup.Version
-        $projXml.Project.PropertyGroup.Version = $manifest.Project.PropertyGroup.Version + "-beta"
+        $projXml.Project.PropertyGroup.Version = "$projXml.Project.PropertyGroup.Version-alpha"
         Write-Output "After: " $projXml.Project.PropertyGroup.Version
         $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
 
