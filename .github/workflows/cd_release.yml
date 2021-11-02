@@ -53,9 +53,9 @@ jobs:
       run : |
         $currentDirectory = Get-Location
         $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
-        $matches = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
-        Write-Output "Setting output variable 'nuget-package-path'... $matches[0].FullName"
-        Write-Output "::set-output name=nuget-package-path::$matches[0].FullName"
+        $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
+        Write-Output "Setting output variable 'nuget-package-path' to $match"
+        Write-Output "::set-output name=nuget-package-path::$match"
     
     
     # ***** NuGet Package Signing ***** #
@@ -103,4 +103,3 @@ jobs:
         asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         asset_content_type: application/zip
-    
