@@ -8,8 +8,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     env:
       Actions_Allow_Unsecure_Commands: true
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -25,6 +27,18 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
 
+    - name: NuGet Restore
+      run: dotnet restore src/CommonHelpers.sln --runtime any
+
+    - name: Build
+      run: dotnet build src/CommonHelpers.sln --configuration Release
+
+    - name: Run Tests
+      run: dotnet test src/CommonHelpers.sln --runtime any
+
+
+    # ***** Nuget Package Path Identification ***** #
+
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v1
       id: get-version
@@ -34,22 +48,17 @@ jobs:
     - name: Verify version
       run: echo version "${{steps.get-version.outputs.package-version}}"
 
-    - name: NuGet Restore
-      run: dotnet restore src/CommonHelpers.sln --configfile src/nuget.config --runtime any
-
-    - name: Build
-      run: dotnet build src/CommonHelpers.sln --configuration Release
-
-    - name: Run Tests
-      run: dotnet test src/CommonHelpers.sln --runtime any
-
     - name: Get Package File Path
       id: get-package-path
       run : |
         $currentDirectory = Get-Location
-        $packageFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        Write-Output "Setting output variable 'nuget-package-path'..."
-        Write-Output "::set-output name=nuget-package-path::$newFilePath"
+        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
+        $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
+        Write-Output "Setting output variable 'nuget-package-path' to $match"
+        Write-Output "::set-output name=nuget-package-path::$match"
+    
+    
+    # ***** NuGet Package Signing ***** #
 
     - name: Decode Base64 and save PFX file
       id: download-cert
@@ -60,10 +69,19 @@ jobs:
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
         Write-Output "Setting output variable 'certificate-path'..."
         Write-Output "::set-output name=certificate-path::$certificatePath"
-
+    
     - name: Sign NuGet package
       run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
     
+    
+    # ***** NuGet.org Release ***** #
+    
+    - name: Publish to NuGet.org
+      run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    
+
+    # ***** GitHub Release ***** #
+
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
@@ -85,6 +103,3 @@ jobs:
         asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         asset_content_type: application/zip
-
-    - name: Publish to NuGet.org
-      run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
