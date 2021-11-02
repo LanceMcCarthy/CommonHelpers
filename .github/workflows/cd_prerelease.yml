@@ -55,7 +55,7 @@ jobs:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
     - name: Verify version
-      run: Write-Output "Version is ${{steps.get-version.outputs.package-version}}""
+      run: Write-Output "Version is ${{steps.get-version.outputs.package-version}}"
 
     - name: Get Package File Path
       id: get-package-path
