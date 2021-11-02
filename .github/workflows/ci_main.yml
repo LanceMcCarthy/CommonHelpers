@@ -27,14 +27,14 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
 
-    - name: Add Alpha (-alpha) suffix to Version Number
-      run : |
-        [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
-        $projXml.Project.PropertyGroup.Version = $manifest.Project.PropertyGroup.Version + "-alpha"
-        $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
-
     - name: Restore Dependencies
       run: dotnet restore src/CommonHelpers.sln --runtime any
+
+    - name: Add Alpha (-beta) suffix to Version Number
+      run : |
+        [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
+        $projXml.Project.PropertyGroup.Version = $manifest.Project.PropertyGroup.Version + "-beta"
+        $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
 
     - name: Build CommonHelpers.sln
       run: dotnet build src/CommonHelpers.sln --configuration Release
