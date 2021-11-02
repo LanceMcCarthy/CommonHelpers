@@ -8,8 +8,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     env:
       Actions_Allow_Unsecure_Commands: true
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -25,14 +27,14 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.3
 
-    - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v1
-      id: get-version
-      with:
-        proj-path: src/CommonHelpers/CommonHelpers.csproj
-
-    - name: Verify version
-      run: echo version "${{steps.get-version.outputs.package-version}}"
+    - name: Add Release Candidate (-rc) suffix to Version Number
+      run : |
+        [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
+        $currentVer = $projXml.Project.PropertyGroup.Version
+        $suffix = "-rc"
+        $newVer = $currentVer + $suffix
+        $projXml.Project.PropertyGroup.Version = $newVer
+        $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
 
     - name: NuGet Restore
       run: dotnet restore src/CommonHelpers.sln --runtime any
@@ -42,17 +44,34 @@ jobs:
     
     - name: Run Tests
       run: dotnet test src/CommonHelpers.sln --runtime any
-    
-    - name: Rename NuGet Package file(s) with '-rc' Release Candidatde suffix
-      id: rename-package-file
+
+
+    # ***** Nuget Package Path Identification ***** #
+
+    - name: Get Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v1
+      id: get-version
+      with:
+        proj-path: src/CommonHelpers/CommonHelpers.csproj
+
+    - name: Verify version
+      run: Write-Output "Version is ${{steps.get-version.outputs.package-version}}"
+
+    - name: Get Package File Path
+      id: get-package-path
       run : |
         $currentDirectory = Get-Location
-        $oldFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        $newFilePath = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
-        Rename-Item $oldFilePath $newFilePath
-        Write-Output "Setting output variable 'nuget-package-path'..."
-        Write-Output "::set-output name=nuget-package-path::$newFilePath"
-        
+        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
+        $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
+        Write-Output "Setting output variable 'nuget-package-path' to $match"
+        Write-Output "::set-output name=nuget-package-path::$match"
+    
+    - name: Verify Package Path
+      run: Write-Output "Package path is ${{steps.get-package-path.outputs.nuget-package-path}}"
+
+
+    # ***** NuGet Package Signing ***** #
+
     - name: Decode Base64 and save PFX file
       id: download-cert
       run: |
@@ -64,11 +83,17 @@ jobs:
         Write-Output "::set-output name=certificate-path::$certificatePath"
 
     - name: Sign NuGet package
-      run: dotnet nuget sign ${{ steps.rename-package-file.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+
+
+    # ***** NuGet.org Release ***** #
     
-    # - name: Publish Package to NuGet.org
-    #   run: dotnet nuget push ${{ steps.rename-package-file.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
-    
+    - name: Publish to NuGet.org
+      run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+
+
+    # ***** GitHub Release ***** #
+
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
@@ -87,6 +112,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.rename-package-file.outputs.nuget-package-path }}
+        asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
         asset_content_type: application/zip
