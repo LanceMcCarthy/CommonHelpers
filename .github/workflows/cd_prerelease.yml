@@ -101,7 +101,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: "v.${{ steps.get-version.outputs.package-version }}-rc ${{ env.GITHUB_RUN_ID }}"
-        release_name: "Prelease ${{ steps.get-version.outputs.package-version }}-rc"
+        release_name: "Prelease ${{ steps.get-version.outputs.package-version }}"
         draft: false
         prerelease: true
 
@@ -113,5 +113,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
-        asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}-rc.nupkg"
+        asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         asset_content_type: application/zip

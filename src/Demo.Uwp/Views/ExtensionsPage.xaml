@@ -6,6 +6,7 @@
       xmlns:controls="using:Microsoft.UI.Xaml.Controls"
       xmlns:viewModels="using:Demo.Uwp.ViewModels"
       xmlns:dataVisualization="using:Telerik.UI.Xaml.Controls.DataVisualization"
+      xmlns:chart="using:Telerik.UI.Xaml.Controls.Chart"
       Style="{StaticResource PageStyle}"
       mc:Ignorable="d">
 
@@ -63,6 +64,81 @@
                         <Rectangle Fill="{Binding RectangleBackground}" Width="200" Height="200" Margin="0,20,0,0"/>
                     </StackPanel>
                 </Grid>
+            </PivotItem>
+            <PivotItem Header="Easing Extensions"
+                       x:Uid="Extensions_PivotItem3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="400"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <chart:RadCartesianChart Grid.Column="0">
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:LinearAxis Title="In"/>
+                        </chart:RadCartesianChart.HorizontalAxis>
+                        <chart:ScatterLineSeries ItemsSource="{Binding EaseInDataPoints}">
+                            <chart:ScatterLineSeries.XValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="XValue" />
+                            </chart:ScatterLineSeries.XValueBinding>
+                            <chart:ScatterLineSeries.YValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="YValue" />
+                            </chart:ScatterLineSeries.YValueBinding>
+                        </chart:ScatterLineSeries>
+                    </chart:RadCartesianChart>
+
+                    <chart:RadCartesianChart Grid.Column="1">
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:LinearAxis  Title="Out"/>
+                        </chart:RadCartesianChart.HorizontalAxis>
+                        <chart:ScatterLineSeries ItemsSource="{Binding EaseOutDataPoints}">
+                            <chart:ScatterLineSeries.XValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="XValue" />
+                            </chart:ScatterLineSeries.XValueBinding>
+                            <chart:ScatterLineSeries.YValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="YValue" />
+                            </chart:ScatterLineSeries.YValueBinding>
+                        </chart:ScatterLineSeries>
+                    </chart:RadCartesianChart>
+
+                    <chart:RadCartesianChart Grid.Column="2">
+                        <chart:RadCartesianChart.VerticalAxis>
+                            <chart:LinearAxis />
+                        </chart:RadCartesianChart.VerticalAxis>
+                        <chart:RadCartesianChart.HorizontalAxis>
+                            <chart:LinearAxis  Title="In-Out"/>
+                        </chart:RadCartesianChart.HorizontalAxis>
+                        <chart:ScatterLineSeries ItemsSource="{Binding EaseInOutDataPoints}">
+                            <chart:ScatterLineSeries.XValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="XValue" />
+                            </chart:ScatterLineSeries.XValueBinding>
+                            <chart:ScatterLineSeries.YValueBinding>
+                                <chart:PropertyNameDataPointBinding PropertyName="YValue" />
+                            </chart:ScatterLineSeries.YValueBinding>
+                        </chart:ScatterLineSeries>
+                    </chart:RadCartesianChart>
+
+
+                    <ComboBox ItemsSource="{Binding EasingFunctions}"
+                              SelectedItem="{Binding SelectedEasingFunction, Mode=TwoWay}"
+                              Grid.Row="1"
+                              Grid.ColumnSpan="3"
+                              Grid.Column="0"
+                              HorizontalAlignment="Center"
+                              Margin="10" />
+                </Grid>
+                
             </PivotItem>
         </Pivot>
     </Grid>

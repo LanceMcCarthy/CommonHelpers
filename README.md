@@ -1,13 +1,18 @@
 # CommonHelpers
-This is a cross platform **NET Standard 2.0** helper library containing a bunch of helper code that I used to rewrite several times a day while creating sample apps for developers.
 
-By publishing this is as a signed NuGet package I save myself a lot of time, but more importantly, I get to share it with you. Enjoy!
+This is a cross platform **NET Standard 2.0** helper library containing a bunch of helper code that I used to rewrite several times a day while creating sample apps for developers. Due to the number of "File > New" projects I create every day, this packages saves me a significant amount of time. I hope it helps you as well. Enjoy!
 
 ## Releases
 
 | NuGet.org (recommended) | GitHub Releases (all releases) |
 |-----------|----------------------|
 | [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [Releases Page](https://github.com/LanceMcCarthy/CommonHelpers/releases/) |
+
+## Support
+
+| Option | Purpose |
+|--------|---------|
+| <a href="https://www.buymeacoffee.com/dvluper" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="35" width="150"></a> | You can buy me a coffee to help support my community efforts. |
 
 ## DevOps
 
@@ -22,7 +27,11 @@ By publishing this is as a signed NuGet package I save myself a lot of time, but
 
 ### Extensions
 
-Extensions for commonly used objects like `string`, `DateTime`, `enum`. There are also some special extensions for `File`, `Exception` and `Color`. Finally, there's a unqiue helper, `HttpClientExtensions` which provides download progress insights and a helper method to POST image data.
+Extensions for commonly used objects like; `string`, `DateTime`, and `enum`. As well as handy methods for `File`, `Exception` and `Color` objects. There's also the `HttpClientExtensions` where you can easily get download progress insights and a helper method to POST image data.
+
+For example, you can quickly get easing function values using the EasingExtensions. Here's what the demo looks like for `myFloatValue.BackEaseIn();`
+
+![easing demo](https://user-images.githubusercontent.com/3520532/163871294-9be04ecd-8dcb-49ca-967b-7f1ff8e091b1.png)
 
 ### Collections
 
