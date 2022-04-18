@@ -27,7 +27,11 @@ This is a cross platform **NET Standard 2.0** helper library containing a bunch 
 
 ### Extensions
 
-Extensions for commonly used objects like `string`, `DateTime`, `enum`. There are also some special extensions for `File`, `Exception` and `Color`. Finally, there's a unqiue helper, `HttpClientExtensions` which provides download progress insights and a helper method to POST image data.
+Extensions for commonly used objects like; `string`, `DateTime`, and `enum`. As well as handy methods for `File`, `Exception` and `Color` objects. There's also the `HttpClientExtensions` where you can easily get download progress insights and a helper method to POST image data.
+
+For example, you can quickly get easing function values using the EasingExtensions. Here's what the demo looks like for `myFloatValue.BackEaseIn();`
+
+![easing demo](https://user-images.githubusercontent.com/3520532/163871294-9be04ecd-8dcb-49ca-967b-7f1ff8e091b1.png)
 
 ### Collections
 
