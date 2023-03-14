@@ -44,7 +44,7 @@ jobs:
       run: dotnet build src/CommonHelpers.sln --configuration Release
 
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.sln --runtime any
+      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
 
 
     # ***** Package Path Identification ***** #
