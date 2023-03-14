@@ -9,9 +9,6 @@ jobs:
   build:
     runs-on: windows-latest
 
-    env:
-      Actions_Allow_Unsecure_Commands: true
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -46,19 +43,19 @@ jobs:
       run: dotnet build src/CommonHelpers.sln --configuration Release
     
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.sln --runtime any
+      run: dotnet test src/CommonHelpers.sln --runtime any --no-self-contained
 
 
     # ***** Nuget Package Path Identification ***** #
 
     - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v1
+      uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
     - name: Verify version
-      run: Write-Output "Version is ${{steps.get-version.outputs.package-version}}"
+      run: Write-Output "Version is ${{ steps.get-version.outputs.package-version }}"
 
     - name: Get Package File Path
       id: get-package-path
@@ -70,7 +67,7 @@ jobs:
         Write-Output "::set-output name=nuget-package-path::$match"
     
     - name: Verify Package Path
-      run: Write-Output "Package path is ${{steps.get-package-path.outputs.nuget-package-path}}"
+      run: Write-Output "Package path is ${{ steps.get-package-path.outputs.nuget-package-path }}"
 
 
     # ***** NuGet Package Signing ***** #

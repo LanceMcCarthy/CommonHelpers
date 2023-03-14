@@ -9,9 +9,6 @@ jobs:
   build:
     runs-on: windows-latest
 
-    env:
-      Actions_Allow_Unsecure_Commands: true
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -37,13 +34,13 @@ jobs:
       run: dotnet build src/CommonHelpers.sln --configuration Release
 
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.sln --runtime any
+      run: dotnet test src/CommonHelpers.sln --runtime any --no-self-contained
 
 
     # ***** Nuget Package Path Identification ***** #
 
     - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v1
+      uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
