@@ -43,7 +43,7 @@ jobs:
       run: dotnet build src/CommonHelpers.sln --configuration Release
     
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.sln --runtime any --no-self-contained
+      run: dotnet test src/CommonHelpers.sln --runtime any
 
 
     # ***** Nuget Package Path Identification ***** #
