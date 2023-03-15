@@ -24,7 +24,7 @@ jobs:
 
 
     # ****** Update version numbers ***** #
-    
+
     - name: Add Alpha (-alpha) suffix to Version Number
       run : |
         [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
@@ -135,11 +135,11 @@ jobs:
     - name: Upload CommonHelpers NuGet package (alpha)
       uses: actions/upload-artifact@v3
       with:
-        name: "CommonHelpers-alpha.nupkg"
+        name: "CommonHelpers-alpha"
         path: ${{ steps.get-package-path.outputs.nuget-package-path }}
 
     - name: Upload CommonHelpers.Maui NuGet package (alpha) 
       uses: actions/upload-artifact@v3
       with:
-        name: "CommonHelpers.Maui-alpha.nupkg"
+        name: "CommonHelpers.Maui-alpha"
         path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}
