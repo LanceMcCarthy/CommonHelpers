@@ -1,8 +1,80 @@
 # CommonHelpers.Maui
 
-This is a library containing some commonly needed helpers. The goal is to build on top of the more popular CommonHelpers package, but with .NET MAUI specialized functionality.
+This is a library containing some commonly needed helpers for .NET MAUI C#/XAML projects. The goal is to build on top of the more popular [CommonHelpers package](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers), but with .NET MAUI-specialized functionality.
 
-#### App Extensions
+| Package | NuGet.org | Features & Docs |
+|---------|-----------|-----------------|
+| `CommonHelpers.Maui` | [![#](https://img.shields.io/nuget/v/CommonHelpers.Maui.svg)](https://www.nuget.org/packages/CommonHelpers.Maui/) | [README](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers.Maui) |
+
+## Features
+
+
+### Behaviors
+
+A `BehaviorBase<T>` class that lets you create your own, or use the out-of-the-box `EventToCommandBehavior` implementation. To get started, Add the XML namespace to the view:
+
+```xaml
+xmlns:behaviors="clr-namespace:CommonHelpers.Maui.Behaviors;assembly=CommonHelpers.Maui"
+```
+
+```xaml
+<SomeControl x:Name="MyControl">
+    <SomeControl.Behaviors>
+        <behaviors:EventToCommandBehavior EventName="Clicked" Command="{Binding MyCommand}">
+    </SomeControl.Behaviors>
+</SomeControl>
+```
+
+### Converters
+
+The library has some commonly needed value converters. To get started, Add the XML namespace to the view:
+
+```xaml
+xmlns:converters="clr-namespace:CommonHelpers.Maui.Converters;assembly=CommonHelpers.Maui"
+```
+Now you can use any of these IValueConverter implementations:
+
+- `IntToDoubleConverter`
+- `InvertBoolConverter`
+- `NullToBoolConverter`
+- `StringToUriConverter`
+
+As well as some boutique ones:
+
+- `ConfigurableBoolConverter`
+
+```xaml
+<Grid>
+    <Grid.Resources>
+        <converters:ConfigurableBoolConverter x:Key="InvertBoolConv"
+                                              x:TypeArguments="x:Boolean"
+                                              TrueResult="False"
+                                              FalseResult="True" />
+    </Grid.Resources>
+
+    <Label IsVisible="{Binding HasItems, Converter={StaticResource InvertBoolConv}}"
+           Text="No Items!" />
+<Grid>
+```
+
+- `NameToInitialsConverter`
+
+```xaml
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:CommonHelpers.Maui.Converters;assembly=CommonHelpers.Maui"
+             x:Class="YourApp.MainPage">
+    <Grid>
+        <ContentPage.Resources>
+            <converters:NameToInitialsConverter x:Key="NameToInitialsConv">
+        </ContentPage.Resources>
+
+        <Label Text="{Binding FullName, Converter={StaticResource NameToInitialsConv}}"/>
+    </Grid>
+</ContentPage>
+```
+
+### MauiApp Extensions
 
 Extensions for platform-specific code that can be used in **MauiProgram.cs**.
 
@@ -12,7 +84,6 @@ Extensions for platform-specific code that can be used in **MauiProgram.cs**.
   - `windowScene.RestrictWindowMinimumSize(new CGSize(600, 400))`
   - `windowScene.RestrictWindowMaximumSize(new CGSize(1920, 1080))`
   - `windowScene.RestrictWindowSize(new CGSize(600, 400), new CGSize(1920, 1080))`
-
 
 ```csharp
 #if WINDOWS10_0_17763_0_OR_GREATER
@@ -60,24 +131,6 @@ public static MauiApp CreateMauiApp()
 }
 ```
 
-#### Behaviors
+### More to come
 
-A `BehaviorBase<T>` class that lets you create your own, or use the out-of-the-box `EventToCommandBehavior` implementation.
-
-#### Converters
-
-There are several commonly used IValueConverter implementations:
-
-- `IntToDoubleConverter`
-- `InvertBoolConverter`
-- `NullToBoolConverter`
-- `StringToUriConverter`
-
-As well as a couple boutique ones:
-
-- `ConfigurableBoolConverter`
-- `NameToInitialsConverter`
-
-#### More to come
-
-This is just the beginning, I plan to build this out as an indispensable comparion to the CommonHelpers library.
+This is only the beginning, I plan to build this out as an indispensable companion to the already fantastic `CommonHelpers` library.
