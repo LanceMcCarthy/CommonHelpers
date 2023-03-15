@@ -1,4 +1,4 @@
-name: CommonHelpers Release
+name: CommonHelpers.Maui Release
 
 on:
   workflow_dispatch:
@@ -27,6 +27,9 @@ jobs:
 
     # ****** Restore and Build ***** #
 
+    - name: Install MAUI workloads (required for GitHub-hosted runners)
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+
     - name: NuGet Restore
       run: dotnet restore src/CommonHelpers.sln --runtime any
 
@@ -37,25 +40,28 @@ jobs:
       run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
 
 
-    # ***** CommonHelpers - Package Path Identification ***** #
+    # ***** CommonHelpers.Maui - Package Path Identification ***** #
 
-    - name: Get Version From Project
+    - name: Get Version From Maui Project
       uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
-      id: get-version
+      id: get-version-number
       with:
-        proj-path: src/CommonHelpers/CommonHelpers.csproj
+        proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
 
     - name: Verify version
-      run: echo version "${{steps.get-version.outputs.package-version}}"
+      run: echo version "${{ steps.get-version-number.outputs.package-version }}"
 
-    - name: Get Package File Path
+    - name: Get CommonHelpers.Maui Package File Path
       id: get-package-path
       run : |
         $currentDirectory = Get-Location
-        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
+        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers.Maui/bin/Release/"
         $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
         Write-Output "Setting output variable 'nuget-package-path' to $match"
         Write-Output "::set-output name=nuget-package-path::$match"
+
+    - name: Verify Package File Path
+      run: Write-Output Package path is "${{steps.get-package-path.outputs.nuget-package-path}}"
 
 
     # ***** NuGet Package Signing ***** #
@@ -70,15 +76,14 @@ jobs:
         Write-Output "Setting output variable 'certificate-path'..."
         Write-Output "::set-output name=certificate-path::$certificatePath"
     
-    - name: Sign NuGet package
+    - name: Sign CommonHelpers.Maui NuGet package
       run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
-
+    
 
     # ***** NuGet.org Release ***** #
     
-    - name: Publish CommonHelpers to NuGet.org
+    - name: Publish CommonHelpers.Maui to NuGet.org
       run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
-
 
     # ***** GitHub Release ***** #
 
@@ -88,12 +93,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "v.${{ steps.get-version.outputs.package-version }}.${{  env.GITHUB_RUN_ID }}"
-        release_name: "CommonHelpers ${{ steps.get-version.outputs.package-version }}"
+        tag_name: "v.${{ steps.get-version-number.outputs.package-version }}.${{  env.GITHUB_RUN_ID }}"
+        release_name: "CommonHelpers.Maui ${{ steps.get-version-number.outputs.package-version }}"
         draft: false
         prerelease: false
 
-    - name: Attach Release Asset
+    - name: Attach Maui Release Asset
       id: upload-sideload-asset
       uses: actions/upload-release-asset@v1
       env:
@@ -101,5 +106,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
-        asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        asset_name: "CommonHelpers.Maui.${{ steps.get-version-number.outputs.package-version }}.nupkg"
         asset_content_type: application/zip
