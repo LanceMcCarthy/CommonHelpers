@@ -28,11 +28,11 @@
 		<Copyright>Copyright 2018 - 2023</Copyright>
 		<PackageIconUrl></PackageIconUrl>
 		<RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
-		<PackageTags>NetStandard C# net6.0 dotnetmaui maui </PackageTags>
+		<PackageTags>dotnetmaui maui net6.0 net7.0 C#</PackageTags>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<AssemblyVersion>0.1.0.0</AssemblyVersion>
-		<Version>0.1.0</Version>
-		<FileVersion>0.1.0.0</FileVersion>
+		<AssemblyVersion>0.2.0.0</AssemblyVersion>
+		<Version>0.1.1</Version>
+		<FileVersion>0.1.1.0</FileVersion>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageIcon>CommonHelpersMauiIcon.png</PackageIcon>
 		<SignAssembly>false</SignAssembly>
