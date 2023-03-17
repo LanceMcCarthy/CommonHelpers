@@ -18,7 +18,8 @@ namespace CommonHelpers.Collections
         /// </summary>
         /// <param name="func"></param>
         public IncrementalLoadingCollection(Func<CancellationToken, uint, Task<ObservableCollection<T>>> func)
-            : this(func, 0) { }
+            : this(func, 0)
+        { }
 
         /// <summary>
         /// Incremental scrolling list supported by UI controls that implement ISupportIncrementalLoading
