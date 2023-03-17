@@ -30,7 +30,7 @@ jobs:
       run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
     - name: Restore Dependencies
-      run: dotnet restore src/CommonHelpers.sln --runtime any
+      run: dotnet restore src/CommonHelpers.sln --runtime any --ignore-failed-sources
 
     - name: Build Projects
       run: |
