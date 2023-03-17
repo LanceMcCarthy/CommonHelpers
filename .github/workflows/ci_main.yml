@@ -65,8 +65,8 @@ jobs:
 
     - name: Restore & Build CommonHelpers.Maui
       run: |
-        dotnet restore src/CommonHelpers.Maui/CommonHelpers.csproj --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers.Maui/CommonHelpers.csproj --configuration Release
+        dotnet restore src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
 
     - name: Restore & Build CommonHelpers.Tests
       run: |
