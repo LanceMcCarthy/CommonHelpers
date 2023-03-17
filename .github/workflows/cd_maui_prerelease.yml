@@ -46,8 +46,11 @@ jobs:
     - name: NuGet Restore
       run: dotnet restore src/CommonHelpers.sln --runtime any
 
-    - name: Build
-      run: dotnet build src/CommonHelpers.sln --configuration Release
+    - name: Build Projects
+      run: |
+        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
+        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
+        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
     
     - name: Run Tests
       run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
