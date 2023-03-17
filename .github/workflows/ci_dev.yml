@@ -7,6 +7,7 @@ on:
       - dev
     paths:
       - 'src/**/*'
+      - '.github/workflows/ci_dev.yml'
 
 jobs:
   build:
