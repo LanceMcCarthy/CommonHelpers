@@ -33,7 +33,7 @@ jobs:
       run: dotnet restore src/CommonHelpers.sln --runtime any
 
     - name: Build CommonHelpers.sln
-      run: dotnet build src/CommonHelpers.sln --configuration debug
+      run: dotnet build src/CommonHelpers.sln --configuration Release
 
     - name: Run Tests
       run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
