@@ -22,6 +22,7 @@
     <PackageIcon>CommonHelpersIcon.png</PackageIcon>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
