@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'issues/*
-      - 'features/*
+      - 'issues/*'
+      - 'features/*'
     paths:
       - 'src/**/*'
       - '.github/workflows/ci_dev.yml'
