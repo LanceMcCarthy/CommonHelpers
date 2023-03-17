@@ -7,16 +7,27 @@ This repository contains source for multiple libraries. To see the available fea
 | `CommonHelpers` | [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [Visit README](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers) |
 | `CommonHelpers.Maui` | [![#](https://img.shields.io/nuget/v/CommonHelpers.Maui.svg)](https://www.nuget.org/packages/CommonHelpers.Maui/) | [Visit README](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers.Maui) |
 
-
-
 ## GitHub Actions
+
+### Developement
 
 | Workflow     | Status                                   |
 |--------------|------------------------------------------|
-| `dev`        | ![Development](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Development/badge.svg) |
-| `main`       | ![Main](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Main/badge.svg) |
-| `prerelease` | ![Release to GitHub Packages](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Prerelease/badge.svg) |
-| `release`    | ![Release to NuGet.org](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Release/badge.svg) |
+| dev        | ![Development](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Development/badge.svg) |
+| main       | ![Main](https://github.com/LanceMcCarthy/CommonHelpers/workflows/Main/badge.svg) |
+
+### Prereleases
+| Workflow     | Status                                   |
+|--------------|------------------------------------------|
+| CommonHelpers Prerelease | ![Prerelease](https://github.com/LanceMcCarthy/CommonHelpers/workflows/CommonHelpers%20Prerelease/badge.svg) |
+| CommonHelpers.Maui Prerelease | ![Prerelease](https://github.com/LanceMcCarthy/CommonHelpers/workflows/CommonHelpers.Maui%20Prerelease/badge.svg) |
+
+### Releases
+| Workflow     | Status                                   |
+|--------------|------------------------------------------|
+| CommonHelpers Release | ![NuGet.org](https://github.com/LanceMcCarthy/CommonHelpers/workflows/CommonHelpers%20Release/badge.svg) |
+| CommonHelpers.Maui Release | ![NuGet.org](https://github.com/LanceMcCarthy/CommonHelpers/workflows/CommonHelpers.Maui%20Release/badge.svg) |
+
 
 ## Support
 

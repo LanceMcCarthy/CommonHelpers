@@ -30,7 +30,7 @@
 		<RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
 		<PackageTags>dotnetmaui maui net6.0 net7.0 C#</PackageTags>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<AssemblyVersion>0.2.0.0</AssemblyVersion>
+		<AssemblyVersion>0.1.1.0</AssemblyVersion>
 		<Version>0.1.1</Version>
 		<FileVersion>0.1.1.0</FileVersion>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -49,6 +49,10 @@
 			<PackagePath></PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommonHelpers" Version="1.2.1" />
 	</ItemGroup>
 
 </Project>

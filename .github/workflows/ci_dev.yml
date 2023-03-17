@@ -1,9 +1,14 @@
 name: Development
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - dev
+      - 'issues/*
+      - 'features/*
+    paths:
+      - 'src/**/*'
+      - '.github/workflows/ci_dev.yml'
 
 jobs:
   build:
@@ -26,11 +31,20 @@ jobs:
       shell: pwsh
       run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
-    - name: Restore Dependencies
-      run: dotnet restore src/CommonHelpers.sln --runtime any
+    - name: Restore & Build CommonHelpers
+      run: |
+        dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
 
-    - name: Build CommonHelpers.sln
-      run: dotnet build src/CommonHelpers.sln --configuration debug
+    - name: Restore & Build CommonHelpers.Maui
+      run: |
+        dotnet restore src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
+
+    - name: Restore & Build CommonHelpers.Tests
+      run: |
+        dotnet restore src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
 
     - name: Run Tests
       run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
