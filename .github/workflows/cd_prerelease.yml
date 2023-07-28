@@ -194,6 +194,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.get-package-path-maui.outputs.nuget-package-path }}
+        asset_path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}
         asset_name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
         asset_content_type: application/zip
