@@ -1,4 +1,4 @@
-name: CommonHelpers NuGet.org Release
+name: Release
 
 on:
   workflow_dispatch:
@@ -119,12 +119,12 @@ jobs:
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
         Write-Output "Setting output variable 'certificate-path'..."
         Write-Output "::set-output name=certificate-path::$certificatePath"
-    
-    - name: Sign NuGet package
+
+    - name: Sign CommonHelpers NuGet package
       run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
 
     - name: Sign CommonHelpers.Maui NuGet package
-      run: dotnet nuget sign ${{ steps.get-package-path-maui.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+      run: dotnet nuget sign ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
 
 
     # ***** NuGet.org Release ***** #
@@ -133,7 +133,7 @@ jobs:
       run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
     - name: Publish CommonHelpers.Maui to NuGet.org
-      run: dotnet nuget push ${{ steps.get-package-path-maui.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
 
       # ***** Upload Artifacts ***** #
