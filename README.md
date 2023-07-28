@@ -19,8 +19,8 @@ To see the available features and sample code usage of a specific library, visit
 | Workflow     | Status                                   |
 |--------------|------------------------------------------|
 | main       | [![Main](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main.yml/badge.svg?branch=main)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main.yml) |
-| prerelease | [![Prerelease](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_prerelease.yml/badge.svg?branch=prerelease)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_prerelease.yml) |
-| release | [![CommonHelpers NuGet.org Release](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml/badge.svg?branch=release)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml) |
+| prerelease | [![Prerelease](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_prerelease.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_prerelease.yml) |
+| release | [![CommonHelpers NuGet.org Release](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml) |
 
 ## Project Support
 
