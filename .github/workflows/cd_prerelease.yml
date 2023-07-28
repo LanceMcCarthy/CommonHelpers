@@ -25,7 +25,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1.3
 
 
-    # ****** Update version numbers ***** #
+    # ****** Update package version numbers ***** #
 
     - name: Add Release Candidate (-rc) suffix to Version Number
       run : |
@@ -39,16 +39,37 @@ jobs:
 
     # ****** Restore and Build ***** #
 
+    # CommonHelpers project
+
     - name: Restore & Build CommonHelpers
       run: |
         dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
         dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
 
+    - name: Add CommonHelpers Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+
+    # CommonHelpers.Maui project
+
+    - name: Install MAUI workloads (required for GitHub-hosted runners)
+      shell: pwsh
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+
+    - name: Restore & Build CommonHelpers.Maui
+      run: |
+        dotnet restore src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
+
+    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
+
+    # CommonHelpers.Tests project
+
     - name: Restore & Build CommonHelpers.Tests
       run: |
         dotnet restore src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --ignore-failed-sources
         dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
-    
+
     - name: Run Tests
       run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
 
@@ -76,6 +97,29 @@ jobs:
     - name: Verify Package Path
       run: Write-Output "Package path is ${{ steps.get-package-path.outputs.nuget-package-path }}"
 
+    # ***** CommonHelpers.Maui - Package Path Identification ***** #
+
+    - name: Get Maui Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
+      id: get-version-maui
+      with:
+        proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
+
+    - name: Verify Maui version
+      run: echo version "${{ steps.get-version-maui.outputs.package-version }}"
+
+    - name: Get Maui Package File Path
+      id: get-package-path-maui
+      run : |
+        $currentDirectory = Get-Location
+        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers.Maui/bin/Release/"
+        $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
+        Write-Output "Setting output variable 'nuget-package-path-maui' to $match"
+        Write-Output "::set-output name=nuget-package-path-maui::$match"
+
+    - name: Verify Maui Package Path
+      run: Write-Output Package path is "${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}"
+
 
     # ***** NuGet Package Signing ***** #
 
@@ -92,16 +136,34 @@ jobs:
     - name: Sign CommonHelpers NuGet package
       run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
 
+    - name: Sign CommonHelpers.Maui NuGet package
+      run: dotnet nuget sign ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
 
-    # Disabling nuget publishing until a solid need for prerelease packages on nuget.org exists
-
-    # # ***** NuGet.org Release ***** #
     
-    # - name: Publish CommonHelpers Prerelease to NuGet.org
-    #   run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+      # ***** Upload Artifacts ***** #
+
+    - name: Upload CommonHelpers NuGet package artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        path: ${{ steps.get-package-path.outputs.nuget-package-path }}
+
+    - name: Upload CommonHelpers.Maui NuGet package artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
+        path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}
 
 
     # ***** GitHub Release ***** #
+
+    - name: Generate version number with date and workflow Run Number
+      id: version-creator
+      run: |
+        $buildDay = Get-Date -Format "yyyy.Mdd"
+        $runNumber = "$env:GITHUB_RUN_NUMBER"
+        $ver = $buildDay + "." + $runNumber + ".0"
+        echo "::set-output name=DATED_VERSION_NUM::$ver"
 
     - name: Create GitHub Prerelease
       id: create_release
@@ -109,12 +171,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "v.${{ steps.get-version.outputs.package-version }}.${{ env.GITHUB_RUN_ID }}"
-        release_name: "CommonHelpers ${{ steps.get-version.outputs.package-version }} (prerelease)"
+        tag_name: "${{ steps.version-creator.outputs.DATED_VERSION_NUM }}-rc"
+        release_name: "CommonHelpers ${{ steps.version-creator.outputs.DATED_VERSION_NUM }}-rc"
         draft: false
         prerelease: true
 
-    - name: Attach Maui prerelease asset
+    - name: Attach CommonHelpers prerelease asset
       id: upload-sideload-asset
       uses: actions/upload-release-asset@v1
       env:
@@ -123,4 +185,15 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
         asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        asset_content_type: application/zip
+
+    - name: Attach CommonHelpers.Maui Prerelease Asset
+      id: upload-maui-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.get-package-path-maui.outputs.nuget-package-path }}
+        asset_name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
         asset_content_type: application/zip
