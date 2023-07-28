@@ -1,10 +1,10 @@
-name: CommonHelpers Prerelease
+name: Prerelease
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - prerelease
+  # push:
+  #   branches:
+  #     - prerelease
 
 jobs:
   build:
