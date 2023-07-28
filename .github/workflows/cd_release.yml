@@ -129,11 +129,11 @@ jobs:
 
     # ***** NuGet.org Release ***** #
     
-    # - name: Publish CommonHelpers to NuGet.org
-    #   run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    - name: Publish CommonHelpers to NuGet.org
+      run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
-    # - name: Publish CommonHelpers.Maui to NuGet.org
-    #   run: dotnet nuget push ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    - name: Publish CommonHelpers.Maui to NuGet.org
+      run: dotnet nuget push ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
 
       # ***** Upload Artifacts ***** #
