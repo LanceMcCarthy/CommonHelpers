@@ -153,6 +153,14 @@ jobs:
 
     # ***** GitHub Release ***** #
 
+    - name: Generate version number with date and workflow Run Number
+      id: version-creator
+      run: |
+        $buildDay = Get-Date -Format "yyyy.Mdd"
+        $runNumber = "$env:GITHUB_RUN_NUMBER"
+        $ver = $buildDay + "." + $runNumber + ".0"
+        echo "::set-output name=DATED_VERSION_NUM::$ver"
+
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
