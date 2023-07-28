@@ -1,4 +1,4 @@
-name: CommonHelpers NuGet.org Release
+name: Release
 
 on:
   workflow_dispatch:
