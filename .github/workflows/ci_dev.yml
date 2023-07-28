@@ -1,9 +1,13 @@
 name: Development
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - dev
+      - 'issues/*'
+      - 'features/*'
+    paths:
+      - 'src/**/*'
 
 jobs:
   build:
@@ -22,15 +26,36 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.1.3
 
+    # CommonHelpers project
+
+    - name: Restore & Build CommonHelpers
+      run: |
+        dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
+
+    - name: Add CommonHelpers Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+
+    # CommonHelpers.Maui project
+
     - name: Install MAUI workloads (required for GitHub-hosted runners)
       shell: pwsh
       run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
-    - name: Restore Dependencies
-      run: dotnet restore src/CommonHelpers.sln --runtime any
+    - name: Restore & Build CommonHelpers.Maui
+      run: |
+        dotnet restore src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
 
-    - name: Build CommonHelpers.sln
-      run: dotnet build src/CommonHelpers.sln --configuration debug
+    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
+
+    # CommonHelpers.Tests project
+
+    - name: Restore & Build CommonHelpers.Tests
+      run: |
+        dotnet restore src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --ignore-failed-sources
+        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
 
     - name: Run Tests
       run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
