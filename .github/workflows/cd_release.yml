@@ -129,11 +129,11 @@ jobs:
 
     # ***** NuGet.org Release ***** #
     
-    - name: Publish CommonHelpers to NuGet.org
-      run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    # - name: Publish CommonHelpers to NuGet.org
+    #   run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
-    - name: Publish CommonHelpers.Maui to NuGet.org
-      run: dotnet nuget push ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    # - name: Publish CommonHelpers.Maui to NuGet.org
+    #   run: dotnet nuget push ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
 
 
       # ***** Upload Artifacts ***** #
@@ -152,6 +152,14 @@ jobs:
 
 
     # ***** GitHub Release ***** #
+
+    - name: Generate version number with date and workflow Run Number
+      id: version-creator
+      run: |
+        $buildDay = Get-Date -Format "yyyy.Mdd"
+        $runNumber = "$env:GITHUB_RUN_NUMBER"
+        $ver = $buildDay + "." + $runNumber + ".0"
+        echo "::set-output name=DATED_VERSION_NUM::$ver"
 
     - name: Create GitHub Release
       id: create_release
