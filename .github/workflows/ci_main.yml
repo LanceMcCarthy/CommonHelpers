@@ -54,17 +54,17 @@ jobs:
 
     # ****** Restore and Build ***** #
 
-    - name: Install MAUI workloads (required for GitHub-hosted runners)
-      shell: pwsh
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
-
     - name: Restore & Build CommonHelpers
       run: |
         dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
         dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "src\CommonHelpers\bin\Release" --name "CommonHelpers_Release"
+      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+
+    - name: Install MAUI workloads (required for GitHub-hosted runners)
+      shell: pwsh
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
     - name: Restore & Build CommonHelpers.Maui
       run: |
@@ -72,7 +72,7 @@ jobs:
         dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
 
     - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "src\CommonHelpers.Maui\bin\Release" --name "CommonHelpers.Maui_Release"
+      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
 
     - name: Restore & Build CommonHelpers.Tests
       run: |
