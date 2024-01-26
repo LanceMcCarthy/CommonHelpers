@@ -130,7 +130,7 @@ jobs:
       # ***** Upload Artifacts ***** #
 
     - name: Upload CommonHelpers.Maui NuGet package artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
         path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}

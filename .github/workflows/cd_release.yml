@@ -92,7 +92,7 @@ jobs:
     # ***** Upload Artifacts ***** #
 
     - name: Upload CommonHelpers NuGet package artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
         path: ${{ steps.get-package-path.outputs.nuget-package-path }}
