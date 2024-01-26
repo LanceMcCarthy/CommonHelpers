@@ -31,4 +31,4 @@ These projects are something I do in my off-hours time to help the developer com
 | [**@l_anceM** on Twitter](https://twitter.com/l_anceM) | Follow or ask questions. |
 | [**lance.boston** on Bluesky](https://staging.bsky.app/profile/lance.boston) | Follow or ask questions. |
 | [**@lance** on Mastodon](https://dvlup.social/@lance) | Follow or ask questions. |
-| <a href="https://www.buymeacoffee.com/dvluper" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="35" width="150"></a> | Keep my caffine topped off to help my brain stay awake and avoid bugs 🐜🐛🪲. |
+| <a href="https://www.buymeacoffee.com/dvluper" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="35" width="150"></a> | Keep my caffeine topped off to help my brain stay awake and avoid bugs 🐜🐛🪲. |
