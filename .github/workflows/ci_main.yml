@@ -92,7 +92,7 @@ jobs:
     # ***** CommonHelpers - Package Path Identification ***** #
 
     - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
+      uses: kzrnm/get-net-sdk-project-versions-action@v2
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
@@ -116,7 +116,7 @@ jobs:
     # ***** CommonHelpers.Maui - Package Path Identification ***** #
 
     # - name: Get Maui Version From Project
-    #   uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
+    #   uses: kzrnm/get-net-sdk-project-versions-action@v2
     #   id: get-version-maui
     #   with:
     #     proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
