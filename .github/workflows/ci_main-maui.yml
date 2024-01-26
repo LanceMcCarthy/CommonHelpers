@@ -1,12 +1,17 @@
-name: Prerelease
+name: Main [.NET MAUI]
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/CommonHelpers.Maui/**/*'
+      - '.github/workflows/ci_main-maui.yml'
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
@@ -21,20 +26,32 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.3.2
 
-
     # ****** Update package version numbers ***** #
 
-    - name: Add Release Candidate (-rc) suffix to Version Number
+    - name: Add Alpha (-alpha) suffix to Version Number
       run : |
         [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
+        Write-Output "Before: " $projXml.Project.PropertyGroup.Version
         $currentVer = $projXml.Project.PropertyGroup.Version
-        $suffix = "-rc"
+        $suffix = "-alpha"
         $newVer = $currentVer + $suffix
         $projXml.Project.PropertyGroup.Version = $newVer
+        Write-Output "After: " $projXml.Project.PropertyGroup.Version
         $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
 
+    - name: Add Alpha (-alpha) suffix to Maui Version Number
+      run : |
+        [xml]$projXml = get-content "src\CommonHelpers.Maui\CommonHelpers.Maui.csproj"
+        Write-Output "Before: " $projXml.Project.PropertyGroup.Version
+        $currentVer = $projXml.Project.PropertyGroup.Version
+        $suffix = "-alpha"
+        $newVer = $currentVer + $suffix
+        $projXml.Project.PropertyGroup.Version = $newVer
+        Write-Output "After: " $projXml.Project.PropertyGroup.Version
+        $projXml.save("src\CommonHelpers.Maui\CommonHelpers.Maui.csproj")
 
-    # ****** Restore and Build ***** #
+
+    # ****** Restore and Build CommonHelpers ***** #
 
     # CommonHelpers project
 
@@ -74,13 +91,13 @@ jobs:
     # ***** CommonHelpers - Package Path Identification ***** #
 
     - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
+      uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
     - name: Verify version
-      run: Write-Output "Version is ${{ steps.get-version.outputs.package-version }}"
+      run: echo version "${{ steps.get-version.outputs.package-version }}"
 
     - name: Get Package File Path
       id: get-package-path
@@ -90,9 +107,10 @@ jobs:
         $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
         Write-Output "Setting output variable 'nuget-package-path' to $match"
         Write-Output "::set-output name=nuget-package-path::$match"
-    
+
     - name: Verify Package Path
-      run: Write-Output "Package path is ${{ steps.get-package-path.outputs.nuget-package-path }}"
+      run: Write-Output Package path is "${{steps.get-package-path.outputs.nuget-package-path}}"
+
 
     # ***** CommonHelpers.Maui - Package Path Identification ***** #
 
@@ -118,7 +136,7 @@ jobs:
       run: Write-Output Package path is "${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}"
 
 
-    # ***** NuGet Package Signing ***** #
+    # ***** Package Signing ***** #
 
     - name: Decode Base64 and save PFX file
       id: download-cert
@@ -136,61 +154,11 @@ jobs:
     - name: Sign CommonHelpers.Maui NuGet package
       run: dotnet nuget sign ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
 
-    
-      # ***** Upload Artifacts ***** #
 
-    - name: Upload CommonHelpers NuGet package artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        path: ${{ steps.get-package-path.outputs.nuget-package-path }}
+      # ***** Upload Artifacts ***** #
 
     - name: Upload CommonHelpers.Maui NuGet package artifact
       uses: actions/upload-artifact@v4
       with:
         name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
         path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}
-
-
-    # ***** GitHub Release ***** #
-
-    - name: Generate version number with date and workflow Run Number
-      id: version-creator
-      run: |
-        $buildDay = Get-Date -Format "yyyy.Mdd"
-        $runNumber = "$env:GITHUB_RUN_NUMBER"
-        $ver = $buildDay + "." + $runNumber + ".0"
-        echo "::set-output name=DATED_VERSION_NUM::$ver"
-
-    - name: Create GitHub Prerelease
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: "${{ steps.version-creator.outputs.DATED_VERSION_NUM }}-rc"
-        release_name: "CommonHelpers ${{ steps.version-creator.outputs.DATED_VERSION_NUM }}-rc"
-        draft: false
-        prerelease: true
-
-    - name: Attach CommonHelpers prerelease asset
-      id: upload-sideload-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
-        asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        asset_content_type: application/zip
-
-    - name: Attach CommonHelpers.Maui Prerelease Asset
-      id: upload-maui-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}
-        asset_name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
-        asset_content_type: application/zip

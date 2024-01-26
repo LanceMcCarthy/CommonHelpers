@@ -14,9 +14,9 @@ Due to the number of "File > New" projects I create every day, this package has 
 
 ### Extensions
 
-Extensions for commonly used objects like; `string`, `DateTime`, and `enum`. As well as handy methods for `File`, `Exception` and `Color` objects. There's also the `HttpClientExtensions` where you can get download progress insights and a helper method to POST image data.
+Helpful extensions for `string`, `DateTime`, and `enum`... as well as common methods for `ObservableCollection`, `File`, `Exception`, `Color` and `HttpClient`. See the [CommonHelpers/Extensions](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers/Extensions) folder for details.
 
-For example, you can quickly get easing function values using the `EasingExtensions`. Here's a screenshot of the `myFloatValue.BackEaseIn()` example.
+For example, you can quickly get easing function values using the `EasingExtensions`, such as `myFloatValue.BackEaseIn()`:
 
 ![easing demo](https://user-images.githubusercontent.com/3520532/163871294-9be04ecd-8dcb-49ca-967b-7f1ff8e091b1.png)
 
