@@ -82,5 +82,22 @@ namespace CommonHelpers.Tests.CollectionsTests
             foreach (var item in rangeToRemove) 
                 Assert.IsFalse(rangeCollection.Contains(item));
         }
+
+        [TestMethod]
+        public void EnsureMaximumCount()
+        {
+            // Arrange
+            var expectedCount = 10;
+            var rangeCollection = new ObservableRangeCollection<string>{ MaximumCount = expectedCount };
+            rangeCollection.AddRange(new[] { "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"});
+
+            // Act
+            rangeCollection.AddRange(new[] { "Ten", "Eleven", "Twelve" });
+            
+            // Assert
+            Assert.AreEqual(expectedCount, rangeCollection.Count);
+            Assert.AreEqual("Three", rangeCollection[0]);
+            Assert.AreEqual("Twelve", rangeCollection[9]);
+        }
     }
 }
