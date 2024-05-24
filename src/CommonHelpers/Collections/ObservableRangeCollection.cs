@@ -15,6 +15,25 @@ namespace CommonHelpers.Collections
         private NotifyCollectionChangedAction defaultAddCollectionChangedAction;
         private NotifyCollectionChangedAction defaultRemoveCollectionChangedAction;
 
+        /// <summary>
+        /// States the maximum number of items the collection can hold. IF the count is larger than this value, the first item will be removed.
+        /// </summary>
+        public int? MaximumCount { get; set; } = null;
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Override OnCollectionChanged with logic that removes the oldest item is the count is larger than the MaximumCount. This will repeat until the count is less than or equal to the MaximumCount.
+        /// </summary> 
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            base.OnCollectionChanged(e);
+
+            if (MaximumCount != null && this.Count > MaximumCount)
+            {
+                base.RemoveAt(0);
+            }
+        }
+
         /// <inheritdoc />
         /// <summary> 
         /// Initializes a new instance of the System.Collections.ObjectModel.ObservableCollection(Of T) class. 
