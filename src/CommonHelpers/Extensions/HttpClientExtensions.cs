@@ -34,8 +34,8 @@ namespace CommonHelpers.Extensions
 
             var fileBytes = File.ReadAllBytes(imageFilePath);
 
-            var multipartContent = new MultipartFormDataContent();
-            multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
+            var multipartContent = new MultipartFormDataContent { { new ByteArrayContent(fileBytes), parameterName } };
+
             return await client.PostAsync(new Uri(apiUrl), multipartContent);
         }
 
@@ -64,8 +64,8 @@ namespace CommonHelpers.Extensions
             
             var fileBytes = File.ReadAllBytes(imageFilePath);
 
-            var multipartContent = new MultipartFormDataContent();
-            multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
+            var multipartContent = new MultipartFormDataContent { { new ByteArrayContent(fileBytes), parameterName } };
+
             return await client.PostAsync(new Uri(apiUrl), multipartContent, token);
         }
 
@@ -110,7 +110,7 @@ namespace CommonHelpers.Extensions
 
                 receivedBytes += bytesRead;
 
-                progessReporter.Report(new DownloadProgressArgs(receivedBytes, receivedBytes));
+                progessReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
 
                 Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
             }
@@ -161,7 +161,7 @@ namespace CommonHelpers.Extensions
 
                 receivedBytes += bytesRead;
 
-                progessReporter.Report(new DownloadProgressArgs(receivedBytes, receivedBytes));
+                progessReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
 
                 Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
             }
@@ -203,39 +203,38 @@ namespace CommonHelpers.Extensions
             var multipartContent = new MultipartFormDataContent();
             multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
 
-            using (var response = await client.PostAsync(new Uri(apiUrl), multipartContent))
+            using var response = await client.PostAsync(new Uri(apiUrl), multipartContent);
+
+            //Important - this makes it possible to rewind and re-read the stream
+            await response.Content.LoadIntoBufferAsync();
+
+            //NOTE - This Stream will need to be closed by the caller
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            var receivedBytes = 0;
+            var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
+
+            while (true)
             {
-                //Important - this makes it possible to rewind and re-read the stream
-                await response.Content.LoadIntoBufferAsync();
+                var buffer = new byte[4096];
+                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                //NOTE - This Stream will need to be closed by the caller
-                var stream = await response.Content.ReadAsStreamAsync();
-
-                var receivedBytes = 0;
-                var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
-
-                while (true)
+                if (bytesRead == 0)
                 {
-                    var buffer = new byte[4096];
-                    var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-
-                    if (bytesRead == 0)
-                    {
-                        break;
-                    }
-
-                    receivedBytes += bytesRead;
-
-                    var args = new DownloadProgressArgs(receivedBytes, receivedBytes);
-                    progessReporter.Report(args);
-
-                    Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
+                    break;
                 }
 
-                stream.Position = 0;
-                var stringContent = new StreamReader(stream);
-                return await stringContent.ReadToEndAsync();
+                receivedBytes += bytesRead;
+
+                var args = new DownloadProgressArgs(receivedBytes, totalBytes);
+                progessReporter.Report(args);
+
+                Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
             }
+
+            stream.Position = 0;
+            var stringContent = new StreamReader(stream);
+            return await stringContent.ReadToEndAsync();
         }
 
         /// <summary>
@@ -272,44 +271,39 @@ namespace CommonHelpers.Extensions
             var multipartContent = new MultipartFormDataContent();
             multipartContent.Add(new ByteArrayContent(fileBytes), parameterName);
 
-            using (var response = await client.PostAsync(new Uri(apiUrl), multipartContent, token))
+            using var response = await client.PostAsync(new Uri(apiUrl), multipartContent, token);
+
+            //Important - this makes it possible to rewind and re-read the stream
+            await response.Content.LoadIntoBufferAsync();
+
+            using var stream = await response.Content.ReadAsStreamAsync();
+
+            var receivedBytes = 0;
+            var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
+
+            while (true)
             {
-                //Important - this makes it possible to rewind and re-read the stream
-                await response.Content.LoadIntoBufferAsync();
+                var buffer = new byte[4096];
+                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token);
 
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                {
-                    var receivedBytes = 0;
-                    var totalBytes = Convert.ToInt32(response.Content.Headers.ContentLength);
+                if (bytesRead == 0)
+                    break;
 
-                    while (true)
-                    {
-                        var buffer = new byte[4096];
-                        var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token);
+                receivedBytes += bytesRead;
 
-                        if (bytesRead == 0)
-                            break;
+                var args = new DownloadProgressArgs(receivedBytes, totalBytes);
+                progessReporter.Report(args);
 
-                        receivedBytes += bytesRead;
-
-                        var args = new DownloadProgressArgs(receivedBytes, receivedBytes);
-                        progessReporter.Report(args);
-
-                        Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
-                    }
-
-                    stream.Position = 0;
-
-                    string result;
-
-                    using (var stringContent = new StreamReader(stream))
-                    {
-                        result = await stringContent.ReadToEndAsync();
-                    }
-
-                    return result;
-                }
+                Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
             }
+
+            stream.Position = 0;
+
+            using var stringContent = new StreamReader(stream);
+
+            var result = await stringContent.ReadToEndAsync();
+
+            return result;
         }
 
         /// <summary>
@@ -330,14 +324,13 @@ namespace CommonHelpers.Extensions
             if (progessReporter == null)
                 throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
 
-            using (var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter))
-            {
-                if (stream == null)
-                    return null;
+            using var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter);
 
-                var stringContent = new StreamReader(stream);
-                return await stringContent.ReadToEndAsync();
-            }
+            if (stream == null)
+                return null;
+
+            var stringContent = new StreamReader(stream);
+            return await stringContent.ReadToEndAsync();
         }
 
         /// <summary>
@@ -358,15 +351,14 @@ namespace CommonHelpers.Extensions
 
             if (progessReporter == null)
                 throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
-            
-            using (var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter, token))
-            {
-                if (stream == null)
-                    return null;
 
-                var stringContent = new StreamReader(stream);
-                return await stringContent.ReadToEndAsync();
-            }
+            using var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter, token);
+
+            if (stream == null)
+                return null;
+
+            var stringContent = new StreamReader(stream);
+            return await stringContent.ReadToEndAsync();
         }
     }
 }
