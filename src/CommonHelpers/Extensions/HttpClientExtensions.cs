@@ -110,7 +110,7 @@ namespace CommonHelpers.Extensions
 
                 receivedBytes += bytesRead;
 
-                progessReporter.Report(new DownloadProgressArgs(receivedBytes, receivedBytes));
+                progessReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
 
                 Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
             }
@@ -161,7 +161,7 @@ namespace CommonHelpers.Extensions
 
                 receivedBytes += bytesRead;
 
-                progessReporter.Report(new DownloadProgressArgs(receivedBytes, receivedBytes));
+                progessReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
 
                 Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
             }
@@ -226,7 +226,7 @@ namespace CommonHelpers.Extensions
 
                     receivedBytes += bytesRead;
 
-                    var args = new DownloadProgressArgs(receivedBytes, receivedBytes);
+                    var args = new DownloadProgressArgs(receivedBytes, totalBytes);
                     progessReporter.Report(args);
 
                     Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
@@ -292,7 +292,7 @@ namespace CommonHelpers.Extensions
 
                         receivedBytes += bytesRead;
 
-                        var args = new DownloadProgressArgs(receivedBytes, receivedBytes);
+                        var args = new DownloadProgressArgs(receivedBytes, totalBytes);
                         progessReporter.Report(args);
 
                         Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
