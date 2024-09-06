@@ -58,4 +58,4 @@ jobs:
         dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
 
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
+      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --no-build -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
