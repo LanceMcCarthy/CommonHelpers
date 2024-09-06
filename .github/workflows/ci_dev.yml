@@ -35,7 +35,7 @@ jobs:
         dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
 
     # CommonHelpers.Maui project
 
@@ -49,7 +49,7 @@ jobs:
         dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --no-restore --configuration Release
 
     - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
 
     # CommonHelpers.Tests project
 
