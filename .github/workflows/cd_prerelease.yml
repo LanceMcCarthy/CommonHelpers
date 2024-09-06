@@ -9,12 +9,12 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Install .NET Core
-      uses: actions/setup-dotnet@v4.0.0
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
     
@@ -68,7 +68,7 @@ jobs:
         dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
 
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
+      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
     # ***** CommonHelpers - Package Path Identification ***** #
