@@ -32,6 +32,10 @@ This folder has some of the most used classes. For example, `BindableBase`, `Vie
 
 Platform agnostic MVVM classes like `DelegateCommand` and `RelayCommand`.
 
+### Structs
+
+This namespace contains structs that are currently missing from the platform or are just really handy to have. It currently contains `Either<TSuccess, TError>`, which is a great help when using rails-based programming.
+
 ### Services
 
 To make testing UI controls easier by quickly providing well formatted data from offline sample data and online API endpoints. This is really useful for quickly testing *Load On Demand* scenarios.
