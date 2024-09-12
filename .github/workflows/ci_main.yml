@@ -15,12 +15,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Install .NET Core
-      uses: actions/setup-dotnet@v4.0.0
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
     
@@ -62,7 +62,7 @@ jobs:
         dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
 
     # CommonHelpers.Maui project
 
@@ -76,7 +76,7 @@ jobs:
     #     dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
 
     # - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-    #   run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
+    #   run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
 
     # CommonHelpers.Tests project
 
@@ -86,7 +86,7 @@ jobs:
         dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
 
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
+      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
     # ***** CommonHelpers - Package Path Identification ***** #
@@ -98,7 +98,7 @@ jobs:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
     - name: Verify version
-      run: echo version "${{ steps.get-version.outputs.package-version }}"
+      run: echo version "${{steps.get-version.outputs.package-version}}"
 
     - name: Get Package File Path
       id: get-package-path
@@ -122,7 +122,7 @@ jobs:
     #     proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
 
     # - name: Verify Maui version
-    #   run: echo version "${{ steps.get-version-maui.outputs.package-version }}"
+    #   run: echo version "${{steps.get-version-maui.outputs.package-version}}"
 
     # - name: Get Maui Package File Path
     #   id: get-package-path-maui
@@ -130,8 +130,8 @@ jobs:
     #     $currentDirectory = Get-Location
     #     $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers.Maui/bin/Release/"
     #     $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
-    #     Write-Output "Setting output variable 'nuget-package-path-maui' to $match"
-    #     Write-Output "::set-output name=nuget-package-path-maui::$match"
+    #     Write-Output "Setting output variable 'nuget-package-path-maui' to $"
+    #     echo "nuget-package-path-maui=$match" >> $env:GITHUB_OUTPUT
 
     # - name: Verify Maui Package Path
     #   run: Write-Output Package path is "${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}"
@@ -142,18 +142,18 @@ jobs:
     - name: Decode Base64 and save PFX file
       id: download-cert
       run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LANCELOTSOFTWARECERT_BASE64 }}")
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{secrets.LANCELOTSOFTWARECERT_BASE64}}")
         $currentDirectory = Get-Location
         $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
         Write-Output "Setting output variable 'certificate-path'..."
-        Write-Output "::set-output name=certificate-path::$certificatePath"
+        echo "certificate-path=$certificatePath" >> $env:GITHUB_OUTPUT
 
     - name: Sign CommonHelpers NuGet package
-      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+      run: dotnet nuget sign ${{steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path}} --certificate-password "${{secrets.LANCELOTSOFTWARECERT_PASSWORD}}" --timestamper "http://timestamp.digicert.com"
 
     # - name: Sign CommonHelpers.Maui NuGet package
-    #   run: dotnet nuget sign ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+    #   run: dotnet nuget sign ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{secrets.LANCELOTSOFTWARECERT_PASSWORD}}" --timestamper "http://timestamp.digicert.com"
 
 
       # ***** Upload Artifacts ***** #
@@ -161,11 +161,11 @@ jobs:
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v4
       with:
-        name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        path: ${{ steps.get-package-path.outputs.nuget-package-path }}
+        name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
+        path: ${{steps.get-package-path.outputs.nuget-package-path}}
 
     # - name: Upload CommonHelpers.Maui NuGet package artifact
     #   uses: actions/upload-artifact@v3
     #   with:
-    #     name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
-    #     path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}
+    #     name: "CommonHelpers.Maui.${{steps.get-version-maui.outputs.package-version}}.nupkg"
+    #     path: ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}

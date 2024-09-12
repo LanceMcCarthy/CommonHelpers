@@ -8,6 +8,7 @@ on:
       - 'features/*'
     paths:
       - 'src/**/*'
+      - '.github/workflows/ci_dev.yml'
 
 jobs:
   build:
@@ -31,10 +32,10 @@ jobs:
     - name: Restore & Build CommonHelpers
       run: |
         dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
+        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
 
     # CommonHelpers.Maui project
 
@@ -45,17 +46,17 @@ jobs:
     - name: Restore & Build CommonHelpers.Maui
       run: |
         dotnet restore src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
+        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --no-restore --configuration Release
 
     - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
 
     # CommonHelpers.Tests project
 
     - name: Restore & Build CommonHelpers.Tests
       run: |
         dotnet restore src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
+        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release --no-restore
 
     - name: Run Tests
-      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
+      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
