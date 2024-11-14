@@ -23,7 +23,15 @@
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <LangVersion>latest</LangVersion>
+    <GenerateSBOM>true</GenerateSBOM>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Sbom.Targets" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <None Include=".\README.md">

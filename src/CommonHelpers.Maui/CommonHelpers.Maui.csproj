@@ -37,6 +37,7 @@
 		<PackageIcon>CommonHelpersMauiIcon.png</PackageIcon>
 		<SignAssembly>false</SignAssembly>
 		<DelaySign>false</DelaySign>
+        <GenerateSBOM>true</GenerateSBOM>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -59,6 +60,10 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Sbom.Targets" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
