@@ -2,15 +2,9 @@
 
 namespace CommonHelpers.Maui.Helpers;
 
-public readonly struct Subscription
+public readonly struct Subscription(WeakReference subscriber, MethodInfo handler)
 {
-    public WeakReference? Subscriber { get; }
+    public WeakReference Subscriber { get; } = subscriber;
 
-    public MethodInfo Handler { get; }
-
-    public Subscription(WeakReference? subscriber, MethodInfo handler)
-    {
-        Subscriber = subscriber;
-        Handler = handler ?? throw new ArgumentNullException(nameof(handler));
-    }
+    public MethodInfo Handler { get; } = handler ?? throw new ArgumentNullException(nameof(handler));
 }

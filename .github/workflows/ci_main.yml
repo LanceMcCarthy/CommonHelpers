@@ -10,24 +10,28 @@ on:
       - 'src/CommonHelpers.Tests/**/*'
       - '.github/workflows/ci_main.yml'
 
+env:
+  DOTNET_SDK_VERSION: '9.0.x'
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Install .NET Core
-      uses: actions/setup-dotnet@v4.0.0
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{env.DOTNET_SDK_VERSION}}
     
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.3.2
+      uses: microsoft/setup-msbuild@v2
 
-    # ****** Update package version numbers ***** #
+
+    # ****** CommonHelpers Tasks ***** #
 
     - name: Add Alpha (-alpha) suffix to Version Number
       run : |
@@ -40,56 +44,14 @@ jobs:
         Write-Output "After: " $projXml.Project.PropertyGroup.Version
         $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
 
-    # - name: Add Alpha (-alpha) suffix to Maui Version Number
-    #   run : |
-    #     [xml]$projXml = get-content "src\CommonHelpers.Maui\CommonHelpers.Maui.csproj"
-    #     Write-Output "Before: " $projXml.Project.PropertyGroup.Version
-    #     $currentVer = $projXml.Project.PropertyGroup.Version
-    #     $suffix = "-alpha"
-    #     $newVer = $currentVer + $suffix
-    #     $projXml.Project.PropertyGroup.Version = $newVer
-    #     Write-Output "After: " $projXml.Project.PropertyGroup.Version
-    #     $projXml.save("src\CommonHelpers.Maui\CommonHelpers.Maui.csproj")
-
-
-    # ****** Restore and Build CommonHelpers ***** #
-
-    # CommonHelpers project
-
     - name: Restore & Build CommonHelpers
+      working-directory: src/CommonHelpers
       run: |
-        dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build --configuration Release
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
-
-    # CommonHelpers.Maui project
-
-    # - name: Install MAUI workloads (required for GitHub-hosted runners)
-    #   shell: pwsh
-    #   run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
-
-    # - name: Restore & Build CommonHelpers.Maui
-    #   run: |
-    #     dotnet restore src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --runtime any --ignore-failed-sources
-    #     dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
-
-    # - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-    #   run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
-
-    # CommonHelpers.Tests project
-
-    - name: Restore & Build CommonHelpers.Tests
-      run: |
-        dotnet restore src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
-
-    - name: Run Tests
-      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
-
-
-    # ***** CommonHelpers - Package Path Identification ***** #
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
 
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v2
@@ -98,7 +60,7 @@ jobs:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
 
     - name: Verify version
-      run: echo version "${{ steps.get-version.outputs.package-version }}"
+      run: echo version "${{steps.get-version.outputs.package-version}}"
 
     - name: Get Package File Path
       id: get-package-path
@@ -106,35 +68,23 @@ jobs:
         $currentDirectory = Get-Location
         $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
         $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
-        Write-Output "Setting output variable 'nuget-package-path' to $match"
-        Write-Output "::set-output name=nuget-package-path::$match"
+        echo "nuget-package-path=$match" >> $env:GITHUB_OUTPUT
 
     - name: Verify Package Path
       run: Write-Output Package path is "${{steps.get-package-path.outputs.nuget-package-path}}"
 
 
-    # ***** CommonHelpers.Maui - Package Path Identification ***** #
+    # ****** CommonHelpers.Tests Tasks ***** #
 
-    # - name: Get Maui Version From Project
-    #   uses: kzrnm/get-net-sdk-project-versions-action@v2
-    #   id: get-version-maui
-    #   with:
-    #     proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
+    - name: Restore & Build CommonHelpers.Tests
+      working-directory: src/CommonHelpers.Tests
+      run: |
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build --configuration Release
 
-    # - name: Verify Maui version
-    #   run: echo version "${{ steps.get-version-maui.outputs.package-version }}"
-
-    # - name: Get Maui Package File Path
-    #   id: get-package-path-maui
-    #   run : |
-    #     $currentDirectory = Get-Location
-    #     $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers.Maui/bin/Release/"
-    #     $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
-    #     Write-Output "Setting output variable 'nuget-package-path-maui' to $match"
-    #     Write-Output "::set-output name=nuget-package-path-maui::$match"
-
-    # - name: Verify Maui Package Path
-    #   run: Write-Output Package path is "${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}"
+    - name: Run Tests
+      working-directory: src/CommonHelpers.Tests
+      run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
     # ***** Package Signing ***** #
@@ -142,18 +92,14 @@ jobs:
     - name: Decode Base64 and save PFX file
       id: download-cert
       run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LANCELOTSOFTWARECERT_BASE64 }}")
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{secrets.LANCELOTSOFTWARECERT_BASE64}}")
         $currentDirectory = Get-Location
         $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        Write-Output "Setting output variable 'certificate-path'..."
-        Write-Output "::set-output name=certificate-path::$certificatePath"
+        echo "certificate-path=$certificatePath" >> $env:GITHUB_OUTPUT
 
     - name: Sign CommonHelpers NuGet package
-      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
-
-    # - name: Sign CommonHelpers.Maui NuGet package
-    #   run: dotnet nuget sign ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+      run: dotnet nuget sign ${{steps.get-package-path.outputs.nuget-package-path}} --certificate-path ${{steps.download-cert.outputs.certificate-path}} --certificate-password "${{secrets.LANCELOTSOFTWARECERT_PASSWORD}}" --timestamper "http://timestamp.digicert.com"
 
 
       # ***** Upload Artifacts ***** #
@@ -161,11 +107,5 @@ jobs:
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v4
       with:
-        name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        path: ${{ steps.get-package-path.outputs.nuget-package-path }}
-
-    # - name: Upload CommonHelpers.Maui NuGet package artifact
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: "CommonHelpers.Maui.${{ steps.get-version-maui.outputs.package-version }}.nupkg"
-    #     path: ${{ steps.get-package-path-maui.outputs.nuget-package-path-maui }}
+        name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
+        path: ${{steps.get-package-path.outputs.nuget-package-path}}

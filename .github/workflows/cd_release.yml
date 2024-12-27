@@ -1,8 +1,14 @@
 name: Release
 
+###############################################################
+########################### WARNING ###########################
+###############################################################
+# Manual trigger only, this workflow publishes to nuget.org!
 on:
-  # WARNING - manual trigger only, this publishes to nuget.org!
   workflow_dispatch:
+
+env:
+  DOTNET_SDK_VERSION: '9.0.x'
 
 jobs:
   publish_commonhelpers:
@@ -10,52 +16,35 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Install .NET Core
-      uses: actions/setup-dotnet@v4.0.0
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{env.DOTNET_SDK_VERSION}}
     
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.3.2
+      uses: microsoft/setup-msbuild@v2
 
 
-    # ****** Restore and Build ***** #
-
-    # CommonHelpers project
+    # ****** CommonHelpers Tasks ***** #
 
     - name: Restore & Build CommonHelpers
+      working-directory: src/CommonHelpers
       run: |
-        dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build --configuration Release
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{ github.workspace }}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
-
-    # CommonHelpers.Tests project
-
-    - name: Restore & Build CommonHelpers.Tests
-      run: |
-        dotnet restore src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
-
-    - name: Run Tests
-      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any
-
-
-    # ***** CommonHelpers - Package Path Identification ***** #
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
 
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v2
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
-
-    - name: Verify version
-      run: echo version "${{steps.get-version.outputs.package-version}}"
 
     - name: Get Package File Path
       id: get-package-path
@@ -64,7 +53,20 @@ jobs:
         $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
         $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
         Write-Output "Setting output variable 'nuget-package-path' to $match"
-        Write-Output "::set-output name=nuget-package-path::$match"
+        echo "nuget-package-path=$match" >> $env:GITHUB_OUTPUT
+
+
+    # CommonHelpers.Tests project
+
+    - name: Restore & Build CommonHelpers.Tests
+      working-directory: src/CommonHelpers.Tests
+      run: |
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build --configuration Release
+
+    - name: Run Tests
+      working-directory: src/CommonHelpers.Tests
+      run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
     # ***** NuGet Package Signing ***** #
@@ -72,21 +74,21 @@ jobs:
     - name: Decode Base64 and save PFX file
       id: download-cert
       run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.LANCELOTSOFTWARECERT_BASE64 }}")
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{secrets.LANCELOTSOFTWARECERT_BASE64}}")
         $currentDirectory = Get-Location
         $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
         Write-Output "Setting output variable 'certificate-path'..."
-        Write-Output "::set-output name=certificate-path::$certificatePath"
+        echo "certificate-path=$certificatePath" >> $env:GITHUB_OUTPUT
 
     - name: Sign CommonHelpers NuGet package
-      run: dotnet nuget sign ${{ steps.get-package-path.outputs.nuget-package-path }} --certificate-path ${{ steps.download-cert.outputs.certificate-path }} --certificate-password "${{ secrets.LANCELOTSOFTWARECERT_PASSWORD }}" --timestamper "http://timestamp.digicert.com"
+      run: dotnet nuget sign ${{steps.get-package-path.outputs.nuget-package-path}} --certificate-path ${{steps.download-cert.outputs.certificate-path}} --certificate-password "${{secrets.LANCELOTSOFTWARECERT_PASSWORD}}" --timestamper "http://timestamp.digicert.com"
 
 
     # ***** NuGet.org Release ***** #
     
     - name: Publish CommonHelpers to NuGet.org
-      run: dotnet nuget push ${{ steps.get-package-path.outputs.nuget-package-path }} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ${{steps.get-package-path.outputs.nuget-package-path}} --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
 
 
     # ***** Upload Artifacts ***** #
@@ -94,8 +96,8 @@ jobs:
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v4
       with:
-        name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
-        path: ${{ steps.get-package-path.outputs.nuget-package-path }}
+        name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
+        path: ${{steps.get-package-path.outputs.nuget-package-path}}
 
 
     # ***** GitHub Release ***** #
@@ -106,16 +108,16 @@ jobs:
         $buildDay = Get-Date -Format "yyyy.Mdd"
         $runNumber = "$env:GITHUB_RUN_NUMBER"
         $ver = $buildDay + "." + $runNumber + ".0"
-        echo "::set-output name=DATED_VERSION_NUM::$ver"
+        echo "DATED_VERSION_NUM=$ver" >> $env:GITHUB_OUTPUT
 
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        tag_name: "${{ steps.version-creator.outputs.DATED_VERSION_NUM }}"
-        release_name: "CommonHelpers ${{ steps.version-creator.outputs.DATED_VERSION_NUM }}"
+        tag_name: "${{steps.version-creator.outputs.DATED_VERSION_NUM}}"
+        release_name: "CommonHelpers ${{steps.version-creator.outputs.DATED_VERSION_NUM}}"
         draft: false
         prerelease: false
 
@@ -123,9 +125,9 @@ jobs:
       id: upload-asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.get-package-path.outputs.nuget-package-path }}
-        asset_name: "CommonHelpers.${{ steps.get-version.outputs.package-version }}.nupkg"
+        upload_url: ${{steps.create_release.outputs.upload_url}}
+        asset_path: ${{steps.get-package-path.outputs.nuget-package-path}}
+        asset_name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
         asset_content_type: application/zip
