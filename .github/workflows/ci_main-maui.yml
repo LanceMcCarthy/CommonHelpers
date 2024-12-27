@@ -9,6 +9,9 @@ on:
       - 'src/CommonHelpers.Maui/**/*'
       - '.github/workflows/ci_main-maui.yml'
 
+env:
+  DOTNET_SDK_VERSION: '9.0.x'
+
 jobs:
   build:
     runs-on: windows-latest
@@ -21,10 +24,10 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{env.DOTNET_SDK_VERSION}}
     
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.3.2
+      uses: microsoft/setup-msbuild@v2
 
     # ****** Update package version numbers ***** #
 
