@@ -3,15 +3,15 @@ using UIKit;
 
 namespace CommonHelpers.Maui.Platforms.MacCatalyst;
 
-public static class MacWindowHelpers
+public static class Helpers
 {
     public static void RestrictWindowMinimumSize(
         this UIWindowScene scene,
         CGSize minimumSize)
     {
-        if (scene is { SizeRestrictions: { } } windowScene)
+        if (scene is { SizeRestrictions: not null })
         {
-            windowScene.SizeRestrictions.MinimumSize = minimumSize;
+            scene.SizeRestrictions.MinimumSize = minimumSize;
         }
     }
 
@@ -19,9 +19,9 @@ public static class MacWindowHelpers
         this UIWindowScene scene,
         CGSize maximumSize)
     {
-        if (scene is { SizeRestrictions: { } } windowScene)
+        if (scene is { SizeRestrictions: not null })
         {
-            windowScene.SizeRestrictions.MaximumSize = maximumSize;
+            scene.SizeRestrictions.MaximumSize = maximumSize;
         }
     }
 
@@ -30,10 +30,10 @@ public static class MacWindowHelpers
         CGSize minimumSize,
         CGSize maximumSize)
     {
-        if (scene is { SizeRestrictions: { } } windowScene)
+        if (scene is { SizeRestrictions: not null })
         {
-            windowScene.SizeRestrictions.MinimumSize = minimumSize;
-            windowScene.SizeRestrictions.MaximumSize = maximumSize;
+            scene.SizeRestrictions.MinimumSize = minimumSize;
+            scene.SizeRestrictions.MaximumSize = maximumSize;
         }
     }
 }

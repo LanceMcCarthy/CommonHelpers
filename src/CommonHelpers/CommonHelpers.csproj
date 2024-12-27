@@ -10,20 +10,28 @@
     <PackageProjectUrl>https://github.com/LanceMcCarthy/CommonHelpers</PackageProjectUrl>
     <PackageLicenseUrl></PackageLicenseUrl>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-    <Copyright>Copyright 2018 - 2024</Copyright>
+    <Copyright>Copyright 2018 - 2025</Copyright>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
     <PackageTags>NetStandard C# netstandard2.0 netstandard netcore</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <Version>1.4.0</Version>
-    <FileVersion>1.4.0.0</FileVersion>
+    <AssemblyVersion>1.4.1.0</AssemblyVersion>
+    <Version>1.4.1</Version>
+    <FileVersion>1.4.1.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>CommonHelpersIcon.png</PackageIcon>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <LangVersion>latest</LangVersion>
+    <GenerateSBOM>true</GenerateSBOM>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Sbom.Targets" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <None Include=".\README.md">

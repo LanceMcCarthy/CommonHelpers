@@ -1,15 +1,17 @@
 ﻿using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
+using System.Runtime.InteropServices;
+using Windows.System; // For DllImport
 using WinRT;
 
 namespace CommonHelpers.Maui.Platforms.Windows;
 
-public static class WindowHelpers
+public static class Helpers
 {
     public static void TryMicaOrAcrylic(this Microsoft.UI.Xaml.Window window)
     {
-        var dispatcherQueueHelper = new WindowsSystemDispatcherQueueHelper(); // in Platforms.Windows folder
+        var dispatcherQueueHelper = new DispatcherQueueHelper(); // Defined below
         dispatcherQueueHelper.EnsureWindowsSystemDispatcherQueueController();
 
         // Hooking up the policy object
@@ -68,9 +70,9 @@ public static class WindowHelpers
             acrylicController.AddSystemBackdropTarget(window.As<ICompositionSupportsSystemBackdrop>());
             acrylicController.SetSystemBackdropConfiguration(configurationSource);
 
-            window.Activated += (sender, args) =>
+            window.Activated += (s, e) =>
             {
-                if (args.WindowActivationState is WindowActivationState.CodeActivated or WindowActivationState.PointerActivated)
+                if (e.WindowActivationState is WindowActivationState.CodeActivated or WindowActivationState.PointerActivated)
                 {
                     // Handle situation where a window is activated and placed on top of other active windows.
                     if (acrylicController == null)
@@ -82,10 +84,10 @@ public static class WindowHelpers
                 }
 
                 if (configurationSource != null)
-                    configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+                    configurationSource.IsInputActive = e.WindowActivationState != WindowActivationState.Deactivated;
             };
 
-            window.Closed += (sender, args) =>
+            window.Closed += (s, e) =>
             {
                 if (acrylicController != null)
                 {
@@ -96,5 +98,38 @@ public static class WindowHelpers
                 configurationSource = null;
             };
         }
+    }
+}
+
+public class DispatcherQueueHelper
+{
+    [StructLayout(LayoutKind.Sequential)]
+    private struct DispatcherQueueOptions
+    {
+        internal int dwSize;
+        internal int threadType;
+        internal int apartmentType;
+    }
+ 
+    [DllImport("CoreMessaging.dll")]
+    private static extern int CreateDispatcherQueueController([In] DispatcherQueueOptions options, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object dispatcherQueueController);
+
+    private object dispatcherQueueController = null;
+ 
+    public void EnsureWindowsSystemDispatcherQueueController()
+    {
+        if (DispatcherQueue.GetForCurrentThread() != null || dispatcherQueueController != null)
+            return;
+
+        DispatcherQueueOptions options;
+#pragma warning disable CA2263
+        options.dwSize = Marshal.SizeOf(typeof(DispatcherQueueOptions));
+#pragma warning restore CA2263
+        options.threadType = 2;    // DQTYPE_THREAD_CURRENT
+        options.apartmentType = 2; // DQTAT_COM_STA
+ 
+#pragma warning disable CA1806
+        CreateDispatcherQueueController(options, ref dispatcherQueueController);
+#pragma warning restore CA1806
     }
 }

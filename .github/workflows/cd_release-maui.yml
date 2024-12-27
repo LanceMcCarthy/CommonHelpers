@@ -1,8 +1,14 @@
 name: Release [.NET MAUI]
 
+###############################################################
+########################### WARNING ###########################
+###############################################################
+# Manual trigger only, this workflow publishes to nuget.org!
 on:
-  # manual trigger only, this publishes to nuget.org!
   workflow_dispatch:
+
+env:
+  DOTNET_SDK_VERSION: '9.0.x'
 
 jobs:
   publish_commonhelpers:
@@ -17,59 +23,28 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{env.DOTNET_SDK_VERSION}}
     
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.3.2
+      uses: microsoft/setup-msbuild@v2
 
 
-    # ****** Restore and Build ***** #
-
-    # CommonHelpers project
+    # ****** CommonHelpers Tasks ***** #
 
     - name: Restore & Build CommonHelpers
+      working-directory: src/CommonHelpers
       run: |
-        dotnet restore src/CommonHelpers/CommonHelpers.csproj  --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers/CommonHelpers.csproj --configuration Release
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build --configuration Release
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
       run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
-
-    # CommonHelpers.Maui project
-
-    - name: Install MAUI workloads (required for GitHub-hosted runners)
-      shell: pwsh
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
-
-    - name: Restore & Build CommonHelpers.Maui
-      run: |
-        dotnet restore src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers.Maui/CommonHelpers.Maui.csproj --configuration Release
-
-    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
-
-    # CommonHelpers.Tests project
-
-    - name: Restore & Build CommonHelpers.Tests
-      run: |
-        dotnet restore src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any --ignore-failed-sources
-        dotnet build src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --configuration Release
-
-    - name: Run Tests
-      run: dotnet test src/CommonHelpers.Tests/CommonHelpers.Tests.csproj --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-
-
-    # ***** CommonHelpers - Package Path Identification ***** #
 
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v2
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
-
-    - name: Verify version
-      run: echo version "${{steps.get-version.outputs.package-version}}"
 
     - name: Get Package File Path
       id: get-package-path
@@ -81,16 +56,27 @@ jobs:
         echo "nuget-package-path=$match" >> $env:GITHUB_OUTPUT
 
 
-    # ***** CommonHelpers.Maui - Package Path Identification ***** #
+    # ****** CommonHelpers.Maui Tasks ***** #
+
+    - name: Install MAUI workloads (required for GitHub-hosted runners)
+      shell: pwsh
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+
+    - name: Restore & Build CommonHelpers.Maui
+      working-directory: src/CommonHelpers.Maui
+      run: |
+        dotnet install "CommonHelpers" --version "${{steps.get-version.outputs.package-version}}"
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build --configuration Release
+
+    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
 
     - name: Get Maui Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v2
       id: get-version-maui
       with:
         proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
-
-    - name: Verify Maui version
-      run: echo version "${{steps.get-version-maui.outputs.package-version}}"
 
     - name: Get Maui Package File Path
       id: get-package-path-maui
@@ -101,8 +87,18 @@ jobs:
         Write-Output "Setting output variable 'nuget-package-path-maui' to $match"
         echo "nuget-package-path-maui=$match" >> $env:GITHUB_OUTPUT
 
-    - name: Verify Maui Package Path
-      run: Write-Output Package path is "${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}"
+
+    # CommonHelpers.Tests project
+
+    - name: Restore & Build CommonHelpers.Tests
+      working-directory: src/CommonHelpers.Tests
+      run: |
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build --configuration Release
+
+    - name: Run Tests
+      working-directory: src/CommonHelpers.Tests
+      run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
     # ***** NuGet Package Signing ***** #
@@ -127,7 +123,7 @@ jobs:
       run: dotnet nuget push ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}} --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
 
 
-      # ***** Upload Artifacts ***** #
+    # ***** Upload Artifacts ***** #
 
     - name: Upload CommonHelpers.Maui NuGet package artifact
       uses: actions/upload-artifact@v4
@@ -144,7 +140,7 @@ jobs:
         $buildDay = Get-Date -Format "yyyy.Mdd"
         $runNumber = "$env:GITHUB_RUN_NUMBER"
         $ver = $buildDay + "." + $runNumber + ".0"
-        echo "::set-output name=DATED_VERSION_NUM::$ver"
+        echo "DATED_VERSION_NUM=$ver" >> $env:GITHUB_OUTPUT
 
     - name: Create GitHub Release
       id: create_release
