@@ -9,18 +9,10 @@ To see the available features and sample code usage of a specific library, visit
 
 ## Packages
 
-| Package | NuGet.org | Information |
-|---------|-----------|-----------------|
-| `CommonHelpers` | [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [Features & Docs](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers) |
-| `CommonHelpers.Maui` | [![#](https://img.shields.io/nuget/v/CommonHelpers.Maui.svg)](https://www.nuget.org/packages/CommonHelpers.Maui/) | [Features & Docs](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers.Maui) |
-
-## CI-CD
-
-| Workflow     | Status                                   |
-|--------------|------------------------------------------|
-| main       | [![Main](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main.yml/badge.svg?branch=main)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main.yml) |
-| prerelease | [![Prerelease](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_prerelease.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_prerelease.yml) |
-| release | [![CommonHelpers NuGet.org Release](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml) |
+| Package | NuGet Badge | Info | Main Build | Release Build |
+|---------|-------------|------|------------|---------------|
+| `CommonHelpers` | [![#](https://img.shields.io/nuget/v/CommonHelpers.svg)](https://www.nuget.org/packages/CommonHelpers/) | [Docs](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers) | [![Main](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main.yml) | [![Release](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release.yml) |
+| `CommonHelpers.Maui` | [![#](https://img.shields.io/nuget/v/CommonHelpers.Maui.svg)](https://www.nuget.org/packages/CommonHelpers.Maui/) | [Docs](https://github.com/LanceMcCarthy/CommonHelpers/tree/main/src/CommonHelpers.Maui) | [![MAUI Main [.NET MAUI]](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main-maui.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/ci_main-maui.yml) | [![MAUI Release [.NET MAUI]](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release-maui.yml/badge.svg)](https://github.com/LanceMcCarthy/CommonHelpers/actions/workflows/cd_release-maui.yml) |
 
 ## Project Support
 
