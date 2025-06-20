@@ -1,37 +1,36 @@
 ﻿using System;
 using CommonHelpers.Common;
 
-namespace CommonHelpers.Models
+namespace CommonHelpers.Models;
+
+public class MenuItem : BindableBase
 {
-    public class MenuItem : BindableBase
+    private int id;
+    private string title;
+    private string iconPath;
+    private Type targetType;
+
+    public int Id
     {
-        private int id;
-        private string title;
-        private string iconPath;
-        private Type targetType;
+        get => id;
+        set => SetProperty(ref id, value);
+    }
 
-        public int Id
-        {
-            get => id;
-            set => SetProperty(ref id, value);
-        }
+    public string Title
+    {
+        get => title;
+        set => SetProperty(ref title, value);
+    }
 
-        public string Title
-        {
-            get => title;
-            set => SetProperty(ref title, value);
-        }
+    public string IconPath
+    {
+        get => iconPath;
+        set => SetProperty(ref iconPath, value);
+    }
 
-        public string IconPath
-        {
-            get => iconPath;
-            set => SetProperty(ref iconPath, value);
-        }
-
-        public Type TargetType
-        {
-            get => targetType;
-            set => SetProperty(ref targetType, value);
-        }
+    public Type TargetType
+    {
+        get => targetType;
+        set => SetProperty(ref targetType, value);
     }
 }

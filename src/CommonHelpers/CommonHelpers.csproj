@@ -15,9 +15,9 @@
     <RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
     <PackageTags>NetStandard C# netstandard2.0 netstandard netcore</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.4.1.0</AssemblyVersion>
-    <Version>1.4.1</Version>
-    <FileVersion>1.4.1.0</FileVersion>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <Version>1.5.0</Version>
+    <FileVersion>1.5.0.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>CommonHelpersIcon.png</PackageIcon>
     <SignAssembly>false</SignAssembly>

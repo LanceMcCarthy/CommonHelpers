@@ -2,7 +2,7 @@
 
 namespace CommonHelpers.Maui.Mvvm;
 
-public class PageViewModelBase : ViewModelBase, IViewModel
+public class PageViewModelBase : ViewModelBase, IPageViewModel
 {
     public virtual void OnAppearing() {}
 

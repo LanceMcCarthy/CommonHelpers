@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace CommonHelpers.Maui.Helpers;
+namespace CommonHelpers.Maui.Events;
 
 public readonly struct Subscription(WeakReference subscriber, MethodInfo handler)
 {
