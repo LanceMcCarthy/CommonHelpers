@@ -1,6 +1,6 @@
 ﻿namespace CommonHelpers.Maui.Mvvm;
 
-public interface IViewModel
+public interface IPageViewModel
 {
     void OnAppearing();
 
