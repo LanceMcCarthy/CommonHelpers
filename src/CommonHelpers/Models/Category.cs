@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using System.Text;
 using CommonHelpers.Common;
 
-namespace CommonHelpers.Models
+namespace CommonHelpers.Models;
+
+public class Category : BindableBase
 {
-    public class Category : BindableBase
+    private string _categoryName;
+    private int _categoryId;
+
+    public int CategoryId
     {
-        private string _categoryName;
-        private int _categoryId;
+        get => _categoryId;
+        set => SetProperty(ref _categoryId, value);
+    }
 
-        public int CategoryId
-        {
-            get => _categoryId;
-            set => SetProperty(ref _categoryId, value);
-        }
-
-        public string CategoryName
-        {
-            get => _categoryName;
-            set => SetProperty(ref _categoryName, value);
-        }
+    public string CategoryName
+    {
+        get => _categoryName;
+        set => SetProperty(ref _categoryName, value);
     }
 }

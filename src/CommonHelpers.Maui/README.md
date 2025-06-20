@@ -8,7 +8,6 @@ This is a library containing some commonly needed helpers for .NET MAUI C#/XAML 
 
 ## Features
 
-
 ### Behaviors
 
 A `BehaviorBase<T>` class that lets you create your own, or use the out-of-the-box `EventToCommandBehavior` implementation. To get started, Add the XML namespace to the view:
@@ -23,6 +22,66 @@ xmlns:behaviors="clr-namespace:CommonHelpers.Maui.Behaviors;assembly=CommonHelpe
         <behaviors:EventToCommandBehavior EventName="Clicked" Command="{Binding MyCommand}">
     </SomeControl.Behaviors>
 </SomeControl>
+```
+
+### MVVM Helpers
+
+The `ContentPageBase` and `PageViewModelBase` allows you to use view lifecycle events safely in your view model!
+
+Inherit your page from `ContentPageBase` instead of `ContentPage`, like this:
+
+```csharp
+public partial class MainPage : ContentPageBase
+{
+    public MainPage(MainPageViewModel vm)
+    {
+        InitializeComponent();
+        BindingContext = new MainPageViewModel();
+    }
+}
+```
+
+Inherit your viewmodel from the `PageViewModelBase` 
+
+```csharp
+public class public class MainPageViewModel : PageViewModelBase
+{
+}
+```
+
+and you can now override any of these view methods:
+
+```csharp
+public class public class MainPageViewModel : PageViewModelBase
+{
+    public override void OnAppearing()
+    {
+    }
+
+    public override void OnDisappearing()
+    {
+    }
+
+    public override void OnNavigatingFrom(NavigatingFromEventArgs args)
+    {
+        base.OnNavigatingFrom(args);
+    }
+
+    public override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+    }
+
+    public override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+    }
+
+    public override bool OnBackButtonRequested()
+    {
+        return base.OnBackButtonRequested();
+    }
+}
 ```
 
 ### Converters

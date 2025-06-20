@@ -2,18 +2,14 @@
 using CommonHelpers.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.ServicesTests
+namespace CommonHelpers.Tests.Services
 {
     [TestClass]
     public class XkcdServiceTests : IDisposable
     {
-        private readonly XkcdApiService service;
+        private readonly XkcdApiService service = new();
 
-        public XkcdServiceTests()
-        {
-            // Arrange
-            service = new XkcdApiService();
-        }
+        // Arrange
 
         [TestMethod]
         public void GetTodaysComic()

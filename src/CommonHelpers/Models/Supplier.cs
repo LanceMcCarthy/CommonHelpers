@@ -1,22 +1,21 @@
 ﻿using CommonHelpers.Common;
 
-namespace CommonHelpers.Models
+namespace CommonHelpers.Models;
+
+public class Supplier : BindableBase
 {
-    public class Supplier : BindableBase
+    private string _supplierName;
+    private int _supplierId;
+
+    public int SupplierId
     {
-        private string _supplierName;
-        private int _supplierId;
+        get => _supplierId;
+        set => SetProperty(ref _supplierId, value);
+    }
 
-        public int SupplierId
-        {
-            get => _supplierId;
-            set => SetProperty(ref _supplierId, value);
-        }
-
-        public string SupplierName
-        {
-            get => _supplierName;
-            set => SetProperty(ref _supplierName, value);
-        }
+    public string SupplierName
+    {
+        get => _supplierName;
+        set => SetProperty(ref _supplierName, value);
     }
 }

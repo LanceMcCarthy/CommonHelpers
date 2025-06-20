@@ -1,7 +1,7 @@
 ﻿using CommonHelpers.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.CommonTests
+namespace CommonHelpers.Tests.Common
 {
     [TestClass]
     public class ViewModelBaseTests
