@@ -2,7 +2,7 @@
 using CommonHelpers.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.CollectionsTests
+namespace CommonHelpers.Tests.Collections
 {
     [TestClass]
     public class ObservableQueueTests

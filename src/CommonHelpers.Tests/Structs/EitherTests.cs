@@ -2,7 +2,7 @@
 using CommonHelpers.Structs;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.StructsTests
+namespace CommonHelpers.Tests.Structs
 {
     [TestClass]
     public class EitherTests

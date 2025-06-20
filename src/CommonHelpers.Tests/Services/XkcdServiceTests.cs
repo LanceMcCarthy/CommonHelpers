@@ -2,7 +2,7 @@
 using CommonHelpers.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.ServicesTests
+namespace CommonHelpers.Tests.Services
 {
     [TestClass]
     public class XkcdServiceTests : IDisposable

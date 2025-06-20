@@ -5,7 +5,7 @@ using CommonHelpers.Services.DataModels;
 using CommonHelpers.Tests.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.ServicesTests
+namespace CommonHelpers.Tests.Services
 {
     [TestClass]
     public class ComicVineServiceTests : IDisposable

@@ -6,11 +6,12 @@ namespace CommonHelpers.Tasks;
 
 public sealed class NotifyTaskCompletion<TResult> : INotifyPropertyChanged
 {
-    private readonly TResult _defaultResult;
+    private readonly TResult defaultResult;
 
     public NotifyTaskCompletion(Task<TResult> task)
     {
-        Task = task;
+        this.Task = task;
+
         if (!task.IsCompleted)
         {
             var _ = WatchTaskAsync(task);
@@ -19,8 +20,9 @@ public sealed class NotifyTaskCompletion<TResult> : INotifyPropertyChanged
 
     public NotifyTaskCompletion(Task<TResult> task, TResult defaultResult = default)
     {
-        _defaultResult = defaultResult;
-        Task = task;
+        this.defaultResult = defaultResult;
+
+        this.Task = task;
 
         if (!task.IsCompleted)
         {
@@ -64,30 +66,28 @@ public sealed class NotifyTaskCompletion<TResult> : INotifyPropertyChanged
             propertyChanged(this, new PropertyChangedEventArgs("Result"));
         }
     }
+
     public Task<TResult> Task { get; private set; }
 
-    //public TResult Result => (Task.Status == TaskStatus.RanToCompletion) ? Task.Result : default(TResult);
+    public TResult Result => this.Task.Status == TaskStatus.RanToCompletion ? this.Task.Result : defaultResult;
 
-    public TResult Result => Task.Status == TaskStatus.RanToCompletion ? Task.Result : _defaultResult;
+    public TaskStatus Status => this.Task.Status;
 
-    public TaskStatus Status => Task.Status;
+    public bool IsCompleted => this.Task.IsCompleted;
 
-    public bool IsCompleted => Task.IsCompleted;
+    public bool IsNotCompleted => !this.Task.IsCompleted;
 
-    public bool IsNotCompleted => !Task.IsCompleted;
+    public bool IsSuccessfullyCompleted => this.Task.Status == TaskStatus.RanToCompletion;
 
-    public bool IsSuccessfullyCompleted => Task.Status == TaskStatus.RanToCompletion;
+    public bool IsCanceled => this.Task.IsCanceled;
 
-    public bool IsCanceled => Task.IsCanceled;
+    public bool IsFaulted => this.Task.IsFaulted;
 
-    public bool IsFaulted => Task.IsFaulted;
-
-    public AggregateException Exception => Task.Exception;
+    public AggregateException Exception => this.Task.Exception;
 
     public Exception InnerException => Exception?.InnerException;
 
     public string ErrorMessage => InnerException?.Message;
-
 
     public event PropertyChangedEventHandler PropertyChanged;
 }

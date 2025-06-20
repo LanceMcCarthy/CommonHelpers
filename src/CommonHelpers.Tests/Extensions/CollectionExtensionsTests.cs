@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.ExtensionsTests
+namespace CommonHelpers.Tests.Extensions
 {
     [TestClass]
     public class CollectionExtensionsTests

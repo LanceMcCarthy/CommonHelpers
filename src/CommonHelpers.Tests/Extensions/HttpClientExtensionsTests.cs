@@ -1,12 +1,12 @@
-﻿using CommonHelpers.Common.Args;
-using CommonHelpers.Extensions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
+using CommonHelpers.Common.Args;
+using CommonHelpers.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.ExtensionsTests
+namespace CommonHelpers.Tests.Extensions
 {
     [TestClass]
     public class HttpClientExtensionsTests
