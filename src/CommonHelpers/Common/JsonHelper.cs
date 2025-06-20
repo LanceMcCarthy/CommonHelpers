@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
@@ -16,12 +18,14 @@ public static class JsonHelper<T> where T : class
     /// </summary>
     public static string Serialize(T instance)
     {
+        if (instance == null)
+            throw new ArgumentNullException(nameof(instance));
         var serializer = new DataContractJsonSerializer(typeof(T));
-        using (var stream = new MemoryStream())
-        {
-            serializer.WriteObject(stream, instance);
-            return Encoding.Default.GetString(stream.ToArray());
-        }
+
+        using var stream = new MemoryStream();
+
+        serializer.WriteObject(stream, instance);
+        return Encoding.Default.GetString(stream.ToArray());
     }
 
     /// <summary>
@@ -29,10 +33,18 @@ public static class JsonHelper<T> where T : class
     /// </summary>
     public static T Deserialize(string json)
     {
-        using (var stream = new MemoryStream(Encoding.Default.GetBytes(json)))
+        if (string.IsNullOrEmpty(json))
+            throw new ArgumentNullException(nameof(json));
+
+        try
         {
+            using var stream = new MemoryStream(Encoding.Default.GetBytes(json));
             var serializer = new DataContractJsonSerializer(typeof(T));
             return serializer.ReadObject(stream) as T;
+        }
+        catch (Exception ex)
+        {
+            throw new SerializationException("Input string is not valid JSON or does not match the expected type.", ex);
         }
     }
 }
