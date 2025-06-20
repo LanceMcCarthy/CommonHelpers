@@ -27,17 +27,17 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommonHelpers.Extensions
+namespace CommonHelpers.Extensions;
+
+public sealed class TaskCompletionNotifier<TResult> : INotifyPropertyChanged
 {
-    public sealed class TaskCompletionNotifier<TResult> : INotifyPropertyChanged
+    public TaskCompletionNotifier(Task<TResult> task)
     {
-        public TaskCompletionNotifier(Task<TResult> task)
+        Task = task;
+        if (!task.IsCompleted)
         {
-            Task = task;
-            if (!task.IsCompleted)
-            {
-                var scheduler = SynchronizationContext.Current == null ? TaskScheduler.Current : TaskScheduler.FromCurrentSynchronizationContext();
-                task.ContinueWith(t =>
+            var scheduler = SynchronizationContext.Current == null ? TaskScheduler.Current : TaskScheduler.FromCurrentSynchronizationContext();
+            task.ContinueWith(t =>
                 {
                     var propertyChanged = PropertyChanged;
                     if (propertyChanged != null)
@@ -61,21 +61,20 @@ namespace CommonHelpers.Extensions
                 CancellationToken.None,
                 TaskContinuationOptions.ExecuteSynchronously,
                 scheduler);
-            }
         }
-        
-        public Task<TResult> Task { get; private set; }
-        
-        public TResult Result => Task.Status == TaskStatus.RanToCompletion ? Task.Result : default(TResult);
-        
-        public bool IsCompleted => Task.IsCompleted;
-        
-        public bool IsSuccessfullyCompleted => Task.Status == TaskStatus.RanToCompletion;
-        
-        public bool IsCanceled => Task.IsCanceled;
-        
-        public bool IsFaulted => Task.IsFaulted;
-        
-        public event PropertyChangedEventHandler PropertyChanged;
     }
+        
+    public Task<TResult> Task { get; private set; }
+        
+    public TResult Result => Task.Status == TaskStatus.RanToCompletion ? Task.Result : default(TResult);
+        
+    public bool IsCompleted => Task.IsCompleted;
+        
+    public bool IsSuccessfullyCompleted => Task.Status == TaskStatus.RanToCompletion;
+        
+    public bool IsCanceled => Task.IsCanceled;
+        
+    public bool IsFaulted => Task.IsFaulted;
+        
+    public event PropertyChangedEventHandler PropertyChanged;
 }
