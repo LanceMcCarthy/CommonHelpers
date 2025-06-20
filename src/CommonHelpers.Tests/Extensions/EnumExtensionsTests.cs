@@ -4,7 +4,7 @@ using CommonHelpers.Extensions;
 using CommonHelpers.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.ExtensionsTests
+namespace CommonHelpers.Tests.Extensions
 {
     [TestClass]
     public class EnumExtensionsTests

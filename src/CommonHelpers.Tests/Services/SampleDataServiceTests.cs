@@ -2,18 +2,14 @@
 using CommonHelpers.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.ServicesTests
+namespace CommonHelpers.Tests.Services
 {
     [TestClass]
     public class SampleDataServiceTests
     {
-        private readonly SampleDataService service;
+        private readonly SampleDataService service = new();
 
-        public SampleDataServiceTests()
-        {
-            // Arrange
-            service = new SampleDataService();
-        }
+        // Arrange
 
         [TestMethod]
         public void GeneratePeopleData()

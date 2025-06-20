@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace CommonHelpers.Maui.Helpers;
+﻿namespace CommonHelpers.Maui.Helpers;
 
 public static class TaskHelpers
 {

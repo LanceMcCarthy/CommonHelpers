@@ -3,7 +3,7 @@ using CommonHelpers.Common;
 using CommonHelpers.Tests.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.CommonTests
+namespace CommonHelpers.Tests.Common
 {
     [TestClass]
     public class SingletonTests
