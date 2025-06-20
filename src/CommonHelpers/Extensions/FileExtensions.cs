@@ -18,6 +18,9 @@ public static class FileExtensions
 
     public static async Task<string> SaveToLocalFolderAsync(this byte[] dataBytes, string fileName)
     {
+        if (dataBytes == null) throw new ArgumentNullException(nameof(dataBytes));
+        if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("File name must not be empty.", nameof(fileName));
+
         return await Task.Run(() =>
         {
             // Use Combine so that the correct file path slashes are used
@@ -34,6 +37,8 @@ public static class FileExtensions
 
     public static async Task<byte[]> LoadFileBytesAsync(string filePath)
     {
+        if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentException("File path must not be empty.", nameof(filePath));
+
         return await Task.Run(() => File.ReadAllBytes(filePath));
     }
     
@@ -41,31 +46,29 @@ public static class FileExtensions
 
     public static async Task<string> SaveToLocalFolderAsync(this Stream dataStream, string fileName)
     {
+        if (dataStream == null) throw new ArgumentNullException(nameof(dataStream));
+        if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("File name must not be empty.", nameof(fileName));
+
         // Use Combine so that the correct file path slashes are used
         var filePath = Path.Combine(LocalFolder, fileName);
 
         if (File.Exists(filePath))
             File.Delete(filePath);
 
-        using (var fileStream = File.OpenWrite(filePath))
-        {
-            if (dataStream.CanSeek)
-                dataStream.Position = 0;
+        using var fileStream = File.OpenWrite(filePath);
+        if (dataStream.CanSeek)
+            dataStream.Position = 0;
 
-            await dataStream.CopyToAsync(fileStream);
+        await dataStream.CopyToAsync(fileStream);
 
-            return filePath;
-        }
+        return filePath;
     }
 
     public static async Task<Stream> LoadFileStreamAsync(string filePath)
     {
-        return await Task.Run(() =>
-        {
-            using (var fileStream = File.OpenRead(filePath))
-            {
-                return fileStream;
-            }
-        });
+        if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentException("File path must not be empty.", nameof(filePath));
+
+        // Do not dispose the stream before returning
+        return await Task.Run(() => (Stream)File.OpenRead(filePath));
     }
 }

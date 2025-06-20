@@ -8,13 +8,9 @@ namespace CommonHelpers.Tests.Services
     [TestClass]
     public class BingImageServiceTests : IDisposable
     {
-        private readonly BingImageService service;
+        private readonly BingImageService service = new();
 
-        public BingImageServiceTests()
-        {
-            // Arrange
-            service = new BingImageService();
-        }
+        // Arrange
 
         [TestMethod]
         public void GetTodaysBingImage()

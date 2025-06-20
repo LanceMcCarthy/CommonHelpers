@@ -2,117 +2,144 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using CommonHelpers.Common.Args;
 using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace CommonHelpers.Tests.Extensions
 {
     [TestClass]
     public class HttpClientExtensionsTests
     {
+        private const string TestUrl = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
+
         [TestMethod]
-        public void DownloadStringWithProgress()
+        public async Task DownloadStringWithProgress_Works()
         {
-            // Arrange
-            string result;
+            string result = "";
             var reporter = new Progress<DownloadProgressArgs>();
             float progress = 0;
-            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
 
-            // Act
-            reporter.ProgressChanged += (s, e) =>
-            {
-                progress = e.PercentComplete;
-            };
+            reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-            using (var client = new HttpClient())
-            {
-                result = client.DownloadStringWithProgressAsync(url, reporter).Result;
-            }
+            using var client = new HttpClient();
+            result = await client.DownloadStringWithProgressAsync(TestUrl, reporter);
 
-            // Assert
-            Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null");
+            IsFalse(string.IsNullOrEmpty(result), "String result was null");
+            IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
         }
 
         [TestMethod]
-        public void DownloadStringWithProgressAndCancellation()
+        public async Task DownloadStringWithProgressAndCancellation_Works()
         {
-            // Arrange
-            string result;
+            string result = null;
             var cts = new CancellationTokenSource();
             float progress = 0;
-            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
             var reporter = new Progress<DownloadProgressArgs>();
+            reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-            // Act
-            reporter.ProgressChanged += (s, e) =>
-            {
-                progress = e.PercentComplete;
-            };
+            using var client = new HttpClient();
+            result = await client.DownloadStringWithProgressAsync(TestUrl, reporter, cts.Token);
 
-            using (var client = new HttpClient())
-            {
-                result = client.DownloadStringWithProgressAsync(url, reporter, cts.Token).Result;
-            }
-
-            // Assert
-            Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
-            Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null.");
+            IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
+            IsFalse(string.IsNullOrEmpty(result), "String result was null.");
+            IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
         }
 
         [TestMethod]
-        public void DownloadStreamWithProgress()
+        public async Task DownloadStreamWithProgress_Works()
         {
-            // Arrange
             Stream result = null;
             float progress = 0;
-            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
             var reporter = new Progress<DownloadProgressArgs>();
+            reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-            // Act
-            reporter.ProgressChanged += (s, e) =>
-            {
-                progress = e.PercentComplete;
-            };
+            using var client = new HttpClient();
+            result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter);
 
-            using (var client = new HttpClient())
-            {
-                result = client.DownloadStreamWithProgressAsync(url, reporter).Result;
-            }
-
-            // Assert
-            Assert.IsTrue(result.Length > 0, "Stream is empty");
-
-            result.Dispose();
+            IsNotNull(result);
+            IsTrue(result.Length > 0, "Stream is empty");
+            IsTrue(progress > 0 && progress <= 100, "Progress was not reported correctly");
+            await result.DisposeAsync();
         }
 
         [TestMethod]
-        public void DownloadSteamWithProgressAndCancellation()
+        public async Task DownloadStreamWithProgressAndCancellation_Works()
         {
-            // Arrange
             Stream result = null;
             var cts = new CancellationTokenSource();
             float progress = 0;
-            var url = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
             var reporter = new Progress<DownloadProgressArgs>();
+            reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-            // Act
-            reporter.ProgressChanged += (s, e) =>
+            using var client = new HttpClient();
+            result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
+
+            IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
+            IsNotNull(result);
+            IsTrue(result.Length > 0, "Stream is empty");
+            IsTrue(progress > 0 && progress <= 100, "Progress was not reported correctly");
+            await result.DisposeAsync();
+        }
+
+        [TestMethod]
+        public async Task DownloadStringWithProgress_Cancellation_Throws()
+        {
+            var cts = new CancellationTokenSource();
+            await cts.CancelAsync();
+            var reporter = new Progress<DownloadProgressArgs>();
+            using var client = new HttpClient();
+            await ThrowsExceptionAsync<TaskCanceledException>(async () =>
             {
-                progress = e.PercentComplete;
-            };
+                await client.DownloadStringWithProgressAsync(TestUrl, reporter, cts.Token);
+            });
+        }
 
-            using (var client = new HttpClient())
+        [TestMethod]
+        public async Task DownloadStreamWithProgress_Cancellation_Throws()
+        {
+            var cts = new CancellationTokenSource();
+            await cts.CancelAsync();
+            var reporter = new Progress<DownloadProgressArgs>();
+            using var client = new HttpClient();
+            await ThrowsExceptionAsync<TaskCanceledException>(async () =>
             {
-                result = client.DownloadStreamWithProgressAsync(url, reporter, cts.Token).Result;
-            }
+                await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
+            });
+        }
 
-            // Assert
-            Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
-            Assert.IsTrue(result.Length > 0, "Stream is empty");
+        [TestMethod]
+        public async Task DownloadStringWithProgress_NullClient_Throws()
+        {
+            HttpClient client = null;
+            var reporter = new Progress<DownloadProgressArgs>();
+            await ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            {
+                await client.DownloadStringWithProgressAsync(TestUrl, reporter);
+            });
+        }
 
-            result.Dispose();
+        [TestMethod]
+        public async Task DownloadStringWithProgress_NullUrl_Throws()
+        {
+            using var client = new HttpClient();
+            var reporter = new Progress<DownloadProgressArgs>();
+            await ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            {
+                await client.DownloadStringWithProgressAsync(null, reporter);
+            });
+        }
+
+        [TestMethod]
+        public async Task DownloadStringWithProgress_NullReporter_Throws()
+        {
+            using var client = new HttpClient();
+            await ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            {
+                await client.DownloadStringWithProgressAsync(TestUrl, null);
+            });
         }
     }
 }

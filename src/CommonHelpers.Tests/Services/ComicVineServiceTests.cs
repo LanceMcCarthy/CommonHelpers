@@ -10,12 +10,7 @@ namespace CommonHelpers.Tests.Services
     [TestClass]
     public class ComicVineServiceTests : IDisposable
     {
-        private readonly ComicVineApiService service;
-
-        public ComicVineServiceTests()
-        {
-            service = new ComicVineApiService(StaticValues.ComicVineApiKey, StaticValues.UniqueUserAgentString);
-        }
+        private readonly ComicVineApiService service = new(StaticValues.ComicVineApiKey, StaticValues.UniqueUserAgentString);
 
         [TestMethod]
         public void GetCharacters()

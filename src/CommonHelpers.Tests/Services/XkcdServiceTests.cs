@@ -7,13 +7,9 @@ namespace CommonHelpers.Tests.Services
     [TestClass]
     public class XkcdServiceTests : IDisposable
     {
-        private readonly XkcdApiService service;
+        private readonly XkcdApiService service = new();
 
-        public XkcdServiceTests()
-        {
-            // Arrange
-            service = new XkcdApiService();
-        }
+        // Arrange
 
         [TestMethod]
         public void GetTodaysComic()
