@@ -1,10 +1,11 @@
-﻿using System;
+﻿using CommonHelpers.Common.Args;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using CommonHelpers.Common.Args;
 
 namespace CommonHelpers.Extensions;
 
@@ -75,9 +76,9 @@ public static class HttpClientExtensions
     /// </summary>
     /// <param name="client">HttpClient instance</param>
     /// <param name="url">Url of where to download the stream from</param>
-    /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+    /// <param name="progressReporter">Args for reporting progress of the download operation</param>
     /// <returns>Stream content of the GET request result</returns>
-    public static async Task<Stream> DownloadStreamWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter)
+    public static async Task<Stream> DownloadStreamWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progressReporter)
     {
         if (client == null)
             throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
@@ -85,8 +86,8 @@ public static class HttpClientExtensions
         if (string.IsNullOrEmpty(url))
             throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
 
-        if (progessReporter == null)
-            throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+        if (progressReporter == null)
+            throw new ArgumentNullException(nameof(progressReporter), "ProgressReporter was null");
 
         client.DefaultRequestHeaders.ExpectContinue = false;
 
@@ -110,7 +111,7 @@ public static class HttpClientExtensions
 
             receivedBytes += bytesRead;
 
-            progessReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
+            progressReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
 
             Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
         }
@@ -125,10 +126,10 @@ public static class HttpClientExtensions
     /// </summary>
     /// <param name="client">HttpClient instance</param>
     /// <param name="url">Url of where to download the stream from</param>
-    /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+    /// <param name="progressReporter">Args for reporting progress of the download operation</param>
     /// <param name="token">Cancellation Token</param>
     /// <returns>Stream content of the GET request result</returns>
-    public static async Task<Stream> DownloadStreamWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter, CancellationToken token)
+    public static async Task<Stream> DownloadStreamWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progressReporter, CancellationToken token)
     {
         if (client == null)
             throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
@@ -136,8 +137,8 @@ public static class HttpClientExtensions
         if (string.IsNullOrEmpty(url))
             throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
 
-        if (progessReporter == null)
-            throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+        if (progressReporter == null)
+            throw new ArgumentNullException(nameof(progressReporter), "ProgressReporter was null");
             
         client.DefaultRequestHeaders.ExpectContinue = false;
 
@@ -161,7 +162,7 @@ public static class HttpClientExtensions
 
             receivedBytes += bytesRead;
 
-            progessReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
+            progressReporter.Report(new DownloadProgressArgs(receivedBytes, totalBytes));
 
             Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
         }
@@ -177,9 +178,9 @@ public static class HttpClientExtensions
     /// <param name="imageFilePath">Url of where to download the stream from</param>
     /// <param name="apiUrl">Endpoint URL</param>
     /// <param name="parameterName">POST request parameter name</param>
-    /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+    /// <param name="progressReporter">Args for reporting progress of the download operation</param>
     /// <returns>String content of the GET request result</returns>
-    public static async Task<string> SendImageDataWithDownloadProgressAsync(this HttpClient client, string imageFilePath, string apiUrl, string parameterName, IProgress<DownloadProgressArgs> progessReporter)
+    public static async Task<string> SendImageDataWithDownloadProgressAsync(this HttpClient client, string imageFilePath, string apiUrl, string parameterName, IProgress<DownloadProgressArgs> progressReporter)
     {
         if (client == null)
             throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
@@ -193,8 +194,8 @@ public static class HttpClientExtensions
         if (string.IsNullOrEmpty(parameterName))
             throw new ArgumentNullException(nameof(parameterName), "You must set a parameter name for the image data");
 
-        if (progessReporter == null)
-            throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+        if (progressReporter == null)
+            throw new ArgumentNullException(nameof(progressReporter), "ProgressReporter was null");
 
         client.DefaultRequestHeaders.ExpectContinue = false;
 
@@ -227,7 +228,7 @@ public static class HttpClientExtensions
             receivedBytes += bytesRead;
 
             var args = new DownloadProgressArgs(receivedBytes, totalBytes);
-            progessReporter.Report(args);
+            progressReporter.Report(args);
 
             Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
         }
@@ -244,10 +245,10 @@ public static class HttpClientExtensions
     /// <param name="imageFilePath">Url of where to download the stream from</param>
     /// <param name="apiUrl">Endpoint URL</param>
     /// <param name="parameterName">POST request parameter name</param>
-    /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+    /// <param name="progressReporter">Args for reporting progress of the download operation</param>
     /// <param name="token">Cancellation token</param>
     /// <returns>String content of the GET request result</returns>
-    public static async Task<string> SendImageDataWithDownloadProgressAsync(this HttpClient client, string imageFilePath, string apiUrl, string parameterName, IProgress<DownloadProgressArgs> progessReporter, CancellationToken token)
+    public static async Task<string> SendImageDataWithDownloadProgressAsync(this HttpClient client, string imageFilePath, string apiUrl, string parameterName, IProgress<DownloadProgressArgs> progressReporter, CancellationToken token)
     {
         if (client == null)
             throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
@@ -261,8 +262,8 @@ public static class HttpClientExtensions
         if (string.IsNullOrEmpty(parameterName))
             throw new ArgumentNullException(nameof(parameterName), "You must set a parameter name for the image data");
 
-        if (progessReporter == null)
-            throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+        if (progressReporter == null)
+            throw new ArgumentNullException(nameof(progressReporter), "ProgressReporter was null");
             
         client.DefaultRequestHeaders.ExpectContinue = false;
 
@@ -292,7 +293,7 @@ public static class HttpClientExtensions
             receivedBytes += bytesRead;
 
             var args = new DownloadProgressArgs(receivedBytes, totalBytes);
-            progessReporter.Report(args);
+            progressReporter.Report(args);
 
             Debug.WriteLine($"Progress: {receivedBytes} of {totalBytes} bytes read");
         }
@@ -311,9 +312,9 @@ public static class HttpClientExtensions
     /// </summary>
     /// <param name="client">HttpClient instance</param>
     /// <param name="url">Url of where to download the stream from</param>
-    /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+    /// <param name="progressReporter">Args for reporting progress of the download operation</param>
     /// <returns>String content of the GET request result</returns>
-    public static async Task<string> DownloadStringWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter)
+    public static async Task<string> DownloadStringWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progressReporter)
     {
         if (client == null)
             throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
@@ -321,10 +322,10 @@ public static class HttpClientExtensions
         if (string.IsNullOrEmpty(url))
             throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
 
-        if (progessReporter == null)
-            throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+        if (progressReporter == null)
+            throw new ArgumentNullException(nameof(progressReporter), "ProgressReporter was null");
 
-        using var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter);
+        using var stream = await DownloadStreamWithProgressAsync(client, url, progressReporter);
 
         if (stream == null)
             return null;
@@ -338,10 +339,10 @@ public static class HttpClientExtensions
     /// </summary>
     /// <param name="client">HttpClient instance</param>
     /// <param name="url">Url of where to download the stream from</param>
-    /// <param name="progessReporter">Args for reporting progress of the download operation</param>
+    /// <param name="progressReporter">Args for reporting progress of the download operation</param>
     /// <param name="token">Cancellation Token</param>
     /// <returns>String content of the GET request result</returns>
-    public static async Task<string> DownloadStringWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progessReporter, CancellationToken token)
+    public static async Task<string> DownloadStringWithProgressAsync(this HttpClient client, string url, IProgress<DownloadProgressArgs> progressReporter, CancellationToken token)
     {
         if (client == null)
             throw new ArgumentNullException(nameof(client), "The HttpClient was null. You must use a valid HttpClient instance to use this extension method.");
@@ -349,15 +350,48 @@ public static class HttpClientExtensions
         if (string.IsNullOrEmpty(url))
             throw new ArgumentNullException(nameof(url), "You must set a URL for the API endpoint");
 
-        if (progessReporter == null)
-            throw new ArgumentNullException(nameof(progessReporter), "ProgressReporter was null");
+        if (progressReporter == null)
+            throw new ArgumentNullException(nameof(progressReporter), "ProgressReporter was null");
 
-        using var stream = await DownloadStreamWithProgressAsync(client, url, progessReporter, token);
+        using var stream = await DownloadStreamWithProgressAsync(client, url, progressReporter, token);
 
         if (stream == null)
             return null;
 
         var stringContent = new StreamReader(stream);
         return await stringContent.ReadToEndAsync();
+    }
+
+    /// <summary>
+    /// Applies a retry delay based on the values provided in the <see cref="RetryConditionHeaderValue"/>.  
+    /// </summary>
+    /// <remarks>This method calculates the appropriate delay using either the <see
+    /// cref="RetryConditionHeaderValue.Delta"/> or the <see cref="RetryConditionHeaderValue.Date"/> property, if
+    /// available. If neither is specified, a default delay of 2 seconds is applied. The method then asynchronously
+    /// waits for the calculated delay.</remarks>
+    /// <param name="retryAfter">The <see cref="RetryConditionHeaderValue"/> containing the retry condition information, such as the recommended
+    /// delay or retry date.</param>
+    /// <returns>A task that represents the asynchronous operation of applying the retry delay.</returns>
+    public static async Task ApplyRetryDelayAsync(this RetryConditionHeaderValue retryAfter)
+    {
+        var retryDelay = TimeSpan.FromSeconds(2).Milliseconds;
+
+        // Use the value from the header
+        if (retryAfter.Delta.HasValue)
+        {
+            retryDelay = retryAfter.Delta.Value.Milliseconds;
+        }
+        else if (retryAfter.Date.HasValue)
+        {
+            // backup option, try to calculate our own delta
+            var delta = retryAfter.Date.Value.ToUniversalTime() - DateTimeOffset.UtcNow;
+            retryDelay = delta.Milliseconds;
+        }
+
+        // Ensure non-negative delay
+        retryDelay = Math.Max(retryDelay, 2000);
+
+        // Wait the recommended delay
+        await Task.Delay(retryDelay);
     }
 }
