@@ -6,15 +6,18 @@ namespace CommonHelpers.Extensions;
 
 public static class StringExtensions
 {
+    public static string TimeOfDaySalutation(DateTime dateTime)
+    {
+        return
+            dateTime.Hour < 12 ? "Good morning" :
+            dateTime.Hour < 18 ? "Good afternoon" :
+            dateTime.Hour < 21 ? "Good evening" :
+            /* otherwise */ "Good night";
+    }
+
     public static string TimeOfDaySalutation()
     {
-        var now = DateTime.Now;
-
-        return
-            now.Hour < 12 ? "Good morning" :
-            now.Hour < 18 ? "Good afternoon" :
-            now.Hour < 21 ? "Good evening" :
-            /* otherwise */ "Good night";
+        return TimeOfDaySalutation(DateTime.Now);
     }
 
     /// <summary>
@@ -25,6 +28,8 @@ public static class StringExtensions
     /// <returns></returns>
     public static string Hash(this string password, HashAlgorithm sha = null)
     {
+        if (password == null)
+            throw new ArgumentNullException(nameof(password));
         sha ??= new SHA1Managed();
 
         var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(password));

@@ -141,5 +141,52 @@ namespace CommonHelpers.Tests.Extensions
                 await client.DownloadStringWithProgressAsync(TestUrl, null);
             });
         }
+
+        [TestMethod]
+        public async Task ApplyRetryDelayAsync_UsesDelta()
+        {
+            // Arrange: Delta = 500ms
+            var delta = TimeSpan.FromMilliseconds(500);
+            var header = new System.Net.Http.Headers.RetryConditionHeaderValue(delta);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            // Act
+            await header.ApplyRetryDelayAsync();
+            sw.Stop();
+
+            // Assert: Should be at least 400ms (allowing for timing inaccuracy)
+            IsTrue(sw.ElapsedMilliseconds >= 400, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
+        }
+
+        [TestMethod]
+        public async Task ApplyRetryDelayAsync_UsesDate()
+        {
+            // Arrange: Date = 600ms in the future
+            var future = DateTimeOffset.UtcNow.AddMilliseconds(600);
+            var header = new System.Net.Http.Headers.RetryConditionHeaderValue(future);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            // Act
+            await header.ApplyRetryDelayAsync();
+            sw.Stop();
+
+            // Assert: Should be at least 500ms (allowing for timing inaccuracy)
+            IsTrue(sw.ElapsedMilliseconds >= 500, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
+        }
+
+        [TestMethod]
+        public async Task ApplyRetryDelayAsync_DefaultsTo2Seconds()
+        {
+            // Arrange: Neither Delta nor Date set
+            var header = new System.Net.Http.Headers.RetryConditionHeaderValue(DateTimeOffset.MinValue); // Use a valid value, but not in the future
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            // Act
+            await header.ApplyRetryDelayAsync();
+            sw.Stop();
+
+            // Assert: Should be at least 1500ms (allowing for timing inaccuracy)
+            IsTrue(sw.ElapsedMilliseconds >= 1500, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
+        }
     }
 }
