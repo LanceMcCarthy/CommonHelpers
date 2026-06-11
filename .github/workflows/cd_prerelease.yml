@@ -158,46 +158,13 @@ jobs:
         $ver = $buildDay + "." + $runNumber + ".0"
         echo "DATED_VERSION_NUM=$ver" >> $env:GITHUB_OUTPUT
 
-    - name: Create GitHub Prerelease
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v3.0.0
       with:
-        tag_name: "${{steps.version-creator.outputs.DATED_VERSION_NUM}}-rc"
-        release_name: "CommonHelpers ${{steps.version-creator.outputs.DATED_VERSION_NUM}}-rc"
+        tag_name: "v${{steps.get-version.outputs.package-version}}"
+        name: "CommonHelpers Preview ${{steps.get-version.outputs.package-version}}"
         draft: false
         prerelease: true
-
-    - name: Attach CommonHelpers prerelease asset
-      id: upload-sideload-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: ${{steps.get-package-path.outputs.nuget-package-path}}
-        asset_name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
-        asset_content_type: application/zip
-
-    - name: Attach CommonHelpers.Maui Prerelease Asset
-      id: upload-maui-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
-        asset_name: "CommonHelpers.Maui.${{steps.get-version-maui.outputs.package-version}}.nupkg"
-        asset_content_type: application/zip
-
-    # - name: Create GitHub Release
-    #   uses: softprops/action-gh-release@v3.0.0
-    #   with:
-    #     tag_name: "v${{steps.get-version.outputs.package-version}}"
-    #     name: "CommonHelpers Preview ${{steps.get-version.outputs.package-version}}"
-    #     draft: false
-    #     prerelease: true
-    #     files: |
-    #       ${{steps.get-package-path.outputs.nuget-package-path}}
-    #       ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
+        files: |
+          ${{steps.get-package-path.outputs.nuget-package-path}}
+          ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}

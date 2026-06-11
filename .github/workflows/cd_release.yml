@@ -115,32 +115,10 @@ jobs:
         echo "DATED_VERSION_NUM=$ver" >> $env:GITHUB_OUTPUT
 
     - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      uses: softprops/action-gh-release@v3.0.0
       with:
-        tag_name: "${{steps.version-creator.outputs.DATED_VERSION_NUM}}"
-        release_name: "CommonHelpers ${{steps.version-creator.outputs.DATED_VERSION_NUM}}"
+        tag_name: "v${{steps.get-version.outputs.package-version}}"
+        name: "CommonHelpers v${{steps.get-version.outputs.package-version}}"
         draft: false
         prerelease: false
-
-    - name: Attach CommonHelpers Release Asset
-      id: upload-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: ${{steps.get-package-path.outputs.nuget-package-path}}
-        asset_name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
-        asset_content_type: application/zip
-
-    # - name: Create GitHub Release
-    #   uses: softprops/action-gh-release@v3.0.0
-    #   with:
-    #     tag_name: "v${{steps.get-version.outputs.package-version}}"
-    #     name: "CommonHelpers v${{steps.get-version.outputs.package-version}}"
-    #     draft: false
-    #     prerelease: false
-    #     files: ${{steps.get-package-path.outputs.nuget-package-path}}
+        files: ${{steps.get-package-path.outputs.nuget-package-path}}
