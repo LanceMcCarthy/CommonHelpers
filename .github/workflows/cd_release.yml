@@ -6,23 +6,45 @@ name: Release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write  # Needed to create GitHub Releases
+  id-token: write  # Needed for Azure auth (OIDC)
+
 env:
   DOTNET_SDK_VERSION: '10.0.x'
+  PROJ_PATH: 'src/CommonHelpers/CommonHelpers.csproj'
+  PROJ_PATH_MAUI: 'src/CommonHelpers.Maui/CommonHelpers.Maui.csproj'
+  SERVICE_PRINCIPAL_CLIENT_ID: "32daa13b-f4bb-4809-8ef6-58cb39051acd"
+  SERVICE_PRINCIPAL_TENANT_ID: "bd47e796-3473-4b8a-9101-1f4c0c7af31a"
+  SERVICE_PRINCIPAL_SUBSCRIPTION_ID: "48ab4839-62af-4ab3-afe6-043ea4d7c137"
+  SIGNING_ACCT_NAME: "PrimaryCodeSign"
+  SIGNING_ACCT_CERT_PROFILE: "lancemccarthylivepublic"
+  SIGNING_ACCT_ENDPOINT_URL: "https://eus.codesigning.azure.net/"
 
 jobs:
   publish_commonhelpers:
     runs-on: windows-latest
     name: 'Build and Publish Release'
     steps:
+      # --------------- Setup --------------- #
+
     - name: Harden Runner
       uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
       with:
         egress-policy: audit
 
+    - name: Azure login using OIDC via GitHub
+      uses: azure/login@v3
+      id: azlogin
+      with:
+        client-id: ${{vars.SERVICE_PRINCIPAL_CLIENT_ID}}
+        tenant-id: ${{vars.SERVICE_PRINCIPAL_TENANT_ID}}
+        subscription-id: ${{vars.SERVICE_PRINCIPAL_SUBSCRIPTION_ID}}
+
     - name: Checkout
       uses: actions/checkout@v6
 
-    - name: Install .NET Core
+    - name: Install .NET
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
@@ -30,8 +52,7 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
-
-    # ****** CommonHelpers Tasks ***** #
+    # --------------- Work --------------- #
 
     - name: Restore & Build CommonHelpers
       working-directory: src/CommonHelpers
@@ -57,9 +78,6 @@ jobs:
         Write-Output "Setting output variable 'nuget-package-path' to $match"
         echo "nuget-package-path=$match" >> $env:GITHUB_OUTPUT
 
-
-    # CommonHelpers.Tests project
-
     - name: Restore & Build CommonHelpers.Tests
       working-directory: src/CommonHelpers.Tests
       run: |
@@ -70,39 +88,35 @@ jobs:
       working-directory: src/CommonHelpers.Tests
       run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
+    - name: Sign MSIX bundle
+      uses: azure/trusted-signing-action@v2.0.0
+      with:
+        endpoint: ${{vars.SIGNING_ACCT_ENDPOINT_URL}}
+        signing-account-name: ${{vars.SIGNING_ACCT_NAME}}
+        certificate-profile-name: ${{vars.SIGNING_ACCT_CERT_PROFILE}}
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+        file-digest: SHA256
+        files: ${{steps.get-package-path.outputs.nuget-package-path}}
+        exclude-azure-cli-credential: false
+        exclude-environment-credential: true
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true
 
-    # ***** NuGet Package Signing ***** #
-
-    - name: Decode Base64 and save PFX file
-      id: download-cert
-      run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{secrets.LANCELOTSOFTWARECERT_BASE64}}")
-        $currentDirectory = Get-Location
-        $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        Write-Output "Setting output variable 'certificate-path'..."
-        echo "certificate-path=$certificatePath" >> $env:GITHUB_OUTPUT
-
-    - name: Sign CommonHelpers NuGet package
-      run: dotnet nuget sign ${{steps.get-package-path.outputs.nuget-package-path}} --certificate-path ${{steps.download-cert.outputs.certificate-path}} --certificate-password "${{secrets.LANCELOTSOFTWARECERT_PASSWORD}}" --timestamper "http://timestamp.digicert.com"
-
-
-    # ***** NuGet.org Release ***** #
-    
     - name: Publish CommonHelpers to NuGet.org
       run: dotnet nuget push ${{steps.get-package-path.outputs.nuget-package-path}} --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
-
-
-    # ***** Upload Artifacts ***** #
 
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
         path: ${{steps.get-package-path.outputs.nuget-package-path}}
-
-
-    # ***** GitHub Release ***** #
 
     - name: Generate version number with date and workflow Run Number
       id: version-creator

@@ -10,23 +10,38 @@ on:
       - 'src/CommonHelpers.Tests/**/*'
       - '.github/workflows/ci_main.yml'
 
+permissions:
+  contents: read
+  id-token: write  # Needed for Azure auth (OIDC)
+
 env:
   DOTNET_SDK_VERSION: '10.0.x'
+  PROJ_PATH: 'src/CommonHelpers/CommonHelpers.csproj'
 
 jobs:
   build:
     runs-on: windows-latest
     name: 'CI - Main'
     steps:
+      # --------------- Setup --------------- #
+
     - name: Harden Runner
       uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
       with:
         egress-policy: audit
 
+    - name: Azure login using OIDC via GitHub
+      uses: azure/login@v3
+      id: azlogin
+      with:
+        client-id: ${{vars.SERVICE_PRINCIPAL_CLIENT_ID}}
+        tenant-id: ${{vars.SERVICE_PRINCIPAL_TENANT_ID}}
+        subscription-id: ${{vars.SERVICE_PRINCIPAL_SUBSCRIPTION_ID}}
+
     - name: Checkout
       uses: actions/checkout@v6
 
-    - name: Install .NET Core
+    - name: Install .NET
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
@@ -34,16 +49,18 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
+    # --------------- Work --------------- #
+
     - name: Add Alpha (-alpha) suffix to Version Number
       run : |
-        [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
+        [xml]$projXml = get-content "${{env.PROJ_PATH}}"
         Write-Output "Before: " $projXml.Project.PropertyGroup.Version
         $currentVer = $projXml.Project.PropertyGroup.Version
         $suffix = "-alpha"
         $newVer = $currentVer + $suffix
         $projXml.Project.PropertyGroup.Version = $newVer
         Write-Output "After: " $projXml.Project.PropertyGroup.Version
-        $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
+        $projXml.save("${{env.PROJ_PATH}}")
 
     - name: Restore & Build CommonHelpers
       working-directory: src/CommonHelpers
@@ -75,23 +92,32 @@ jobs:
       working-directory: src/CommonHelpers.Tests
       run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
-    - name: Decode Base64 and save PFX file
-      id: download-cert
-      run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{secrets.LANCELOTSOFTWARECERT_BASE64}}")
-        $currentDirectory = Get-Location
-        $certificatePath = Join-Path -Path $currentDirectory -ChildPath "LancelotSoftware.pfx"
-        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
-        echo "certificate-path=$certificatePath" >> $env:GITHUB_OUTPUT
-
-    - name: Sign CommonHelpers NuGet package
-      run: dotnet nuget sign ${{steps.get-package-path.outputs.nuget-package-path}} --certificate-path ${{steps.download-cert.outputs.certificate-path}} --certificate-password "${{secrets.LANCELOTSOFTWARECERT_PASSWORD}}" --timestamper "http://timestamp.digicert.com"
+    - name: Sign MSIX bundle
+      uses: azure/trusted-signing-action@v2.0.0
+      with:
+        endpoint: ${{vars.SIGNING_ACCT_ENDPOINT_URL}}
+        signing-account-name: ${{vars.SIGNING_ACCT_NAME}}
+        certificate-profile-name: ${{vars.SIGNING_ACCT_CERT_PROFILE}}
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+        file-digest: SHA256
+        files: ${{steps.get-package-path.outputs.nuget-package-path}}
+        exclude-azure-cli-credential: false
+        exclude-environment-credential: true
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true
 
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version
       with:
-        proj-path: src/CommonHelpers/CommonHelpers.csproj
+        proj-path: ${{env.PROJ_PATH}}
 
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v7
