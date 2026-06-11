@@ -25,8 +25,6 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v6
-      with:
-        fetch-depth: 0
 
     - name: Install .NET Core
       uses: actions/setup-dotnet@v5
@@ -35,9 +33,6 @@ jobs:
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
-
-
-    # ****** CommonHelpers Tasks ***** #
 
     - name: Add Alpha (-alpha) suffix to Version Number
       run : |
@@ -59,15 +54,6 @@ jobs:
     - name: Add CommonHelpers Bin to NuGet Package Sources
       run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
 
-    - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v3
-      id: get-version
-      with:
-        proj-path: src/CommonHelpers/CommonHelpers.csproj
-
-    - name: Verify version
-      run: echo version "${{steps.get-version.outputs.package-version}}"
-
     - name: Get Package File Path
       id: get-package-path
       run : |
@@ -79,9 +65,6 @@ jobs:
     - name: Verify Package Path
       run: Write-Output Package path is "${{steps.get-package-path.outputs.nuget-package-path}}"
 
-
-    # ****** CommonHelpers.Tests Tasks ***** #
-
     - name: Restore & Build CommonHelpers.Tests
       working-directory: src/CommonHelpers.Tests
       run: |
@@ -91,9 +74,6 @@ jobs:
     - name: Run Tests
       working-directory: src/CommonHelpers.Tests
       run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-
-
-    # ***** Package Signing ***** #
 
     - name: Decode Base64 and save PFX file
       id: download-cert
@@ -107,8 +87,11 @@ jobs:
     - name: Sign CommonHelpers NuGet package
       run: dotnet nuget sign ${{steps.get-package-path.outputs.nuget-package-path}} --certificate-path ${{steps.download-cert.outputs.certificate-path}} --certificate-password "${{secrets.LANCELOTSOFTWARECERT_PASSWORD}}" --timestamper "http://timestamp.digicert.com"
 
-
-      # ***** Upload Artifacts ***** #
+    - name: Get Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v3
+      id: get-version
+      with:
+        proj-path: src/CommonHelpers/CommonHelpers.csproj
 
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v7
