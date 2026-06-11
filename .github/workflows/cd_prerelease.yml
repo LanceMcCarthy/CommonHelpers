@@ -7,10 +7,6 @@ name: Prerelease
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write  # Needed to create GitHub Releases
-  id-token: write  # Needed for Azure auth (OIDC)
-
 env:
   DOTNET_SDK_VERSION: '10.0.x'
   PROJ_PATH: 'src/CommonHelpers/CommonHelpers.csproj'
@@ -19,22 +15,15 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    name: 'Build and Publish Prerelease'
+    name: 'Build Prerelease'
+    outputs:
+      app_version: ${{steps.get-version.outputs.package-version}}
+      app_version_maui: ${{steps.get-version-maui.outputs.package-version}}
     steps:
-      # --------------- Setup --------------- #
-
     - name: Harden Runner
       uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
       with:
         egress-policy: audit
-
-    - name: Azure login using OIDC via GitHub
-      uses: azure/login@v3
-      id: azlogin
-      with:
-        client-id: ${{vars.SERVICE_PRINCIPAL_CLIENT_ID}}
-        tenant-id: ${{vars.SERVICE_PRINCIPAL_TENANT_ID}}
-        subscription-id: ${{vars.SERVICE_PRINCIPAL_SUBSCRIPTION_ID}}
 
     - name: Checkout
       uses: actions/checkout@v6
@@ -44,9 +33,6 @@ jobs:
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
-    - name: Install .NET Sign CLI tool
-      run: dotnet tool install --tool-path . --prerelease sign
-
     - name: Install .NET Workload (maui)
       shell: pwsh
       run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
@@ -54,31 +40,53 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
-    # --------------- Work --------------- #
-
     - name: Add Release Candidate (-rc) suffix to Version Number
       run : |
-        [xml]$projXml = get-content "src\CommonHelpers\CommonHelpers.csproj"
+        [xml]$projXml = get-content ${{env.PROJ_PATH}}
         $currentVer = $projXml.Project.PropertyGroup.Version
         $suffix = "-rc"
         $newVer = $currentVer + $suffix
         $projXml.Project.PropertyGroup.Version = $newVer
-        $projXml.save("src\CommonHelpers\CommonHelpers.csproj")
+        $projXml.save(${{env.PROJ_PATH}})
 
-    - name: Restore & Build CommonHelpers
-      working-directory: src/CommonHelpers
-      run: |
-        dotnet restore --runtime any --ignore-failed-sources
-        dotnet build --configuration Release
-
-    - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+    - name: Add Release Candidate (-rc) suffix to Maui Version Number
+      run : |
+        [xml]$projXml = get-content ${{env.PROJ_PATH_MAUI}}
+        $currentVer = $projXml.Project.PropertyGroup.Version
+        $suffix = "-rc"
+        $newVer = $currentVer + $suffix
+        $projXml.Project.PropertyGroup.Version = $newVer
+        $projXml.save(${{env.PROJ_PATH_MAUI}})
 
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v2
       id: get-version
       with:
-        proj-path: src/CommonHelpers/CommonHelpers.csproj
+        proj-path: ${{env.PROJ_PATH}}
+
+    - name: Get Maui Version From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v2
+      id: get-version-maui
+      with:
+        proj-path: ${{env.PROJ_PATH_MAUI}}
+
+    - name: Restore & Build CommonHelpers
+      working-directory: src/CommonHelpers
+      run: |
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build -c Release --no-restore
+
+    - name: Add CommonHelpers Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+
+    - name: Restore & Build CommonHelpers.Maui
+      working-directory: src/CommonHelpers.Maui
+      run: |
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build -c Release --no-restore
+
+    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
 
     - name: Get Package File Path
       id: get-package-path
@@ -88,21 +96,6 @@ jobs:
         $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
         Write-Output "Setting output variable 'nuget-package-path' to $match"
         echo "nuget-package-path=$match" >> $env:GITHUB_OUTPUT
-
-    - name: Restore & Build CommonHelpers.Maui
-      working-directory: src/CommonHelpers.Maui
-      run: |
-        dotnet restore --runtime any --ignore-failed-sources
-        dotnet build --configuration Release
-
-    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
-
-    - name: Get Maui Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
-      id: get-version-maui
-      with:
-        proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
 
     - name: Get Maui Package File Path
       id: get-package-path-maui
@@ -123,29 +116,6 @@ jobs:
       working-directory: src/CommonHelpers.Tests
       run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
-    - name: Sign MSIX bundle
-      uses: azure/trusted-signing-action@v2.0.0
-      with:
-        endpoint: ${{vars.SIGNING_ACCT_ENDPOINT_URL}}
-        signing-account-name: ${{vars.SIGNING_ACCT_NAME}}
-        certificate-profile-name: ${{vars.SIGNING_ACCT_CERT_PROFILE}}
-        timestamp-rfc3161: http://timestamp.acs.microsoft.com
-        timestamp-digest: SHA256
-        file-digest: SHA256
-        files: |
-          ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
-          ${{steps.get-package-path.outputs.nuget-package-path}}
-        exclude-azure-cli-credential: false
-        exclude-environment-credential: true
-        exclude-workload-identity-credential: true
-        exclude-managed-identity-credential: true
-        exclude-shared-token-cache-credential: true
-        exclude-visual-studio-credential: true
-        exclude-visual-studio-code-credential: true
-        exclude-azure-powershell-credential: true
-        exclude-azure-developer-cli-credential: true
-        exclude-interactive-browser-credential: true
-
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v7
       with:
@@ -158,21 +128,105 @@ jobs:
         name: "CommonHelpers.Maui.${{steps.get-version-maui.outputs.package-version}}.nupkg"
         path: ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
 
-    - name: Generate version number with date and workflow Run Number
-      id: version-creator
+  codesign:
+    name: Sign NuGet packages
+    needs: [build]
+    runs-on: [self-hosted, x64, digicert-enabled]
+    env:
+      NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+      NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Clean bundle workspace
+      run: Remove-Item -Recurse -Force "${{github.workspace}}\**\*.nupkg" -ErrorAction SilentlyContinue
+
+    - name: Download nupkg artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+        path: ${{env.NUPKG_PATH}}
+
+    - name: Download nupkg artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        path: ${{env.NUPKG_PATH_MAUI}}
+
+    - name: Sign NuGet packages
       run: |
-        $buildDay = Get-Date -Format "yyyy.Mdd"
-        $runNumber = "$env:GITHUB_RUN_NUMBER"
-        $ver = $buildDay + "." + $runNumber + ".0"
-        echo "DATED_VERSION_NUM=$ver" >> $env:GITHUB_OUTPUT
+        $sacTools = "C:\Program Files\SafeNet\Authentication\SAC\x64\SACTools.exe"
+        & $sacTools /Token /LogOn /Password "${{secrets.DIGICERT_HARDWARE_TOKEN_PASSWORD}}"
+        $thumbprint = "8BC202959D2DCE3EEB3A489D8348B5C9B6B64A97"
+        $sdkRoot = "C:\Program Files (x86)\Windows Kits\10\bin"
+        $signTool = Get-ChildItem -Path $sdkRoot -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
+          Where-Object { $_.FullName -match '\\x64\\signtool\.exe$' } |
+          Sort-Object FullName -Descending | Select-Object -First 1
+        if (-not $signTool) { throw "signtool.exe not found under $sdkRoot" }
+        Write-Host "Using signtool: $($signTool.FullName)"
+        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 ${{env.NUPKG_PATH}}
+        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 ${{env.NUPKG_PATH_MAUI}}
+        if ($LASTEXITCODE -ne 0) { throw "signtool sign failed with exit code $LASTEXITCODE" }
+
+    - name: Upload signed NuGet package
+      uses: actions/upload-artifact@v7
+      with:
+        name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+        path: ${{env.NUPKG_PATH}}
+        if-no-files-found: error
+        retention-days: 30
+        overwrite: true
+
+    - name: Upload signed NuGet package
+      uses: actions/upload-artifact@v7
+      with:
+        name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        path: ${{env.NUPKG_PATH_MAUI}}
+        if-no-files-found: error
+        retention-days: 30
+        overwrite: true
+
+  release:
+    name: Push Releases
+    needs: [build, codesign]
+    runs-on: windows-latest
+    env:
+      NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+      NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Download nupkg artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+        path: ${{env.NUPKG_PATH}}
+
+    - name: Download nupkg artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        path: ${{env.NUPKG_PATH_MAUI}}
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3.0.0
       with:
-        tag_name: "v${{steps.get-version.outputs.package-version}}"
-        name: "CommonHelpers Preview ${{steps.get-version.outputs.package-version}}"
+        tag_name: "v${{needs.build.outputs.app_version}}"
+        name: "CommonHelpers Preview v${{needs.build.outputs.app_version}}"
         draft: false
         prerelease: true
         files: |
-          ${{steps.get-package-path.outputs.nuget-package-path}}
-          ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
+          ${{env.NUPKG_PATH}}
+          ${{env.NUPKG_PATH_MAUI}}

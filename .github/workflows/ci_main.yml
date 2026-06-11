@@ -10,10 +10,6 @@ on:
       - 'src/CommonHelpers.Tests/**/*'
       - '.github/workflows/ci_main.yml'
 
-permissions:
-  contents: read
-  id-token: write  # Needed for Azure auth (OIDC)
-
 env:
   DOTNET_SDK_VERSION: '10.0.x'
   PROJ_PATH: 'src/CommonHelpers/CommonHelpers.csproj'
@@ -25,8 +21,6 @@ jobs:
     outputs:
       app_version: ${{steps.get-version.outputs.package-version}}
     steps:
-      # --------------- Setup --------------- #
-
     - name: Harden Runner
       uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
       with:
@@ -43,8 +37,6 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
-    # --------------- Work --------------- #
-
     - name: Add Alpha (-alpha) suffix to Version Number
       run : |
         [xml]$projXml = get-content "${{env.PROJ_PATH}}"
@@ -60,7 +52,7 @@ jobs:
       working-directory: src/CommonHelpers
       run: |
         dotnet restore --runtime any --ignore-failed-sources
-        dotnet build --configuration Release
+        dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
       run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
@@ -80,7 +72,7 @@ jobs:
       working-directory: src/CommonHelpers.Tests
       run: |
         dotnet restore --runtime any --ignore-failed-sources
-        dotnet build --configuration Release
+        dotnet build -c Release --no-restore
 
     - name: Run Tests
       working-directory: src/CommonHelpers.Tests
@@ -105,6 +97,11 @@ jobs:
     env:
       NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      with:
+        egress-policy: audit
+
     - name: Checkout
       uses: actions/checkout@v6
 
@@ -121,24 +118,17 @@ jobs:
       run: |
         $sacTools = "C:\Program Files\SafeNet\Authentication\SAC\x64\SACTools.exe"
         & $sacTools /Token /LogOn /Password "${{secrets.DIGICERT_HARDWARE_TOKEN_PASSWORD}}"
-
         $thumbprint = "8BC202959D2DCE3EEB3A489D8348B5C9B6B64A97"
-
         $sdkRoot = "C:\Program Files (x86)\Windows Kits\10\bin"
-
         $signTool = Get-ChildItem -Path $sdkRoot -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
           Where-Object { $_.FullName -match '\\x64\\signtool\.exe$' } |
           Sort-Object FullName -Descending | Select-Object -First 1
-
         if (-not $signTool) { throw "signtool.exe not found under $sdkRoot" }
-
         Write-Host "Using signtool: $($signTool.FullName)"
-
         & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 ${{env.NUPKG_PATH}}
-
         if ($LASTEXITCODE -ne 0) { throw "signtool sign failed with exit code $LASTEXITCODE" }
 
-    - name: Upload MSIX bundle artifact
+    - name: Upload signed NuGet package
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
