@@ -1,9 +1,8 @@
 name: Release
 
-###############################################################
 ########################### WARNING ###########################
-###############################################################
 # Manual trigger only, this workflow publishes to nuget.org!
+
 on:
   workflow_dispatch:
 
@@ -13,8 +12,13 @@ env:
 jobs:
   publish_commonhelpers:
     runs-on: windows-latest
-
+    name: 'Build and Publish Release'
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      with:
+        egress-policy: audit
+
     - name: Checkout
       uses: actions/checkout@v4
       with:
