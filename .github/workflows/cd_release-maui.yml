@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  DOTNET_SDK_VERSION: '9.0.x'
+  DOTNET_SDK_VERSION: '10.0.x'
 
 jobs:
   publish_commonhelpers:
@@ -20,17 +20,17 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
     - name: Install .NET Core
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
     
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
 
 
     # ****** CommonHelpers Tasks ***** #
@@ -130,7 +130,7 @@ jobs:
     # ***** Upload Artifacts ***** #
 
     - name: Upload CommonHelpers.Maui NuGet package artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.Maui.${{steps.get-version-maui.outputs.package-version}}.nupkg"
         path: ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
@@ -167,3 +167,12 @@ jobs:
         asset_path: ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
         asset_name: "CommonHelpers.Maui.${{steps.get-version-maui.outputs.package-version}}.nupkg"
         asset_content_type: application/zip
+
+    # - name: Create GitHub Release
+    #   uses: softprops/action-gh-release@v3.0.0
+    #   with:
+    #     tag_name: "v${{steps.get-version-maui.outputs.package-version}}"
+    #     name: "CommonHelpers.Maui v${{steps.get-version-maui.outputs.package-version}}"
+    #     draft: false
+    #     prerelease: false
+    #     files: ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
