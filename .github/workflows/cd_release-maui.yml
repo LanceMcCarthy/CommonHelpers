@@ -14,12 +14,6 @@ env:
   DOTNET_SDK_VERSION: '10.0.x'
   PROJ_PATH: 'src/CommonHelpers/CommonHelpers.csproj'
   PROJ_PATH_MAUI: 'src/CommonHelpers.Maui/CommonHelpers.Maui.csproj'
-  SERVICE_PRINCIPAL_CLIENT_ID: "32daa13b-f4bb-4809-8ef6-58cb39051acd"
-  SERVICE_PRINCIPAL_TENANT_ID: "bd47e796-3473-4b8a-9101-1f4c0c7af31a"
-  SERVICE_PRINCIPAL_SUBSCRIPTION_ID: "48ab4839-62af-4ab3-afe6-043ea4d7c137"
-  SIGNING_ACCT_NAME: "PrimaryCodeSign"
-  SIGNING_ACCT_CERT_PROFILE: "lancemccarthylivepublic"
-  SIGNING_ACCT_ENDPOINT_URL: "https://eus.codesigning.azure.net/"
 
 jobs:
   publish_commonhelpers:
@@ -48,13 +42,16 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
+
+    - name: Install .NET Sign CLI tool
+      run: dotnet tool install --tool-path . --prerelease sign
+
+    - name: Install .NET Workload (maui)
+      shell: pwsh
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
-
-    - name: Install MAUI workloads (required for GitHub-hosted runners)
-      shell: pwsh
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
     # --------------- Work --------------- #
 

@@ -45,12 +45,15 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
+
+    - name: Install .NET Tool (Sign CLI)
+      run: dotnet tool install --tool-path . --prerelease sign
+
+    - name: Install .NET Workload (maui)
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
-
-    - name: Install MAUI workloads (required for GitHub-hosted runners)
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
     # --------------- Work --------------- #
 
