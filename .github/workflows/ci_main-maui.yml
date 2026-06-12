@@ -51,37 +51,14 @@ jobs:
         Write-Output "After: " $projXml.Project.PropertyGroup.Version
         $projXml.save("${{env.PROJ_PATH}}")
 
-    - name: Restore & Build CommonHelpers
-      working-directory: src/CommonHelpers
-      run: |
-        dotnet restore --runtime any --ignore-failed-sources
-        dotnet build -c Release --no-restore
-
-    - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
-
-    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Bin"
-
-    - name: Get CommonHelpers.nupkg File Path
-      id: get-package-path
-      run : |
-        $currentDirectory = Get-Location
-        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
-        $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
-        Write-Output "Setting output variable 'nuget-package-path' to $match"
-        echo "nuget-package-path=$match" >> $env:GITHUB_OUTPUT
-
-    - name: Add Alpha (-alpha) suffix to Maui Package Version Number
-      run : |
-        [xml]$projXml = get-content "${{env.PROJ_PATH_MAUI}}"
-        Write-Output "Before: " $projXml.Project.PropertyGroup.Version
-        $currentVer = $projXml.Project.PropertyGroup.Version
-        $suffix = "-alpha"
-        $newVer = $currentVer + $suffix
-        $projXml.Project.PropertyGroup.Version = $newVer
-        Write-Output "After: " $projXml.Project.PropertyGroup.Version
-        $projXml.save("${{env.PROJ_PATH_MAUI}}")
+        [xml]$projXmlMaui = get-content "${{env.PROJ_PATH_MAUI}}"
+        Write-Output "Before: " $projXmlMaui.Project.PropertyGroup.Version
+        $currentVerMaui = $projXmlMaui.Project.PropertyGroup.Version
+        $suffixMaui = "-alpha"
+        $newVerMaui = $currentVerMaui + $suffixMaui
+        $projXmlMaui.Project.PropertyGroup.Version = $newVerMaui
+        Write-Output "After: " $projXmlMaui.Project.PropertyGroup.Version
+        $projXmlMaui.save("${{env.PROJ_PATH_MAUI}}")
 
     - name: Get Package Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v2
@@ -95,6 +72,15 @@ jobs:
       with:
         proj-path: ${{env.PROJ_PATH_MAUI}}
 
+    - name: Restore & Build CommonHelpers
+      working-directory: src/CommonHelpers
+      run: |
+        dotnet restore --runtime any --ignore-failed-sources
+        dotnet build -c Release --no-restore
+
+    - name: Add CommonHelpers Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+
     - name: Restore & Build CommonHelpers.Maui
       working-directory: src/CommonHelpers.Maui
       run: |
@@ -102,13 +88,21 @@ jobs:
         dotnet restore --runtime any --ignore-failed-sources
         dotnet build -c Release --no-restore
 
-    - name: Get CommonHelpers.Maui.nupkg File Path
-      id: get-package-path-maui
+    - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
+      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Bin"
+
+    - name: Get nupkg File Paths
+      id: get-package-path
       run : |
+        # CommonHelpers
         $currentDirectory = Get-Location
+        $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers/bin/Release/"
+        $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
+        echo "nuget-package-path=$match" >> $env:GITHUB_OUTPUT
+
+        # CommonHelpers.Maui
         $outputFolder = Join-Path -Path $currentDirectory -ChildPath "src/CommonHelpers.Maui/bin/Release/"
         $match = Get-ChildItem $outputFolder -Recurse -Force -Include *.nupkg
-        Write-Output "Setting output variable 'nuget-package-path-maui' to $match"
         echo "nuget-package-path-maui=$match" >> $env:GITHUB_OUTPUT
 
     - name: Restore & Build CommonHelpers.Tests
@@ -125,7 +119,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.Maui.${{steps.get-version-maui.outputs.package-version}}.nupkg"
-        path: ${{steps.get-package-path-maui.outputs.nuget-package-path-maui}}
+        path: ${{steps.get-package-path.outputs.nuget-package-path-maui}}
 
   codesign:
     name: Sign NuGet packages
