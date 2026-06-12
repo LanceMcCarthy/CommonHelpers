@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -91,7 +91,7 @@ namespace CommonHelpers.Tests.Extensions
             await cts.CancelAsync();
             var reporter = new Progress<DownloadProgressArgs>();
             using var client = new HttpClient();
-            await ThrowsExceptionAsync<TaskCanceledException>(async () =>
+            await ThrowsExactlyAsync<TaskCanceledException>(async () =>
             {
                 await client.DownloadStringWithProgressAsync(TestUrl, reporter, cts.Token);
             });
@@ -104,7 +104,7 @@ namespace CommonHelpers.Tests.Extensions
             await cts.CancelAsync();
             var reporter = new Progress<DownloadProgressArgs>();
             using var client = new HttpClient();
-            await ThrowsExceptionAsync<TaskCanceledException>(async () =>
+            await ThrowsExactlyAsync<TaskCanceledException>(async () =>
             {
                 await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
             });
@@ -115,7 +115,7 @@ namespace CommonHelpers.Tests.Extensions
         {
             HttpClient client = null;
             var reporter = new Progress<DownloadProgressArgs>();
-            await ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await ThrowsExactlyAsync<ArgumentNullException>(async () =>
             {
                 await client.DownloadStringWithProgressAsync(TestUrl, reporter);
             });
@@ -126,7 +126,7 @@ namespace CommonHelpers.Tests.Extensions
         {
             using var client = new HttpClient();
             var reporter = new Progress<DownloadProgressArgs>();
-            await ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await ThrowsExactlyAsync<ArgumentNullException>(async () =>
             {
                 await client.DownloadStringWithProgressAsync(null, reporter);
             });
@@ -136,7 +136,7 @@ namespace CommonHelpers.Tests.Extensions
         public async Task DownloadStringWithProgress_NullReporter_Throws()
         {
             using var client = new HttpClient();
-            await ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await ThrowsExactlyAsync<ArgumentNullException>(async () =>
             {
                 await client.DownloadStringWithProgressAsync(TestUrl, null);
             });

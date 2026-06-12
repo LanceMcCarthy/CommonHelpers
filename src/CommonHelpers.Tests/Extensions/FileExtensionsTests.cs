@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.IO;
 using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -128,7 +128,7 @@ namespace CommonHelpers.Tests.Extensions
         {
             byte[] data = null;
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
             {
                 await data.SaveToLocalFolderAsync(GetTempFilePath("null.txt"));
             });
@@ -139,7 +139,7 @@ namespace CommonHelpers.Tests.Extensions
         {
             Stream stream = null;
 
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
             {
                 await stream.SaveToLocalFolderAsync(GetTempFilePath("nullstream.txt"));
             });
@@ -149,7 +149,7 @@ namespace CommonHelpers.Tests.Extensions
         public async Task SaveToLocalFolder_EmptyFileName_Throws()
         {
             var data = Encoding.ASCII.GetBytes("test");
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
             {
                 await data.SaveToLocalFolderAsync("");
             });
@@ -158,7 +158,7 @@ namespace CommonHelpers.Tests.Extensions
         [TestMethod]
         public async Task LoadFileBytesAsync_FileNotFound_Throws()
         {
-            await Assert.ThrowsExceptionAsync<FileNotFoundException>(async () =>
+            await Assert.ThrowsExactlyAsync<FileNotFoundException>(async () =>
             {
                 await FileExtensions.LoadFileBytesAsync(GetTempFilePath("notfound.txt"));
             });

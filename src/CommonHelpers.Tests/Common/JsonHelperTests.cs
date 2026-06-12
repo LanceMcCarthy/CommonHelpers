@@ -1,4 +1,4 @@
-﻿using CommonHelpers.Common;
+using CommonHelpers.Common;
 using CommonHelpers.Tests.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -67,7 +67,7 @@ namespace CommonHelpers.Tests.Common
             var invalidJson = "not a json string";
 
             // Act & Assert
-            Assert.ThrowsException<System.Runtime.Serialization.SerializationException>(() =>
+            Assert.ThrowsExactly<System.Runtime.Serialization.SerializationException>(() =>
             {
                 JsonHelper<TestEmployee>.Deserialize(invalidJson);
             });
@@ -77,7 +77,7 @@ namespace CommonHelpers.Tests.Common
         public void Serialize_NullObject_ThrowsException()
         {
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 JsonHelper<TestEmployee>.Serialize(null);
             });

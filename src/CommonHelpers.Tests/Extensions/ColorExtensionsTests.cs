@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -56,8 +56,8 @@ namespace CommonHelpers.Tests.Extensions
         public void ConvertFromHex_Invalid_Throws()
         {
             // Assert
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => ColorExtensions.ConvertHexStringToColor("#FFF"));
-            Assert.ThrowsException<FormatException>(() => ColorExtensions.ConvertHexStringToColor("#GGGGGGGG"));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ColorExtensions.ConvertHexStringToColor("#FFF"));
+            Assert.ThrowsExactly<FormatException>(() => ColorExtensions.ConvertHexStringToColor("#GGGGGGGG"));
         }
 
         [TestMethod]

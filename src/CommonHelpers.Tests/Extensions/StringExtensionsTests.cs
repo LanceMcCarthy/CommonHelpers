@@ -69,7 +69,7 @@ namespace CommonHelpers.Tests.Extensions
         public void Hash_NullPassword_Throws()
         {
             string password = null;
-            Assert.ThrowsException<ArgumentNullException>(() => password.Hash());
+            Assert.ThrowsExactly<ArgumentNullException>(() => password.Hash());
         }
     }
 }

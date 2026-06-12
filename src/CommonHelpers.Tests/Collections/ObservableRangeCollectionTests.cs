@@ -1,4 +1,4 @@
-﻿using CommonHelpers.Collections;
+using CommonHelpers.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Specialized;
@@ -136,28 +136,28 @@ namespace CommonHelpers.Tests.Collections
         public void AddRange_Null_Throws()
         {
             var rangeCollection = new ObservableRangeCollection<string>();
-            Assert.ThrowsException<ArgumentNullException>(() => rangeCollection.AddRange(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => rangeCollection.AddRange(null));
         }
 
         [TestMethod]
         public void RemoveRange_Null_Throws()
         {
             var rangeCollection = new ObservableRangeCollection<string>();
-            Assert.ThrowsException<ArgumentNullException>(() => rangeCollection.RemoveRange(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => rangeCollection.RemoveRange(null));
         }
 
         [TestMethod]
         public void AddRange_InvalidNotificationMode_Throws()
         {
             var rangeCollection = new ObservableRangeCollection<string>();
-            Assert.ThrowsException<ArgumentException>(() => rangeCollection.AddRange(new[] { "A" }, (NotifyCollectionChangedAction)999));
+            Assert.ThrowsExactly<ArgumentException>(() => rangeCollection.AddRange(new[] { "A" }, (NotifyCollectionChangedAction)999));
         }
 
         [TestMethod]
         public void RemoveRange_InvalidNotificationMode_Throws()
         {
             var rangeCollection = new ObservableRangeCollection<string>();
-            Assert.ThrowsException<ArgumentException>(() => rangeCollection.RemoveRange(new[] { "A" }, (NotifyCollectionChangedAction)999));
+            Assert.ThrowsExactly<ArgumentException>(() => rangeCollection.RemoveRange(new[] { "A" }, (NotifyCollectionChangedAction)999));
         }
 
         [TestMethod]
