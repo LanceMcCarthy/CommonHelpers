@@ -6,7 +6,9 @@ on:
     branches:
       - main
     paths:
+      - 'src/CommonHelpers/**/*'
       - 'src/CommonHelpers.Maui/**/*'
+      - 'src/CommonHelpers.Tests/**/*'
       - '.github/workflows/ci_main-maui.yml'
 
 env:
