@@ -42,14 +42,14 @@ jobs:
 
     - name: Add Alpha (-alpha) suffix to Version Number
       run : |
-        [xml]$projXml = get-content ${{env.PROJ_PATH}}
+        [xml]$projXml = get-content "${{env.PROJ_PATH}}"
         Write-Output "Before: " $projXml.Project.PropertyGroup.Version
         $currentVer = $projXml.Project.PropertyGroup.Version
         $suffix = "-alpha"
         $newVer = $currentVer + $suffix
         $projXml.Project.PropertyGroup.Version = $newVer
         Write-Output "After: " $projXml.Project.PropertyGroup.Version
-        $projXml.save(${{env.PROJ_PATH}})
+        $projXml.save("${{env.PROJ_PATH}}")
 
     - name: Restore & Build CommonHelpers
       working-directory: src/CommonHelpers
@@ -74,14 +74,14 @@ jobs:
 
     - name: Add Alpha (-alpha) suffix to Maui Package Version Number
       run : |
-        [xml]$projXml = get-content ${{env.PROJ_PATH_MAUI}}
+        [xml]$projXml = get-content "${{env.PROJ_PATH_MAUI}}"
         Write-Output "Before: " $projXml.Project.PropertyGroup.Version
         $currentVer = $projXml.Project.PropertyGroup.Version
         $suffix = "-alpha"
         $newVer = $currentVer + $suffix
         $projXml.Project.PropertyGroup.Version = $newVer
         Write-Output "After: " $projXml.Project.PropertyGroup.Version
-        $projXml.save(${{env.PROJ_PATH_MAUI}})
+        $projXml.save("${{env.PROJ_PATH_MAUI}}")
 
     - name: Get Package Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v2
