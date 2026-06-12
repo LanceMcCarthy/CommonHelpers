@@ -47,7 +47,7 @@ jobs:
       uses: kzrnm/get-net-sdk-project-versions-action@v2
       id: get-version
       with:
-        proj-path: src/CommonHelpers/CommonHelpers.csproj
+        proj-path: "${{env.PROJ_PATH}}"
 
     - name: Get Package File Path
       id: get-package-path
