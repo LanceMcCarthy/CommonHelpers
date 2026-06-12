@@ -52,10 +52,8 @@ jobs:
     - name: Add Release Candidate (-rc) suffix to Maui Version Number
       run : |
         [xml]$projXml = get-content ${{env.PROJ_PATH_MAUI}}
-        $currentVer = $projXml.Project.PropertyGroup.Version
-        $suffix = "-rc"
-        $newVer = $currentVer + $suffix
-        $projXml.Project.PropertyGroup.Version = $newVer
+        $versionNode = $projXml.SelectSingleNode('/Project/PropertyGroup/Version')
+        $versionNode.InnerText = $versionNode.InnerText + "-rc"
         $projXml.save(${{env.PROJ_PATH_MAUI}})
 
     - name: Get Version From Project
