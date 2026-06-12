@@ -1,24 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst;net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0;net9.0-windows10.0.19041.0;net8.0-windows10.0.22621.0;net9.0-windows10.0.22621.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('net9.0-maccatalyst'))">15.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('net8.0-maccatalyst'))">14.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('maccatalyst'))">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-    <WindowsSdkPackageVersion Condition="$(TargetFramework.Contains('windows10.0.19041'))">10.0.19041.38</WindowsSdkPackageVersion>
-    <WindowsSdkPackageVersion Condition="$(TargetFramework.Contains('windows10.0.22621'))">10.0.22621.38</WindowsSdkPackageVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-    
+
+    <WindowsSdkPackageVersion Condition="$(TargetFramework.Contains('windows10.0.19041'))">10.0.19041.38</WindowsSdkPackageVersion>
     <CsWinRTRcwFactoryFallbackGeneratorForceOptOut Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</CsWinRTRcwFactoryFallbackGeneratorForceOptOut>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefaultLanguage>en</DefaultLanguage>
+  </PropertyGroup>
 
+  <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Lance McCarthy</Authors>
     <Company>Lancelot Software, LLC</Company>
@@ -28,7 +28,7 @@
     <PackageProjectUrl>https://github.com/LanceMcCarthy/CommonHelpers</PackageProjectUrl>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Copyright>Copyright 2018 - 2025</Copyright>
+    <Copyright>Copyright 2018 - 2026</Copyright>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
     <PackageTags>dotnetmaui maui C#</PackageTags>
@@ -60,21 +60,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Sbom.Targets" Version="3.1.0">
+    <PackageReference Include="Microsoft.Sbom.Targets" Version="4.1.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.Contains('net8'))">
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
-    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework.Contains('net9'))">
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.50" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
   </ItemGroup>
 
 </Project>
