@@ -32,6 +32,10 @@ jobs:
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
+    # Change the bin's relative path to work in CI
+    - name: Update package sources for CI
+      run: dotnet nuget update source "CommonHelpersBin" --source "${{github.workspace}}/src/CommonHelpers/bin" --configfile "${{github.workspace}}/src/nuget.config"
+
     - name: Install .NET Workload (maui)
       shell: pwsh
       run: dotnet workload install maui --source https://api.nuget.org/v3/index.json

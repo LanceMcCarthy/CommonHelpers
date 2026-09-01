@@ -34,6 +34,10 @@ jobs:
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
+    # Change the bin's relative path to work in CI
+    - name: Update package sources for CI
+      run: dotnet nuget update source "CommonHelpersBin" --source "${{github.workspace}}/src/CommonHelpers/bin" --configfile "${{github.workspace}}/src/nuget.config"
+
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
