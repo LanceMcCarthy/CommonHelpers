@@ -1,12 +1,10 @@
+using CommonHelpers.Common.Args;
+using CommonHelpers.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using CommonHelpers.Common.Args;
-using CommonHelpers.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace CommonHelpers.Tests.Extensions;
 
@@ -14,11 +12,7 @@ namespace CommonHelpers.Tests.Extensions;
 public class HttpClientExtensionsTests
 {
     private const string TestUrl = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
-
-    private static ServiceProvider CreateServiceProvider()
-    {
-        return new ServiceCollection().AddHttpClient().BuildServiceProvider();
-    }
+    private readonly HttpClient client = new();
 
     [TestMethod]
     public async Task DownloadStringWithProgress_Works()
@@ -28,11 +22,10 @@ public class HttpClientExtensionsTests
 
         reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-        using var client = new HttpClient();
         var result = await client.DownloadStringWithProgressAsync(TestUrl, reporter);
 
-        IsFalse(string.IsNullOrEmpty(result), "String result was null");
-        IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
+        Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null");
+        Assert.IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
     }
 
     [TestMethod]
@@ -43,29 +36,11 @@ public class HttpClientExtensionsTests
         var reporter = new Progress<DownloadProgressArgs>();
         reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-        using var client = new HttpClient();
         var result = await client.DownloadStringWithProgressAsync(TestUrl, reporter, cts.Token);
 
-        IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
-        IsFalse(string.IsNullOrEmpty(result), "String result was null.");
-        IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
-    }
-
-    [TestMethod]
-    public async Task DownloadStringWithProgress_Works_WithFactoryCreatedClient()
-    {
-        var reporter = new Progress<DownloadProgressArgs>();
-        float progress = 0;
-
-        reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
-
-        await using var serviceProvider = CreateServiceProvider();
-        var clientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-        using var client = clientFactory.CreateClient();
-        var result = await client.DownloadStringWithProgressAsync(TestUrl, reporter);
-
-        IsFalse(string.IsNullOrEmpty(result), "String result was null");
-        IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
+        Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
+        Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null.");
+        Assert.IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
     }
 
     [TestMethod]
@@ -75,30 +50,12 @@ public class HttpClientExtensionsTests
         var reporter = new Progress<DownloadProgressArgs>();
         reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-        using var client = new HttpClient();
         var result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter);
 
-        IsNotNull(result);
-        IsTrue(result.Length > 0, "Stream is empty");
-        IsTrue(progress > 0 && progress <= 100, "Progress was not reported correctly");
-        await result.DisposeAsync();
-    }
+        Assert.IsNotNull(result);
+        Assert.IsTrue(result.Length > 0, "Stream is empty");
+        Assert.IsTrue(progress > 0 && progress <= 100, "Progress was not reported correctly");
 
-    [TestMethod]
-    public async Task DownloadStreamWithProgress_Works_WithFactoryCreatedClient()
-    {
-        float progress = 0;
-        var reporter = new Progress<DownloadProgressArgs>();
-        reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
-
-        await using var serviceProvider = CreateServiceProvider();
-        var clientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-        using var client = clientFactory.CreateClient();
-        var result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter);
-
-        IsNotNull(result);
-        IsTrue(result.Length > 0, "Stream is empty");
-        IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
         await result.DisposeAsync();
     }
 
@@ -110,13 +67,12 @@ public class HttpClientExtensionsTests
         var reporter = new Progress<DownloadProgressArgs>();
         reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
 
-        using var client = new HttpClient();
         var result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
 
-        IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
-        IsNotNull(result);
-        IsTrue(result.Length > 0, "Stream is empty");
-        IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
+        Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
+        Assert.IsNotNull(result);
+        Assert.IsTrue(result.Length > 0, "Stream is empty");
+        Assert.IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
         await result.DisposeAsync();
     }
 
@@ -126,8 +82,7 @@ public class HttpClientExtensionsTests
         var cts = new CancellationTokenSource();
         await cts.CancelAsync();
         var reporter = new Progress<DownloadProgressArgs>();
-        using var client = new HttpClient();
-        await ThrowsExactlyAsync<TaskCanceledException>(async () =>
+        await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
         {
             await client.DownloadStringWithProgressAsync(TestUrl, reporter, cts.Token);
         });
@@ -139,8 +94,7 @@ public class HttpClientExtensionsTests
         var cts = new CancellationTokenSource();
         await cts.CancelAsync();
         var reporter = new Progress<DownloadProgressArgs>();
-        using var client = new HttpClient();
-        await ThrowsExactlyAsync<TaskCanceledException>(async () =>
+        await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
         {
             await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
         });
@@ -149,21 +103,20 @@ public class HttpClientExtensionsTests
     [TestMethod]
     public async Task DownloadStringWithProgress_NullClient_Throws()
     {
-        HttpClient client = null;
+        HttpClient nullClient = null;
         var reporter = new Progress<DownloadProgressArgs>();
-        await ThrowsExactlyAsync<ArgumentNullException>(async () =>
+        await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
         {
             // ReSharper disable once ExpressionIsAlwaysNull
-            await client.DownloadStringWithProgressAsync(TestUrl, reporter);
+            await nullClient.DownloadStringWithProgressAsync(TestUrl, reporter);
         });
     }
 
     [TestMethod]
     public async Task DownloadStringWithProgress_NullUrl_Throws()
     {
-        using var client = new HttpClient();
         var reporter = new Progress<DownloadProgressArgs>();
-        await ThrowsExactlyAsync<ArgumentNullException>(async () =>
+        await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
         {
             await client.DownloadStringWithProgressAsync(null, reporter);
         });
@@ -172,8 +125,7 @@ public class HttpClientExtensionsTests
     [TestMethod]
     public async Task DownloadStringWithProgress_NullReporter_Throws()
     {
-        using var client = new HttpClient();
-        await ThrowsExactlyAsync<ArgumentNullException>(async () =>
+        await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
         {
             await client.DownloadStringWithProgressAsync(TestUrl, null);
         });
@@ -192,7 +144,7 @@ public class HttpClientExtensionsTests
         sw.Stop();
 
         // Assert: Should be at least 400ms (allowing for timing inaccuracy)
-        IsTrue(sw.ElapsedMilliseconds >= 400, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
+        Assert.IsTrue(sw.ElapsedMilliseconds >= 400, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
     }
 
     [TestMethod]
@@ -208,7 +160,7 @@ public class HttpClientExtensionsTests
         sw.Stop();
 
         // Assert: Should be at least 500ms (allowing for timing inaccuracy)
-        IsTrue(sw.ElapsedMilliseconds >= 500, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
+        Assert.IsTrue(sw.ElapsedMilliseconds >= 500, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
     }
 
     [TestMethod]
@@ -223,6 +175,13 @@ public class HttpClientExtensionsTests
         sw.Stop();
 
         // Assert: Should be at least 1500ms (allowing for timing inaccuracy)
-        IsTrue(sw.ElapsedMilliseconds >= 1500, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
+        Assert.IsTrue(sw.ElapsedMilliseconds >= 1500, $"Delay was too short: {sw.ElapsedMilliseconds}ms");
+    }
+
+
+    [TestCleanup]
+    public void Dispose()
+    {
+        client.Dispose();
     }
 }

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using CommonHelpers.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using CommonHelpers.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommonHelpers.Tests.Services;
 
@@ -15,9 +14,7 @@ public class BingImageServiceTests : IDisposable
     [TestMethod]
     public async Task GetTodaysBingImage()
     {
-        await using var serviceProvider = new ServiceCollection().AddHttpClient().BuildServiceProvider();
-        var clientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-        using var client = clientFactory.CreateClient();
+        using var client = new HttpClient();
 
         var imageUrl = await service.GetBingImageOfTheDayAsync();
 
