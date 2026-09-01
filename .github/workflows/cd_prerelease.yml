@@ -1,9 +1,9 @@
 name: Prerelease
 
-###############################################################
-########################### WARNING ###########################
-###############################################################
-# Manual trigger only, this workflow publishes both to nuget.org!
+#############################################################
+#                       ⚠️ WARNING ⚠️                      #
+# Manual trigger only, this workflow publishes to nuget.org #
+#############################################################
 on:
   workflow_dispatch:
 
@@ -26,7 +26,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Install .NET
       uses: actions/setup-dotnet@v5

@@ -6,10 +6,10 @@ on:
     branches:
       - main
     paths:
-      - 'src/CommonHelpers/**/*'
+      #- 'src/CommonHelpers/**/*'
       - 'src/CommonHelpers.Maui/**/*'
-      - 'src/CommonHelpers.Tests/**/*'
-      - '.github/workflows/ci_main-maui.yml'
+      #- 'src/CommonHelpers.Tests/**/*'
+      #- '.github/workflows/ci_main-maui.yml'
 
 env:
   DOTNET_SDK_VERSION: '10.0.x'
@@ -29,7 +29,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Install .NET
       uses: actions/setup-dotnet@v5
@@ -61,13 +61,13 @@ jobs:
         Write-Output "After: " $versionNodeMaui.InnerText
         $projXmlMaui.save("${{env.PROJ_PATH_MAUI}}")
 
-    - name: Get Package Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
+    - name: Get CommonHelpers Version Number From Project
+      uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version
       with:
         proj-path: ${{env.PROJ_PATH}}
 
-    - name: Get CommonHelpers.Maui Version From Project
+    - name: Get CommonHelpers.Maui Version Number From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version-maui
       with:
@@ -80,7 +80,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "./src/CommonHelpers/bin" --name "CommonHelpers_Bin"
 
     - name: Restore & Build CommonHelpers.Maui
       working-directory: src/CommonHelpers.Maui
@@ -90,7 +90,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Bin"
+      run: dotnet nuget add source "./src/CommonHelpers.Maui/bin" --name "CommonHelpers.Maui_Bin"
 
     - name: Get nupkg File Paths
       id: get-package-path
@@ -126,20 +126,26 @@ jobs:
     name: Sign NuGet packages
     needs: [build]
     runs-on: [self-hosted, x64, digicert-enabled]
-    env:
-      NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
-    - name: Clean bundle workspace
-      run: Remove-Item -Recurse -Force "${{github.workspace}}\**\*.nupkg" -ErrorAction SilentlyContinue
+    - name: Clean packages from runner workspace
+      run: Remove-Item -Recurse -Force "./**/*.nupkg" -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{env.NUPKG_PATH_MAUI}}
+        path: "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+
+    - name: Confirm package exists
+      run: |
+        if (-not (Test-Path -Path "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg")) {
+          throw "NuGet package not found at ./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        } else {
+          Write-Host "NuGet package found at ./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        }
 
     - name: Sign NuGet package
       run: |
@@ -152,14 +158,14 @@ jobs:
           Sort-Object FullName -Descending | Select-Object -First 1
         if (-not $signTool) { throw "signtool.exe not found under $sdkRoot" }
         Write-Host "Using signtool: $($signTool.FullName)"
-        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 ${{env.NUPKG_PATH_MAUI}}
+        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
         if ($LASTEXITCODE -ne 0) { throw "signtool sign failed with exit code $LASTEXITCODE" }
 
     - name: Upload signed NuGet package
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{env.NUPKG_PATH_MAUI}}
+        path: "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
         if-no-files-found: error
         retention-days: 30
         overwrite: true

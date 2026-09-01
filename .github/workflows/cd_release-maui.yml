@@ -1,8 +1,9 @@
 name: Release [.NET MAUI]
 
-########################### WARNING ###########################
-# Manual trigger only, this workflow publishes to nuget.org!
-
+#############################################################
+#                       ⚠️ WARNING ⚠️                      #
+# Manual trigger only, this workflow publishes to nuget.org #
+#############################################################
 on:
   workflow_dispatch:
 
@@ -24,7 +25,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Install .NET
       uses: actions/setup-dotnet@v5
@@ -48,7 +49,7 @@ jobs:
       run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
 
     - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
+      uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version
       with:
         proj-path: src/CommonHelpers/CommonHelpers.csproj
@@ -73,7 +74,7 @@ jobs:
       run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
 
     - name: Get Maui Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
+      uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version-maui
       with:
         proj-path: src/CommonHelpers.Maui/CommonHelpers.Maui.csproj
@@ -111,7 +112,7 @@ jobs:
       NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Clean bundle workspace
       run: Remove-Item -Recurse -Force "${{github.workspace}}\**\*.nupkg" -ErrorAction SilentlyContinue
@@ -160,7 +161,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
@@ -178,7 +179,7 @@ jobs:
       run: dotnet nuget push ${{env.NUPKG_PATH_MAUI}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
 
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v3.0.0
+      uses: softprops/action-gh-release@v3.0.3
       with:
         tag_name: "v${{needs.build.outputs.app_version_maui}}"
         name: "CommonHelpers.Maui v${{needs.build.outputs.app_version_maui}}"

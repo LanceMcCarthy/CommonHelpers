@@ -8,7 +8,7 @@ on:
     paths:
       - 'src/CommonHelpers/**/*'
       - 'src/CommonHelpers.Tests/**/*'
-      - '.github/workflows/ci_main.yml'
+      # - '.github/workflows/ci_main.yml'
 
 env:
   DOTNET_SDK_VERSION: '10.0.x'
@@ -27,7 +27,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Install .NET
       uses: actions/setup-dotnet@v5
@@ -55,7 +55,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "./src/CommonHelpers/bin" --name "CommonHelpers_Bin"
 
     - name: Get Package File Path
       id: get-package-path
@@ -93,9 +93,7 @@ jobs:
   codesign:
     name: Sign NuGet packages
     needs: [build]
-    runs-on: [self-hosted, x64, digicert-enabled]
-    env:
-      NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+    runs-on: [self-hosted, x64, digicert-enabled] 
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
@@ -103,16 +101,24 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Clean bundle workspace
-      run: Remove-Item -Recurse -Force "${{github.workspace}}\**\*.nupkg" -ErrorAction SilentlyContinue
+      run: Remove-Item -Recurse -Force "./**/*.nupkg" -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
       with:
         name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{env.NUPKG_PATH}}
+        path: "./CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+
+    - name: Confirm package exists
+      run: |
+        if (-not (Test-Path -Path "./CommonHelpers.${{needs.build.outputs.app_version}}.nupkg")) {
+          throw "NuGet package not found at ./CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+        } else {
+          Write-Host "NuGet package found at ./CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+        }
 
     - name: Sign NuGet package
       run: |
@@ -125,14 +131,14 @@ jobs:
           Sort-Object FullName -Descending | Select-Object -First 1
         if (-not $signTool) { throw "signtool.exe not found under $sdkRoot" }
         Write-Host "Using signtool: $($signTool.FullName)"
-        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 ${{env.NUPKG_PATH}}
+        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 "./CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
         if ($LASTEXITCODE -ne 0) { throw "signtool sign failed with exit code $LASTEXITCODE" }
 
     - name: Upload signed NuGet package
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{env.NUPKG_PATH}}
+        path: "./CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
         if-no-files-found: error
         retention-days: 30
         overwrite: true
