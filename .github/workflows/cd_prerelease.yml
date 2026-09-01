@@ -57,13 +57,13 @@ jobs:
         $projXml.save(${{env.PROJ_PATH_MAUI}})
 
     - name: Get Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
+      uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version
       with:
         proj-path: ${{env.PROJ_PATH}}
 
     - name: Get Maui Version From Project
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
+      uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version-maui
       with:
         proj-path: ${{env.PROJ_PATH_MAUI}}
@@ -115,7 +115,7 @@ jobs:
       run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
     - name: Upload CommonHelpers NuGet package artifact
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@v8
       with:
         name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
         path: ${{steps.get-package-path.outputs.nuget-package-path}}
@@ -140,7 +140,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Install .NET
       uses: actions/setup-dotnet@v6
@@ -225,7 +225,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
@@ -240,7 +240,7 @@ jobs:
         path: ${{env.NUPKG_PATH_MAUI}}
 
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v3.0.0
+      uses: softprops/action-gh-release@v3.0.3
       with:
         tag_name: "v${{needs.build.outputs.app_version}}"
         name: "CommonHelpers Preview v${{needs.build.outputs.app_version}}"
