@@ -42,7 +42,7 @@ jobs:
         [xml]$projXml = get-content "${{env.PROJ_PATH}}"
         Write-Output "Before: " $projXml.Project.PropertyGroup.Version
         $currentVer = $projXml.Project.PropertyGroup.Version
-        $suffix = "-alpha"
+        $suffix = "-alpha.${{github.run_number}}"
         $newVer = $currentVer + $suffix
         $projXml.Project.PropertyGroup.Version = $newVer
         Write-Output "After: " $projXml.Project.PropertyGroup.Version

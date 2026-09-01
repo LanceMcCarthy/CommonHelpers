@@ -29,7 +29,7 @@ jobs:
       uses: actions/checkout@v7
 
     - name: Install .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
@@ -40,29 +40,29 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
-    - name: Add Release Candidate (-rc) suffix to Version Number
+    - name: Add Release Candidate (-rc.${{github.run_number}}) suffix to Version Number
       run : |
         [xml]$projXml = get-content ${{env.PROJ_PATH}}
-        $currentVer = $projXml.Project.PropertyGroup.Version
-        $suffix = "-rc"
-        $newVer = $currentVer + $suffix
-        $projXml.Project.PropertyGroup.Version = $newVer
+        $versionNode = $projXml.Project.PropertyGroup.Version
+        $suffix = "-rc.${{github.run_number}}"
+        $versionNode.InnerText = $versionNode.InnerText + $suffix
         $projXml.save(${{env.PROJ_PATH}})
 
-    - name: Add Release Candidate (-rc) suffix to Maui Version Number
-      run : |
-        [xml]$projXml = get-content ${{env.PROJ_PATH_MAUI}}
-        $versionNode = $projXml.SelectSingleNode('/Project/PropertyGroup/Version')
-        $versionNode.InnerText = $versionNode.InnerText + "-rc"
-        $projXml.save(${{env.PROJ_PATH_MAUI}})
-
-    - name: Get Version From Project
+    - name: Get Version From CommonHelpers Project
       uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version
       with:
         proj-path: ${{env.PROJ_PATH}}
 
-    - name: Get Maui Version From Project
+    - name: Add Release Candidate (-rc.${{github.run_number}}) suffix to Maui Version Number
+      run : |
+        [xml]$projXml = get-content ${{env.PROJ_PATH_MAUI}}
+        $versionNode = $projXml.SelectSingleNode('/Project/PropertyGroup/Version')
+        $suffix = "-rc.${{github.run_number}}"
+        $versionNode.InnerText = $versionNode.InnerText + $suffix
+        $projXml.save(${{env.PROJ_PATH_MAUI}})
+
+    - name: Get Version From CommonHelpers.Maui Project
       uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version-maui
       with:
@@ -115,7 +115,7 @@ jobs:
       run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
     - name: Upload CommonHelpers NuGet package artifact
-      uses: actions/upload-artifact@v8
+      uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.${{steps.get-version.outputs.package-version}}.nupkg"
         path: ${{steps.get-package-path.outputs.nuget-package-path}}
