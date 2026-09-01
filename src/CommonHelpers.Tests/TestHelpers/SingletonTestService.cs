@@ -1,14 +1,8 @@
 ﻿using System;
 
-namespace CommonHelpers.Tests.TestHelpers
-{
-    public class SingletonTestService
-    {
-        public SingletonTestService()
-        {
-            InstanceId = DateTime.Now.Ticks;
-        }
+namespace CommonHelpers.Tests.TestHelpers;
 
-        public long InstanceId { get; set; }
-    }
+public class SingletonTestService
+{
+    public long InstanceId { get; set; } = DateTime.Now.Ticks;
 }

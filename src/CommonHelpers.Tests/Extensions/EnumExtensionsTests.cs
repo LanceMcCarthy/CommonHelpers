@@ -1,40 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using CommonHelpers.Extensions;
+﻿using CommonHelpers.Extensions;
 using CommonHelpers.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
-namespace CommonHelpers.Tests.Extensions
+namespace CommonHelpers.Tests.Extensions;
+
+[TestClass]
+public class EnumExtensionsTests
 {
-    [TestClass]
-    public class EnumExtensionsTests
+    [TestMethod]
+    public void GetEnumAsList()
     {
-        [TestMethod]
-        public void GetEnumAsList()
-        {
-            // Arrange
-            int expectedCount = 7;
-            List<DayOfWeek> days;
+        const int expectedCount = 7;
+        var days = EnumExtenstions.GetEnumAsList<DayOfWeek>();
+        var actualDayCount = days.Count;
+        Assert.AreEqual(expectedCount, actualDayCount);
+    }
 
-            // Act
-            days = EnumExtenstions.GetEnumAsList<DayOfWeek>();
-            var actualDayCount = days.Count;
-
-            // Assert
-            Assert.AreEqual(expectedCount, actualDayCount);
-        }
-
-        [TestMethod]
-        public void GetDefaultValue()
-        {
-            // Arrange
-            var expectedDefault = GenderType.Male;
-
-            // Act
-            var actualDefault = EnumExtenstions.GetEnumDefaultValue<GenderType>();
-
-            // Assert
-            Assert.AreEqual(expectedDefault, actualDefault);
-        }
+    [TestMethod]
+    public void GetDefaultValue()
+    {
+        const GenderType expectedDefault = GenderType.Male;
+        var actualDefault = EnumExtenstions.GetEnumDefaultValue<GenderType>();
+        Assert.AreEqual(expectedDefault, actualDefault);
     }
 }

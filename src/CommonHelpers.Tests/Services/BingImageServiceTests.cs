@@ -1,43 +1,35 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using CommonHelpers.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.Services
+namespace CommonHelpers.Tests.Services;
+
+[TestClass]
+public class BingImageServiceTests : IDisposable
 {
-    [TestClass]
-    public class BingImageServiceTests : IDisposable
+    private readonly BingImageService service = new();
+
+    [TestMethod]
+    public async Task GetTodaysBingImage()
     {
-        private readonly BingImageService service = new();
+        await using var serviceProvider = new ServiceCollection().AddHttpClient().BuildServiceProvider();
+        var clientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+        using var client = clientFactory.CreateClient();
 
-        // Arrange
+        var imageUrl = await service.GetBingImageOfTheDayAsync();
 
-        [TestMethod]
-        public void GetTodaysBingImage()
-        {
-            // Arrange
-            string imageUrl;
-            byte[] imageBytes;
+        using var response = await client.GetAsync(imageUrl);
+        var imageBytes = await response.Content.ReadAsByteArrayAsync();
+        var byteCount = imageBytes.Length;
+        Assert.IsTrue(byteCount > 0);
+    }
 
-            // Act
-            imageUrl = service.GetBingImageOfTheDayAsync().Result;
-
-            // Assert
-            using (var client = new HttpClient())
-            using (var response = client.GetAsync(imageUrl).Result)
-            {
-                imageBytes = response.Content.ReadAsByteArrayAsync().Result;
-            }
-
-            // Assert
-            var byteCount = imageBytes.Length;
-            Assert.IsTrue(byteCount > 0);
-        }
-
-        [TestCleanup]
-        public void Dispose()
-        {
-            service.Dispose();
-        }
+    [TestCleanup]
+    public void Dispose()
+    {
+        service.Dispose();
     }
 }

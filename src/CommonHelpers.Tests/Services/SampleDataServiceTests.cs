@@ -1,152 +1,113 @@
-﻿using System.Linq;
-using CommonHelpers.Services;
+﻿using CommonHelpers.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
-namespace CommonHelpers.Tests.Services
+namespace CommonHelpers.Tests.Services;
+
+[TestClass]
+public class SampleDataServiceTests
 {
-    [TestClass]
-    public class SampleDataServiceTests
+    private readonly SampleDataService service = new();
+
+    // Arrange
+
+    [TestMethod]
+    public void GeneratePeopleData()
     {
-        private readonly SampleDataService service = new();
+        var dataWithoutRealNames = service.GeneratePeopleData();
+        var dataWithRealNames = service.GeneratePeopleData(true);
+        Assert.IsNotNull(dataWithoutRealNames);
+        Assert.IsNotNull(dataWithRealNames);
+        Assert.IsTrue(dataWithoutRealNames.Any());
+        Assert.IsTrue(dataWithRealNames.Any());
+    }
 
-        // Arrange
+    [TestMethod]
+    public void GeneratePeopleNames()
+    {
+        var data = service.GeneratePeopleNames();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-        [TestMethod]
-        public void GeneratePeopleData()
-        {
-            // Act
-            var dataWithoutRealNames = service.GeneratePeopleData();
-            var dataWithRealNames = service.GeneratePeopleData(true);
+    [TestMethod]
+    public void GenerateCategoryData()
+    {
+        var data = service.GenerateCategoryData();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-            // Assert
-            Assert.IsNotNull(dataWithoutRealNames);
-            Assert.IsNotNull(dataWithRealNames);
+    [TestMethod]
+    public void GenerateSupplierData()
+    {
+        var data = service.GenerateSupplierData();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-            Assert.IsTrue(dataWithoutRealNames.Any());
-            Assert.IsTrue(dataWithRealNames.Any());
-        }
+    [TestMethod]
+    public void GenerateProductData()
+    {
+        var data = service.GenerateProductData();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-        [TestMethod]
-        public void GeneratePeopleNames()
-        {
-            // Act
-            var data = service.GeneratePeopleNames();
+    [TestMethod]
+    public void FindProductByCategory()
+    {
+        var product = service.FindProductByCategory(2);
+        Assert.IsNotNull(product);
+    }
 
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
+    [TestMethod]
+    public void FindProductBySupplier()
+    {
+        var product = service.FindProductBySupplier(2);
+        Assert.IsNotNull(product);
+    }
 
-        [TestMethod]
-        public void GenerateCategoryData()
-        {
-            // Act
-            var data = service.GenerateCategoryData();
+    [TestMethod]
+    public void GenerateCategoricalChartData()
+    {
+        var data = service.GenerateCategoricalData();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
+    [TestMethod]
+    public void GenerateDateTimeChartData()
+    {
+        var data = service.GenerateDateTimeDayData();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-        [TestMethod]
-        public void GenerateSupplierData()
-        {
-            // Act
-            var data = service.GenerateSupplierData();
+    [TestMethod]
+    public void GenerateDateTimeMinuteChartData()
+    {
+        var data = service.GenerateDateTimeMinuteData();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
+    [TestMethod]
+    public void GenerateScatterPointChartData()
+    {
+        var data = service.GenerateScatterPointData();
+        Assert.IsNotNull(data);
+        Assert.IsTrue(data.Any());
+    }
 
-        [TestMethod]
-        public void GenerateProductData()
-        {
-            // Act
-            var data = service.GenerateProductData();
-
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
-
-        [TestMethod]
-        public void FindProductByCategory()
-        {
-            // Act
-            var product = service.FindProductByCategory(2);
-
-            // Assert
-            Assert.IsNotNull(product);
-        }
-
-        [TestMethod]
-        public void FindProductBySupplier()
-        {
-            // Act
-            var product = service.FindProductBySupplier(2);
-
-            // Assert
-            Assert.IsNotNull(product);
-        }
-
-        [TestMethod]
-        public void GenerateCategoricalChartData()
-        {
-            // Act
-            var data = service.GenerateCategoricalData();
-
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
-
-        [TestMethod]
-        public void GenerateDateTimeChartData()
-        {
-            // Act
-            var data = service.GenerateDateTimeDayData();
-
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
-
-        [TestMethod]
-        public void GenerateDateTimeMinuteChartData()
-        {
-            // Act
-            var data = service.GenerateDateTimeMinuteData();
-
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
-
-        [TestMethod]
-        public void GenerateScatterPointChartData()
-        {
-            // Act
-            var data = service.GenerateScatterPointData();
-
-            // Assert
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Any());
-        }
-
-        [TestMethod]
-        public void GenerateEmployeeData()
-        {
-            // Act
-            var dataWithoutRealNames = service.GenerateEmployeeData(false);
-            var dataWithRealNames = service.GenerateEmployeeData();
-
-            // Assert
-            Assert.IsNotNull(dataWithoutRealNames);
-            Assert.IsNotNull(dataWithRealNames);
-
-            Assert.IsTrue(dataWithoutRealNames.Any());
-            Assert.IsTrue(dataWithRealNames.Any());
-        }
+    [TestMethod]
+    public void GenerateEmployeeData()
+    {
+        var dataWithoutRealNames = service.GenerateEmployeeData(false);
+        var dataWithRealNames = service.GenerateEmployeeData();
+        Assert.IsNotNull(dataWithoutRealNames);
+        Assert.IsNotNull(dataWithRealNames);
+        Assert.IsTrue(dataWithoutRealNames.Any());
+        Assert.IsTrue(dataWithRealNames.Any());
     }
 }

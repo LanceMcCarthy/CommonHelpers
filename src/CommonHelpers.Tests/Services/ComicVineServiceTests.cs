@@ -1,70 +1,55 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using CommonHelpers.Services;
-using CommonHelpers.Services.DataModels;
 using CommonHelpers.Tests.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.Services
+namespace CommonHelpers.Tests.Services;
+
+[TestClass]
+public class ComicVineServiceTests : IDisposable
 {
-    [TestClass]
-    public class ComicVineServiceTests : IDisposable
+    private readonly ComicVineApiService service = new(StaticValues.ComicVineApiKey, StaticValues.UniqueUserAgentString);
+
+    [TestMethod]
+    public async Task GetCharacters()
     {
-        private readonly ComicVineApiService service = new(StaticValues.ComicVineApiKey, StaticValues.UniqueUserAgentString);
+        const int expectedCount = 10;
+        var result = await service.GetCharactersAsync(0, 10);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(expectedCount, result.Results.Count);
+    }
 
-        [TestMethod]
-        public void GetCharacters()
-        {
-            //Arrange
-            int expectedCount = 10;
+    [TestMethod]
+    public async Task GetVideos()
+    {
+        const int expectedCount = 10;
+        var result = await service.GetVideosAsync(0, 10);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(expectedCount, result.Results.Count);
+    }
 
-            //Act
-            CharactersResult result = service.GetCharactersAsync(0, 10).Result;
+    [TestMethod]
+    public async Task GetImage()
+    {
+        var characterResult = await service.GetCharactersAsync(0, 3);
+        var character = characterResult.Results.FirstOrDefault();
+        Assert.IsNotNull(character);
+        Assert.IsNotNull(character.Image);
+        Assert.IsNotNull(character.Image.OriginalUrl);
+        var imageUrl = character.Image.OriginalUrl;
 
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedCount, result.Results.Count);
-        }
+        using var imageStream = await service.GetImageAsync(imageUrl);
+        var imageBytes = imageStream.ToArray();
 
-        [TestMethod]
-        public void GetVideos()
-        {
-            //Arrange
-            int expectedCount = 10;
+        Assert.IsNotNull(imageBytes);
+        Assert.IsTrue(imageBytes.Length > 0);
+    }
 
-            //Act
-            VideosResult result = service.GetVideosAsync(0, 10).Result;
-
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedCount, result.Results.Count);
-        }
-
-        [TestMethod]
-        public void GetImage()
-        {
-            //Arrange
-            byte[] imageBytes;
-
-            var characterResult = service.GetCharactersAsync(0, 3).Result;
-            var character = characterResult.Results.FirstOrDefault();
-            var imageUrl = character?.Image.OriginalUrl;
-
-            //Act
-            using (var imageStream = service.GetImageAsync(imageUrl).Result)
-            {
-                imageBytes = imageStream.ToArray();
-            }
-
-            //Assert
-            Assert.IsNotNull(imageBytes);
-            Assert.IsTrue(imageBytes.Length > 0);
-        }
-
-        [TestCleanup]
-        public void Dispose()
-        {
-            service.Dispose();
-        }
+    [TestCleanup]
+    public void Dispose()
+    {
+        service.Dispose();
     }
 }

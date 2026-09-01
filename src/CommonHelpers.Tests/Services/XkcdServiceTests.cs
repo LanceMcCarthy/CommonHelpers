@@ -1,43 +1,33 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CommonHelpers.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.Services
+namespace CommonHelpers.Tests.Services;
+
+[TestClass]
+public class XkcdServiceTests : IDisposable
 {
-    [TestClass]
-    public class XkcdServiceTests : IDisposable
+    private readonly XkcdApiService service = new();
+
+    [TestMethod]
+    public async Task GetTodaysComic()
     {
-        private readonly XkcdApiService service = new();
+        var xkcdComic = await service.GetNewestComicAsync();
+        Assert.IsNotNull(xkcdComic);
+    }
 
-        // Arrange
+    [TestMethod]
+    public async Task GetComicById()
+    {
+        const int comicNumber = 1214;
+        var xkcdComic = await service.GetComicAsync(comicNumber);
+        Assert.IsNotNull(xkcdComic);
+    }
 
-        [TestMethod]
-        public void GetTodaysComic()
-        {
-            //Act
-            var xkcdComic = service.GetNewestComicAsync().Result;
-
-            // Assert
-            Assert.IsNotNull(xkcdComic);
-        }
-
-        [TestMethod]
-        public void GetComicById()
-        {
-            //Arrange
-            var comicNumber = 1214;
-
-            // Act
-            var xkcdComic = service.GetComicAsync(comicNumber).Result;
-
-            // Assert
-            Assert.IsNotNull(xkcdComic);
-        }
-
-        [TestCleanup]
-        public void Dispose()
-        {
-            service.Dispose();
-        }
+    [TestCleanup]
+    public void Dispose()
+    {
+        service.Dispose();
     }
 }

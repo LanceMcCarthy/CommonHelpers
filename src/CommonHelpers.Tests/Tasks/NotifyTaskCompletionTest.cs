@@ -2,8 +2,6 @@
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,7 +30,7 @@ public class NotifyTaskCompletionTest
         var exception = new InvalidOperationException("fail");
         var task = Task.FromException<int>(exception);
         var notifyTask = new NotifyTaskCompletion<int>(task);
-        try { await task; } catch { }
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => task);
         Assert.IsTrue(notifyTask.IsCompleted);
         Assert.IsFalse(notifyTask.IsSuccessfullyCompleted);
         Assert.IsTrue(notifyTask.IsFaulted);
@@ -49,8 +47,8 @@ public class NotifyTaskCompletionTest
             cts.Token.ThrowIfCancellationRequested();
             return 0;
         }, cts.Token);
-        cts.Cancel();
-        try { await task; } catch { }
+        await cts.CancelAsync();
+        await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => task);
         var notifyTask = new NotifyTaskCompletion<int>(task);
         Assert.IsTrue(notifyTask.IsCompleted);
         Assert.IsFalse(notifyTask.IsSuccessfullyCompleted);
@@ -63,9 +61,9 @@ public class NotifyTaskCompletionTest
     {
         var tcs = new TaskCompletionSource<int>();
         var notifyTask = new NotifyTaskCompletion<int>(tcs.Task);
-        string[] expectedProps = new[] { "Status", "IsCompleted", "IsNotCompleted", "IsSuccessfullyCompleted", "Result" };
+        var expectedProps = new[] { "Status", "IsCompleted", "IsNotCompleted", "IsSuccessfullyCompleted", "Result" };
         var changedProps = new System.Collections.Generic.List<string>();
-        notifyTask.PropertyChanged += (s, e) => changedProps.Add(e.PropertyName);
+        notifyTask.PropertyChanged += (s, e) => changedProps.Add(e.PropertyName ?? string.Empty);
         tcs.SetResult(123);
         await tcs.Task;
         // Wait for property changed events to propagate

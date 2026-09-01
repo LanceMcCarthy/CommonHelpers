@@ -3,73 +3,48 @@ using System.Collections.ObjectModel;
 using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonHelpers.Tests.Extensions
+namespace CommonHelpers.Tests.Extensions;
+
+[TestClass]
+public class CollectionExtensionsTests
 {
-    [TestClass]
-    public class CollectionExtensionsTests
+    [TestMethod]
+    public void AddRange()
     {
-        [TestMethod]
-        public void AddRange()
-        {
-            // Arrange
-            var source = new List<string> { "Four", "Five", "Six" };
-            var target = new ObservableCollection<string> { "One", "Two", "Three" };
-            var expectedCount = source.Count + target.Count;
+        var source = new List<string> { "Four", "Five", "Six" };
+        var target = new ObservableCollection<string> { "One", "Two", "Three" };
+        var expectedCount = source.Count + target.Count;
 
+        target.AddRange(source);
 
-            // Act
-            target.AddRange(source);
+        Assert.IsTrue(target.Count == expectedCount);
+        Assert.AreEqual(target[3], "Four");
+    }
 
+    [TestMethod]
+    public void InsertRange()
+    {
+        var source = new List<string> { "Four", "Five", "Six" };
+        var target = new ObservableCollection<string> { "One", "Two", "Three" };
+        var expectedCount = source.Count + target.Count;
 
-            // Assert
-            // Checking total count
-            Assert.IsTrue(target.Count == expectedCount);
+        target.InsertRange(source, 1);
 
-            // Check items are at the expected location
-            Assert.AreEqual(target[3], "Four");
-        }
+        Assert.AreEqual(expectedCount, target.Count);
+        Assert.AreEqual("Four", target[1]);
+    }
 
-        [TestMethod]
-        public void InsertRange()
-        {
-            // Arrange
-            var source = new List<string> { "Four", "Five", "Six" };
-            var target = new ObservableCollection<string> { "One", "Two", "Three" };
-            var expectedCount = source.Count + target.Count;
+    [TestMethod]
+    public void RemoveRange()
+    {
+        const int startIndex = 1;
+        const int lengthToRemove = 2;
+        var target = new ObservableCollection<string> { "One", "Two", "Three", "Four", "Five", "Six" };
+        var expectedCount = target.Count - lengthToRemove;
 
+        target.RemoveRange(startIndex, lengthToRemove);
 
-            // Act
-            target.InsertRange(source, 1);
-
-
-            // Assert
-            // Checking total count
-            Assert.IsTrue(target.Count == expectedCount);
-
-            // Check items are at the expected location
-            Assert.AreEqual(target[1], "Four");
-        }
-
-        [TestMethod]
-        public void RemoveRange()
-        {
-            // Arrange
-            var target = new ObservableCollection<string> { "One", "Two", "Three", "Four", "Five", "Six" };
-            var startIndex = 1;
-            var lengthToRemove = 2;
-            var expectedCount = target.Count - lengthToRemove;
-
-
-            // Act
-            target.RemoveRange(startIndex, lengthToRemove);
-
-
-            // Assert
-            // Checking total count
-            Assert.IsTrue(target.Count == expectedCount);
-
-            // Check items are at the expected location
-            Assert.AreEqual(target[1], "Four");
-        }
+        Assert.AreEqual(expectedCount, target.Count);
+        Assert.AreEqual("Four", target[1]);
     }
 }
