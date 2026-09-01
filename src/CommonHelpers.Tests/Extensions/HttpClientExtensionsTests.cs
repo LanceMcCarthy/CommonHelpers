@@ -2,7 +2,10 @@ using CommonHelpers.Common.Args;
 using CommonHelpers.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,69 +14,97 @@ namespace CommonHelpers.Tests.Extensions;
 [TestClass]
 public class HttpClientExtensionsTests
 {
-    private const string TestUrl = "https://dvlup.blob.core.windows.net/general-app-files/StaticResources/LoremIpsum.txt";
-    private readonly HttpClient client = new();
+    private const string TestUrl = "https://example.test/LoremIpsum.txt";
+    private static readonly string TestContent = new('A', 10000);
+    private static readonly byte[] TestContentBytes = Encoding.UTF8.GetBytes(TestContent);
+    private readonly HttpClient client = CreateClient();
+
+    private sealed class FakeHttpMessageHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(CreateResponse());
+        }
+    }
+
+    private sealed class SynchronousProgressReporter : IProgress<DownloadProgressArgs>
+    {
+        public float PercentComplete { get; private set; }
+
+        public void Report(DownloadProgressArgs value)
+        {
+            PercentComplete = value.PercentComplete;
+        }
+    }
+
+    private static HttpClient CreateClient() => new(new FakeHttpMessageHandler());
+
+    private static HttpResponseMessage CreateResponse()
+    {
+        var content = new ByteArrayContent(TestContentBytes);
+        content.Headers.ContentLength = TestContentBytes.Length;
+
+        return new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = content
+        };
+    }
 
     [TestMethod]
     public async Task DownloadStringWithProgress_Works()
     {
-        var reporter = new Progress<DownloadProgressArgs>();
-        float progress = 0;
-
-        reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
+        var reporter = new SynchronousProgressReporter();
 
         var result = await client.DownloadStringWithProgressAsync(TestUrl, reporter);
 
-        Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null");
-        Assert.IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
+        Assert.AreEqual(TestContent, result);
+        Assert.IsTrue(reporter.PercentComplete is > 0 and <= 100, "Progress was not reported correctly");
     }
 
     [TestMethod]
     public async Task DownloadStringWithProgressAndCancellation_Works()
     {
         var cts = new CancellationTokenSource();
-        float progress = 0;
-        var reporter = new Progress<DownloadProgressArgs>();
-        reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
+        var reporter = new SynchronousProgressReporter();
 
         var result = await client.DownloadStringWithProgressAsync(TestUrl, reporter, cts.Token);
 
         Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
-        Assert.IsFalse(string.IsNullOrEmpty(result), "String result was null.");
-        Assert.IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
+        Assert.AreEqual(TestContent, result);
+        Assert.IsTrue(reporter.PercentComplete is > 0 and <= 100, "Progress was not reported correctly");
     }
 
     [TestMethod]
     public async Task DownloadStreamWithProgress_Works()
     {
-        float progress = 0;
-        var reporter = new Progress<DownloadProgressArgs>();
-        reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
+        var reporter = new SynchronousProgressReporter();
 
-        var result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter);
+        await using var result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter);
+        using var reader = new StreamReader(result);
+        var content = await reader.ReadToEndAsync();
 
         Assert.IsNotNull(result);
-        Assert.IsTrue(result.Length > 0, "Stream is empty");
-        Assert.IsTrue(progress > 0 && progress <= 100, "Progress was not reported correctly");
-
-        await result.DisposeAsync();
+        Assert.AreEqual(TestContentBytes.Length, result.Length, "Stream length was unexpected");
+        Assert.AreEqual(TestContent, content);
+        Assert.IsTrue(reporter.PercentComplete is > 0 and <= 100, "Progress was not reported correctly");
     }
 
     [TestMethod]
     public async Task DownloadStreamWithProgressAndCancellation_Works()
     {
         var cts = new CancellationTokenSource();
-        float progress = 0;
-        var reporter = new Progress<DownloadProgressArgs>();
-        reporter.ProgressChanged += (s, e) => progress = e.PercentComplete;
+        var reporter = new SynchronousProgressReporter();
 
-        var result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
+        await using var result = await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
+        using var reader = new StreamReader(result);
+        var content = await reader.ReadToEndAsync();
 
         Assert.IsFalse(cts.Token.IsCancellationRequested, "Cancellation was incorrectly requested.");
         Assert.IsNotNull(result);
-        Assert.IsTrue(result.Length > 0, "Stream is empty");
-        Assert.IsTrue(progress is > 0 and <= 100, "Progress was not reported correctly");
-        await result.DisposeAsync();
+        Assert.AreEqual(TestContentBytes.Length, result.Length, "Stream length was unexpected");
+        Assert.AreEqual(TestContent, content);
+        Assert.IsTrue(reporter.PercentComplete is > 0 and <= 100, "Progress was not reported correctly");
     }
 
     [TestMethod]
@@ -81,7 +112,7 @@ public class HttpClientExtensionsTests
     {
         var cts = new CancellationTokenSource();
         await cts.CancelAsync();
-        var reporter = new Progress<DownloadProgressArgs>();
+        var reporter = new SynchronousProgressReporter();
         await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
         {
             await client.DownloadStringWithProgressAsync(TestUrl, reporter, cts.Token);
@@ -93,7 +124,7 @@ public class HttpClientExtensionsTests
     {
         var cts = new CancellationTokenSource();
         await cts.CancelAsync();
-        var reporter = new Progress<DownloadProgressArgs>();
+        var reporter = new SynchronousProgressReporter();
         await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
         {
             await client.DownloadStreamWithProgressAsync(TestUrl, reporter, cts.Token);
