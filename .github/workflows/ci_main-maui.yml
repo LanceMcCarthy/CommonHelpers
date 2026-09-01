@@ -126,46 +126,59 @@ jobs:
     name: Sign NuGet packages
     needs: [build]
     runs-on: [self-hosted, x64, digicert-enabled]
+    env:
+      NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
     - name: Checkout
       uses: actions/checkout@v7
 
+    - name: Install .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{env.DOTNET_SDK_VERSION}}
+
     - name: Clean packages from runner workspace
-      run: Remove-Item -Recurse -Force "./**/*.nupkg" -ErrorAction SilentlyContinue
+      run: Remove-Item -Recurse -Force ${{env.NUPKG_PATH_MAUI}} -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        path: ${{github.workspace}}
 
     - name: Confirm package exists
       run: |
-        if (-not (Test-Path -Path "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg")) {
-          throw "NuGet package not found at ./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        } else {
-          Write-Host "NuGet package found at ./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        if (-not (Test-Path -LiteralPath ${{env.NUPKG_PATH_MAUI}} -PathType Leaf)) {
+          throw "NuGet package file not found at ${{env.NUPKG_PATH_MAUI}}"
         }
+        Write-Host "NuGet package found at ${{env.NUPKG_PATH_MAUI}}"
 
     - name: Sign NuGet package
       run: |
         $sacTools = "C:\Program Files\SafeNet\Authentication\SAC\x64\SACTools.exe"
         & $sacTools /Token /LogOn /Password "${{secrets.DIGICERT_HARDWARE_TOKEN_PASSWORD}}"
+        if ($LASTEXITCODE -ne 0) { throw "SACTools token logon failed with exit code $LASTEXITCODE" }
+
         $thumbprint = "8BC202959D2DCE3EEB3A489D8348B5C9B6B64A97"
-        $sdkRoot = "C:\Program Files (x86)\Windows Kits\10\bin"
-        $signTool = Get-ChildItem -Path $sdkRoot -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
-          Where-Object { $_.FullName -match '\\x64\\signtool\.exe$' } |
-          Sort-Object FullName -Descending | Select-Object -First 1
-        if (-not $signTool) { throw "signtool.exe not found under $sdkRoot" }
-        Write-Host "Using signtool: $($signTool.FullName)"
-        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        if ($LASTEXITCODE -ne 0) { throw "signtool sign failed with exit code $LASTEXITCODE" }
+        $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -ErrorAction Stop
+        $certificateFingerprint = $certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256)
+
+        dotnet nuget sign ${{env.NUPKG_PATH_MAUI}} `
+          --certificate-fingerprint $certificateFingerprint `
+          --certificate-store-location CurrentUser `
+          --certificate-store-name My `
+          --hash-algorithm SHA256 `
+          --timestamper http://timestamp.digicert.com `
+          --timestamp-hash-algorithm SHA256 `
+          --verbosity detailed
+
+        if ($LASTEXITCODE -ne 0) { throw "dotnet nuget sign failed with exit code $LASTEXITCODE" }
 
     - name: Upload signed NuGet package
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: "./CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+        path: ${{env.NUPKG_PATH_MAUI}}
         if-no-files-found: error
         retention-days: 30
         overwrite: true

@@ -85,28 +85,47 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v7
 
+    - name: Install .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{env.DOTNET_SDK_VERSION}}
+
     - name: Clean bundle workspace
-      run: Remove-Item -Recurse -Force "${{github.workspace}}\**\*.nupkg" -ErrorAction SilentlyContinue
+      run: Remove-Item -Recurse -Force ${{env.NUPKG_PATH}} -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
       with:
         name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{env.NUPKG_PATH}}
+        path: ${{github.workspace}}
+
+    - name: Confirm package exists
+      run: |
+        if (-not (Test-Path -LiteralPath ${{env.NUPKG_PATH}} -PathType Leaf)) {
+          throw "NuGet package file not found at ${{env.NUPKG_PATH}}"
+        }
+        Write-Host "NuGet package found at ${{env.NUPKG_PATH}}"
 
     - name: Sign NuGet package
       run: |
         $sacTools = "C:\Program Files\SafeNet\Authentication\SAC\x64\SACTools.exe"
         & $sacTools /Token /LogOn /Password "${{secrets.DIGICERT_HARDWARE_TOKEN_PASSWORD}}"
+        if ($LASTEXITCODE -ne 0) { throw "SACTools token logon failed with exit code $LASTEXITCODE" }
+
         $thumbprint = "8BC202959D2DCE3EEB3A489D8348B5C9B6B64A97"
-        $sdkRoot = "C:\Program Files (x86)\Windows Kits\10\bin"
-        $signTool = Get-ChildItem -Path $sdkRoot -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
-          Where-Object { $_.FullName -match '\\x64\\signtool\.exe$' } |
-          Sort-Object FullName -Descending | Select-Object -First 1
-        if (-not $signTool) { throw "signtool.exe not found under $sdkRoot" }
-        Write-Host "Using signtool: $($signTool.FullName)"
-        & $signTool.FullName sign /fd SHA256 /sha1 $thumbprint /tr http://timestamp.digicert.com /td SHA256 ${{env.NUPKG_PATH}}
-        if ($LASTEXITCODE -ne 0) { throw "signtool sign failed with exit code $LASTEXITCODE" }
+        $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -ErrorAction Stop
+        $certificateFingerprint = $certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256)
+
+        dotnet nuget sign ${{env.NUPKG_PATH}} `
+          --certificate-fingerprint $certificateFingerprint `
+          --certificate-store-location CurrentUser `
+          --certificate-store-name My `
+          --hash-algorithm SHA256 `
+          --timestamper http://timestamp.digicert.com `
+          --timestamp-hash-algorithm SHA256 `
+          --verbosity detailed
+
+        if ($LASTEXITCODE -ne 0) { throw "dotnet nuget sign failed with exit code $LASTEXITCODE" }
 
     - name: Upload signed NuGet package
       uses: actions/upload-artifact@v7
