@@ -1,15 +1,15 @@
 ﻿#nullable enable
-using System.Reflection;
 using CommonHelpers.Maui.Events;
+using System.Reflection;
 
 namespace CommonHelpers.Maui.Commands;
 
 public abstract class BaseCommand<TCanExecute>
 {
-    readonly Func<TCanExecute?, bool> canExecute;
-    readonly DelegateWeakEventManager weakEventManager = new();
+    private readonly Func<TCanExecute?, bool> canExecute;
+    private readonly DelegateWeakEventManager weakEventManager = new();
 
-    volatile int executionCount;
+    private volatile int executionCount;
 
     /// <summary>
     /// Initializes BaseCommand

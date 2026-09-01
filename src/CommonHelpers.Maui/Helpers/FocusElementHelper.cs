@@ -15,7 +15,7 @@ public static class FocusElementHelper
         view.SetValue(IsFocusedProperty, value);
     }
 
-    static void OnIsFocusedPropertyChanged(BindableObject view, object oldValue, object newValue)
+    private static void OnIsFocusedPropertyChanged(BindableObject view, object oldValue, object newValue)
     {
         if (view is not VisualElement visual)
         {

@@ -2,9 +2,9 @@
 
 namespace CommonHelpers.Maui.Events;
 
-public readonly struct Subscription(WeakReference subscriber, MethodInfo handler)
+public readonly record struct Subscription(WeakReference Subscriber, MethodInfo Handler)
 {
-    public WeakReference Subscriber { get; } = subscriber;
+    public WeakReference Subscriber { get; } = Subscriber;
 
-    public MethodInfo Handler { get; } = handler ?? throw new ArgumentNullException(nameof(handler));
+    public MethodInfo Handler { get; } = Handler ?? throw new ArgumentNullException(nameof(Handler));
 }

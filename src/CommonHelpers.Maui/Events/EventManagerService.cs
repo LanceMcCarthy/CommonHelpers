@@ -1,6 +1,6 @@
-﻿using System.Reflection;
+﻿using CommonHelpers.Maui.Events.Exceptions;
+using System.Reflection;
 using System.Reflection.Emit;
-using CommonHelpers.Maui.Events.Exceptions;
 
 namespace CommonHelpers.Maui.Events;
 
@@ -9,21 +9,20 @@ public static class EventManagerService
     internal static void AddEventHandler(in string eventName, in object? handlerTarget, in MethodInfo methodInfo, in Dictionary<string, List<Subscription>> eventHandlers)
     {
         var doesContainSubscriptions = eventHandlers.TryGetValue(eventName, out var targets);
+
         if (!doesContainSubscriptions || targets == null)
         {
-            targets = new List<Subscription>();
+            targets = [];
             eventHandlers.Add(eventName, targets);
         }
 
-        if (handlerTarget == null)
-            targets.Add(new Subscription(null, methodInfo));
-        else
-            targets.Add(new Subscription(new WeakReference(handlerTarget), methodInfo));
+        targets.Add(handlerTarget == null ? new Subscription(null, methodInfo) : new Subscription(new WeakReference(handlerTarget), methodInfo));
     }
 
     internal static void RemoveEventHandler(in string eventName, in object? handlerTarget, in MemberInfo methodInfo, in Dictionary<string, List<Subscription>> eventHandlers)
     {
         var doesContainSubscriptions = eventHandlers.TryGetValue(eventName, out var subscriptions);
+
         if (!doesContainSubscriptions || subscriptions == null)
             return;
 
@@ -42,23 +41,23 @@ public static class EventManagerService
         }
     }
 
-    internal static void HandleEvent(in string eventName, in object? sender, in object? eventArgs, in Dictionary<string, List<Subscription>> eventHandlers)
+    internal static void HandleEvent(in string eventName, in object sender, in object eventArgs, in Dictionary<string, List<Subscription>> eventHandlers)
     {
         AddRemoveEvents(eventName, eventHandlers, out var toRaise);
 
-        for (var i = 0; i < toRaise.Count; i++)
+        foreach (var t in toRaise)
         {
             try
             {
-                var (instance, eventHandler) = toRaise[i];
+                var (instance, eventHandler) = t;
                 if (eventHandler.IsLightweightMethod())
                 {
                     var method = TryGetDynamicMethod(eventHandler);
-                    method?.Invoke(instance, new[] { sender, eventArgs });
+                    method?.Invoke(instance, [sender, eventArgs]);
                 }
                 else
                 {
-                    eventHandler.Invoke(instance, new[] { sender, eventArgs });
+                    eventHandler.Invoke(instance, [sender, eventArgs]);
                 }
             }
             catch (TargetParameterCountException e)
@@ -68,23 +67,23 @@ public static class EventManagerService
         }
     }
 
-    internal static void HandleEvent(in string eventName, in object? actionEventArgs, in Dictionary<string, List<Subscription>> eventHandlers)
+    internal static void HandleEvent(in string eventName, in object actionEventArgs, in Dictionary<string, List<Subscription>> eventHandlers)
     {
         AddRemoveEvents(eventName, eventHandlers, out var toRaise);
 
-        for (var i = 0; i < toRaise.Count; i++)
+        foreach (var t in toRaise)
         {
             try
             {
-                var (instance, eventHandler) = toRaise[i];
+                var (instance, eventHandler) = t;
                 if (eventHandler.IsLightweightMethod())
                 {
                     var method = TryGetDynamicMethod(eventHandler);
-                    method?.Invoke(instance, new[] { actionEventArgs });
+                    method?.Invoke(instance, [actionEventArgs]);
                 }
                 else
                 {
-                    eventHandler.Invoke(instance, new[] { actionEventArgs });
+                    eventHandler.Invoke(instance, [actionEventArgs]);
                 }
             }
             catch (TargetParameterCountException e)
@@ -98,11 +97,11 @@ public static class EventManagerService
     {
         AddRemoveEvents(eventName, eventHandlers, out var toRaise);
 
-        for (var i = 0; i < toRaise.Count; i++)
+        foreach (var t in toRaise)
         {
             try
             {
-                var (instance, eventHandler) = toRaise[i];
+                var (instance, eventHandler) = t;
                 if (eventHandler.IsLightweightMethod())
                 {
                     var method = TryGetDynamicMethod(eventHandler);
@@ -120,55 +119,54 @@ public static class EventManagerService
         }
     }
 
-    static void AddRemoveEvents(in string eventName, in Dictionary<string, List<Subscription>> eventHandlers, out List<(object? Instance, MethodInfo EventHandler)> toRaise)
+    private static void AddRemoveEvents(in string eventName, in Dictionary<string, List<Subscription>> eventHandlers, out List<(object Instance, MethodInfo EventHandler)> toRaise)
     {
         var toRemove = new List<Subscription>();
-        toRaise = new List<(object?, MethodInfo)>();
+        toRaise = [];
 
         var doesContainEventName = eventHandlers.TryGetValue(eventName, out var target);
-        if (doesContainEventName && target != null)
+
+        if (!doesContainEventName || target == null) 
+            return;
+
+        foreach (var subscription in target)
         {
-            for (var i = 0; i < target.Count; i++)
+            var isStatic = subscription.Subscriber == null;
+
+            if (isStatic)
             {
-                var subscription = target[i];
-                var isStatic = subscription.Subscriber == null;
-
-                if (isStatic)
-                {
-                    toRaise.Add((null, subscription.Handler));
-                    continue;
-                }
-
-                var subscriber = subscription.Subscriber?.Target;
-
-                if (subscriber == null)
-                    toRemove.Add(subscription);
-                else
-                    toRaise.Add((subscriber, subscription.Handler));
+                toRaise.Add((null, subscription.Handler));
+                continue;
             }
 
-            for (var i = 0; i < toRemove.Count; i++)
-            {
-                var subscription = toRemove[i];
-                target.Remove(subscription);
-            }
+            var subscriber = subscription.Subscriber?.Target;
+
+            if (subscriber == null)
+                toRemove.Add(subscription);
+            else
+                toRaise.Add((subscriber, subscription.Handler));
+        }
+
+        foreach (var subscription in toRemove)
+        {
+            target.Remove(subscription);
         }
     }
 
-    static DynamicMethod? TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
+    private static DynamicMethod TryGetDynamicMethod(in MethodInfo rtDynamicMethod)
     {
-        var typeInfoRTDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
-        var typeRTDynamicMethod = typeInfoRTDynamicMethod?.AsType();
+        var typeInfoRtDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
+        var typeRtDynamicMethod = typeInfoRtDynamicMethod?.AsType();
 
-        if (typeInfoRTDynamicMethod != null && typeInfoRTDynamicMethod.IsAssignableFrom(rtDynamicMethod.GetType().GetTypeInfo()))
-            return (DynamicMethod?)typeRTDynamicMethod?.GetRuntimeFields()?.FirstOrDefault(f => f?.Name is "m_owner")?.GetValue(rtDynamicMethod);
+        if (typeInfoRtDynamicMethod != null && typeInfoRtDynamicMethod.IsAssignableFrom(rtDynamicMethod.GetType().GetTypeInfo()))
+            return (DynamicMethod?)typeRtDynamicMethod?.GetRuntimeFields()?.FirstOrDefault(f => f?.Name is "m_owner")?.GetValue(rtDynamicMethod);
         else
             return null;
     }
 
-    static bool IsLightweightMethod(this MethodBase method)
+    private static bool IsLightweightMethod(this MethodBase method)
     {
-        var typeInfoRTDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
-        return method is DynamicMethod || (typeInfoRTDynamicMethod?.IsAssignableFrom(method.GetType().GetTypeInfo()) ?? false);
+        var typeInfoRtDynamicMethod = typeof(DynamicMethod).GetTypeInfo().GetDeclaredNestedType("RTDynamicMethod");
+        return method is DynamicMethod || (typeInfoRtDynamicMethod?.IsAssignableFrom(method.GetType().GetTypeInfo()) ?? false);
     }
 }

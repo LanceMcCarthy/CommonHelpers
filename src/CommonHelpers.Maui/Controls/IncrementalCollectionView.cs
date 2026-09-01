@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using CommonHelpers.Collections.Interfaces;
+﻿using CommonHelpers.Collections.Interfaces;
+using System.ComponentModel;
 
 namespace CommonHelpers.Maui.Controls
 {

@@ -5,14 +5,14 @@ namespace CommonHelpers.Maui.Events;
 
 public class DelegateWeakEventManager
 {
-    readonly Dictionary<string, List<Subscription>> eventHandlers = new Dictionary<string, List<Subscription>>();
+    private readonly Dictionary<string, List<Subscription>> eventHandlers = new Dictionary<string, List<Subscription>>();
 
     /// <summary>
     /// Adds the event handler
     /// </summary>
     /// <param name="handler">Handler</param>
     /// <param name="eventName">Event name</param>
-    public void AddEventHandler(Delegate? handler, [CallerMemberName] string eventName = "")
+    public void AddEventHandler(Delegate handler, [CallerMemberName] string eventName = "")
     {
         if (string.IsNullOrWhiteSpace(eventName))
             throw new ArgumentNullException(nameof(eventName));
@@ -30,7 +30,7 @@ public class DelegateWeakEventManager
     /// </summary>
     /// <param name="handler">Handler</param>
     /// <param name="eventName">Event name</param>
-    public void RemoveEventHandler(Delegate? handler, [CallerMemberName] string eventName = "")
+    public void RemoveEventHandler(Delegate handler, [CallerMemberName] string eventName = "")
     {
         if (string.IsNullOrWhiteSpace(eventName))
             throw new ArgumentNullException(nameof(eventName));
@@ -49,7 +49,7 @@ public class DelegateWeakEventManager
     /// <param name="sender">Sender</param>
     /// <param name="eventArgs">Event arguments</param>
     /// <param name="eventName">Event name</param>
-    public void HandleEvent(object? sender, object eventArgs, string eventName) => RaiseEvent(sender, eventArgs, eventName);
+    public void HandleEvent(object sender, object eventArgs, string eventName) => RaiseEvent(sender, eventArgs, eventName);
 
     /// <summary>
     /// Invokes the event Action
@@ -63,7 +63,7 @@ public class DelegateWeakEventManager
     /// <param name="sender">Sender</param>
     /// <param name="eventArgs">Event arguments</param>
     /// <param name="eventName">Event name</param>
-    public void RaiseEvent(object? sender, object eventArgs, string eventName) =>
+    public void RaiseEvent(object sender, object eventArgs, string eventName) =>
         EventManagerService.HandleEvent(eventName, sender, eventArgs, eventHandlers);
 
     /// <summary>
