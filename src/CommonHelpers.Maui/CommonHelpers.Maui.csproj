@@ -16,9 +16,7 @@
     <CsWinRTRcwFactoryFallbackGeneratorForceOptOut Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</CsWinRTRcwFactoryFallbackGeneratorForceOptOut>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefaultLanguage>en</DefaultLanguage>
-  </PropertyGroup>
-
-  <PropertyGroup>
+    
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Lance McCarthy</Authors>
     <Company>Lancelot Software, LLC</Company>
