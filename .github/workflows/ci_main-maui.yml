@@ -79,7 +79,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "./src/CommonHelpers/bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers/bin/Release" --name "CommonHelpers_Bin"
 
     - name: Restore & Build CommonHelpers.Maui
       working-directory: src/CommonHelpers.Maui
@@ -89,7 +89,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "./src/CommonHelpers.Maui/bin" --name "CommonHelpers.Maui_Bin"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers.Maui/bin/Release" --name "CommonHelpers.Maui_Bin"
 
     - name: Get nupkg File Paths
       id: get-package-path

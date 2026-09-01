@@ -79,7 +79,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers/bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers/bin/Release" --name "CommonHelpers_Bin"
 
     - name: Install .NET Workload (maui)
       shell: pwsh
@@ -92,7 +92,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers.Maui/bin" --name "CommonHelpers.Maui_Release"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers.Maui/bin/Release" --name "CommonHelpers.Maui_Release"
 
     - name: Get Package File Path
       id: get-package-path
