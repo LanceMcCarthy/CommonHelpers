@@ -69,6 +69,6 @@ public static class FileExtensions
         if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentException("File path must not be empty.", nameof(filePath));
 
         // Do not dispose the stream before returning
-        return await Task.Run(() => (Stream)File.OpenRead(filePath));
+        return await Task.Run(Stream () => File.OpenRead(filePath));
     }
 }

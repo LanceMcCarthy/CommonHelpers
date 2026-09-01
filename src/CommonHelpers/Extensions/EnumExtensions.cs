@@ -6,20 +6,13 @@ using System.Reflection;
 
 namespace CommonHelpers.Extensions;
 
-public static class EnumExtenstions
+public static class EnumExtensions
 {
     public static List<T> GetEnumAsList<T>()
     {
         var array = Enum.GetValues(typeof(T));
 
-        var list = new List<T>();
-
-        foreach (var item in array)
-        {
-            list.Add((T) item);
-        }
-
-        return list;
+        return [.. array.Cast<T>()];
     }
         
     public static T GetEnumDefaultValue<T>()

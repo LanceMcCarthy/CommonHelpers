@@ -12,7 +12,7 @@ public class EnumExtensionsTests
     public void GetEnumAsList()
     {
         const int expectedCount = 7;
-        var days = EnumExtenstions.GetEnumAsList<DayOfWeek>();
+        var days = EnumExtensions.GetEnumAsList<DayOfWeek>();
         var actualDayCount = days.Count;
         Assert.AreEqual(expectedCount, actualDayCount);
     }
@@ -21,7 +21,7 @@ public class EnumExtensionsTests
     public void GetDefaultValue()
     {
         const GenderType expectedDefault = GenderType.Male;
-        var actualDefault = EnumExtenstions.GetEnumDefaultValue<GenderType>();
+        var actualDefault = EnumExtensions.GetEnumDefaultValue<GenderType>();
         Assert.AreEqual(expectedDefault, actualDefault);
     }
 }

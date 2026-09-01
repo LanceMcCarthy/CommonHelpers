@@ -24,12 +24,13 @@ public static class StringExtensions
     /// Hashes the given password using the provided SHA algorithm.
     /// </summary>
     /// <param name="password"></param>
-    /// <param name="sha">Default is SHA1Managed, but can accept any override (e.g. SHA256Managed or SHA512Managed)</param>
+    /// <param name="sha">Default is SHA1Managed, but can accept any override (e.g. SHA1.Create(), SHA256.Create(), etc.)</param>
     /// <returns></returns>
     public static string Hash(this string password, HashAlgorithm sha = null)
     {
         if (password == null)
             throw new ArgumentNullException(nameof(password));
+
         sha ??= new SHA1Managed();
 
         var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
