@@ -32,9 +32,9 @@ jobs:
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
-    # Change the bin's relative path to work in CI
+    # Remove nuget.config now, and only add project bin package sources later after they're created
     - name: Update package sources for CI
-      run: dotnet nuget update source "CommonHelpersBin" --source "${{github.workspace}}/src/CommonHelpers/bin" --configfile "${{github.workspace}}/src/nuget.config"
+      run: rm ${{github.workspace}}/src/nuget.config
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
@@ -46,7 +46,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers/bin" --name "CommonHelpers_Bin"
 
     - name: Get Version From Project
       uses: kzrnm/get-net-sdk-project-versions-action@v3

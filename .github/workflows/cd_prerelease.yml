@@ -33,24 +33,20 @@ jobs:
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
-    # Change the bin's relative path to work in CI
+    # Remove nuget.config now, and only add project bin package sources later after they're created
     - name: Update package sources for CI
-      run: dotnet nuget update source "CommonHelpersBin" --source "${{github.workspace}}/src/CommonHelpers/bin" --configfile "${{github.workspace}}/src/nuget.config"
-
-    - name: Install .NET Workload (maui)
-      shell: pwsh
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+      run: rm ${{github.workspace}}/src/nuget.config
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
     - name: Add Release Candidate (-rc.${{github.run_number}}) suffix to Version Number
       run : |
-        [xml]$projXml = get-content ${{env.PROJ_PATH}}
-        $versionNode = $projXml.Project.PropertyGroup.Version
-        $suffix = "-rc.${{github.run_number}}"
-        $versionNode.InnerText = $versionNode.InnerText + $suffix
-        $projXml.save(${{env.PROJ_PATH}})
+        [xml]$projXml = get-content "${{env.PROJ_PATH}}"
+        $currentVer = $projXml.Project.PropertyGroup.Version
+        $newVer = $currentVer + "-rc.${{github.run_number}}"
+        $projXml.Project.PropertyGroup.Version = $newVer
+        $projXml.save("${{env.PROJ_PATH}}")
 
     - name: Get Version From CommonHelpers Project
       uses: kzrnm/get-net-sdk-project-versions-action@v3
@@ -60,17 +56,21 @@ jobs:
 
     - name: Add Release Candidate (-rc.${{github.run_number}}) suffix to Maui Version Number
       run : |
-        [xml]$projXml = get-content ${{env.PROJ_PATH_MAUI}}
-        $versionNode = $projXml.SelectSingleNode('/Project/PropertyGroup/Version')
-        $suffix = "-rc.${{github.run_number}}"
-        $versionNode.InnerText = $versionNode.InnerText + $suffix
-        $projXml.save(${{env.PROJ_PATH_MAUI}})
+        [xml]$projXml = get-content "${{env.PROJ_PATH_MAUI}}"
+        $currentVer = $projXml.Project.PropertyGroup.Version
+        $newVer = $currentVer + "-rc.${{github.run_number}}"
+        $projXml.Project.PropertyGroup.Version = $newVer
+        $projXml.save("${{env.PROJ_PATH_MAUI}}")
 
     - name: Get Version From CommonHelpers.Maui Project
       uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version-maui
       with:
         proj-path: ${{env.PROJ_PATH_MAUI}}
+
+    - name: Install .NET Workload (maui)
+      shell: pwsh
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
     - name: Restore & Build CommonHelpers
       working-directory: src/CommonHelpers
@@ -79,7 +79,11 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers\bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers/bin" --name "CommonHelpers_Bin"
+
+    - name: Install .NET Workload (maui)
+      shell: pwsh
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
 
     - name: Restore & Build CommonHelpers.Maui
       working-directory: src/CommonHelpers.Maui
@@ -88,7 +92,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers.Maui Bin to NuGet Package Sources
-      run: dotnet nuget add source "${{github.workspace}}\src\CommonHelpers.Maui\bin" --name "CommonHelpers.Maui_Release"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers.Maui/bin" --name "CommonHelpers.Maui_Release"
 
     - name: Get Package File Path
       id: get-package-path

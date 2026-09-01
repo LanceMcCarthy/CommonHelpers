@@ -36,9 +36,9 @@ jobs:
       with:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
-    # Change the bin's relative path to work in CI
+    # Remove nuget.config now, and only add project bin package sources later after they're created
     - name: Update package sources for CI
-      run: dotnet nuget update source "CommonHelpersBin" --source "${{github.workspace}}/src/CommonHelpers/bin" --configfile "${{github.workspace}}/src/nuget.config"
+      run: rm ${{github.workspace}}/src/nuget.config
 
     - name: Install .NET Workload (maui)
       run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
@@ -49,20 +49,15 @@ jobs:
     - name: Add Alpha (-alpha.${{github.run_number}}) suffix to Version Numbers
       run : |
         [xml]$projXml = get-content "${{env.PROJ_PATH}}"
-        Write-Output "Before: " $projXml.Project.PropertyGroup.Version
         $currentVer = $projXml.Project.PropertyGroup.Version
-        $suffix = "-alpha.${{github.run_number}}"
-        $newVer = $currentVer + $suffix
+        $newVer = $currentVer + "-alpha.${{github.run_number}}"
         $projXml.Project.PropertyGroup.Version = $newVer
-        Write-Output "After: " $projXml.Project.PropertyGroup.Version
         $projXml.save("${{env.PROJ_PATH}}")
 
         [xml]$projXmlMaui = get-content "${{env.PROJ_PATH_MAUI}}"
-        $versionNodeMaui = $projXmlMaui.SelectSingleNode('/Project/PropertyGroup/Version')
-        Write-Output "Before: " $versionNodeMaui.InnerText
-        $newVerMaui = $versionNodeMaui.InnerText + "-alpha.${{github.run_number}}"
-        $versionNodeMaui.InnerText = $newVerMaui
-        Write-Output "After: " $versionNodeMaui.InnerText
+        $currentVerMaui = $projXmlMaui.Project.PropertyGroup.Version
+        $newVerMaui = $currentVerMaui + "-alpha.${{github.run_number}}"
+        $projXmlMaui.Project.PropertyGroup.Version = $newVerMaui
         $projXmlMaui.save("${{env.PROJ_PATH_MAUI}}")
 
     - name: Get CommonHelpers Version Number From Project
@@ -89,7 +84,7 @@ jobs:
     - name: Restore & Build CommonHelpers.Maui
       working-directory: src/CommonHelpers.Maui
       run: |
-        dotnet install "CommonHelpers" --version "${{steps.get-version.outputs.package-version}}"
+        dotnet add package "CommonHelpers" --version "${{steps.get-version.outputs.package-version}}"
         dotnet restore --runtime any --ignore-failed-sources
         dotnet build -c Release --no-restore
 
