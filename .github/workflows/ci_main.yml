@@ -56,7 +56,7 @@ jobs:
         dotnet build -c Release --no-restore
 
     - name: Add CommonHelpers Bin to NuGet Package Sources
-      run: dotnet nuget add source "./src/CommonHelpers/bin" --name "CommonHelpers_Bin"
+      run: dotnet nuget add source "${{github.workspace}}/src/CommonHelpers/bin/Release" --name "CommonHelpers_Bin"
 
     - name: Get Package File Path
       id: get-package-path
