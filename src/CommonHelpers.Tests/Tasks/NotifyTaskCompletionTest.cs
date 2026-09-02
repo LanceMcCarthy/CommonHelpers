@@ -42,13 +42,8 @@ public class NotifyTaskCompletionTest
     [TestMethod]
     public async Task NotifyTaskCompletion_CanceledTask_PropertiesAreCorrect()
     {
-        var cts = new CancellationTokenSource();
-        var task = Task.Run<int>(() => {
-            cts.Token.ThrowIfCancellationRequested();
-            return 0;
-        }, cts.Token);
-        await cts.CancelAsync();
-        await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => task);
+        var task = Task.FromCanceled<int>(new CancellationToken(canceled: true));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => task);
         var notifyTask = new NotifyTaskCompletion<int>(task);
         Assert.IsTrue(notifyTask.IsCompleted);
         Assert.IsFalse(notifyTask.IsSuccessfullyCompleted);
