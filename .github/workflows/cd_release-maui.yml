@@ -124,7 +124,7 @@ jobs:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
     - name: Clean bundle workspace
-      run: Remove-Item -Recurse -Force ${{env.NUPKG_PATH_MAUI}} -ErrorAction SilentlyContinue
+      run: Remove-Item -Recurse -Force "${{env.NUPKG_PATH_MAUI}}" -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
@@ -134,7 +134,7 @@ jobs:
 
     - name: Confirm package exists
       run: |
-        if (-not (Test-Path -LiteralPath ${{env.NUPKG_PATH_MAUI}} -PathType Leaf)) {
+        if (-not (Test-Path -LiteralPath "${{env.NUPKG_PATH_MAUI}}" -PathType Leaf)) {
           throw "NuGet package file not found at ${{env.NUPKG_PATH_MAUI}}"
         }
         Write-Host "NuGet package found at ${{env.NUPKG_PATH_MAUI}}"
@@ -149,7 +149,7 @@ jobs:
         $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -ErrorAction Stop
         $certificateFingerprint = $certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256)
 
-        dotnet nuget sign ${{env.NUPKG_PATH_MAUI}} `
+        dotnet nuget sign "${{env.NUPKG_PATH_MAUI}}" `
           --certificate-fingerprint $certificateFingerprint `
           --certificate-store-location CurrentUser `
           --certificate-store-name My `
@@ -164,7 +164,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{env.NUPKG_PATH_MAUI}}
+        path: "${{env.NUPKG_PATH_MAUI}}"
         if-no-files-found: error
         retention-days: 30
         overwrite: true
@@ -174,6 +174,7 @@ jobs:
     needs: [build, codesign]
     runs-on: windows-latest
     permissions:
+      contents: write  # Create the GitHub prerelease
       id-token: write  # OIDC for NuGet.org
     env:
       NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
@@ -208,4 +209,4 @@ jobs:
         name: "CommonHelpers.Maui v${{needs.build.outputs.app_version_maui}}"
         draft: false
         prerelease: false
-        files: ${{env.NUPKG_PATH_MAUI}}
+        files: "${{env.NUPKG_PATH_MAUI}}"

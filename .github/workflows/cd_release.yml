@@ -52,7 +52,7 @@ jobs:
       uses: kzrnm/get-net-sdk-project-versions-action@v3
       id: get-version
       with:
-        proj-path: ${{env.PROJ_PATH}}
+        proj-path: "${{env.PROJ_PATH}}"
 
     - name: Get Package File Path
       id: get-package-path
@@ -98,7 +98,7 @@ jobs:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
     - name: Clean bundle workspace
-      run: Remove-Item -Recurse -Force ${{env.NUPKG_PATH}} -ErrorAction SilentlyContinue
+      run: Remove-Item -Recurse -Force "${{env.NUPKG_PATH}}" -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
@@ -108,7 +108,7 @@ jobs:
 
     - name: Confirm package exists
       run: |
-        if (-not (Test-Path -LiteralPath ${{env.NUPKG_PATH}} -PathType Leaf)) {
+        if (-not (Test-Path -LiteralPath "${{env.NUPKG_PATH}}" -PathType Leaf)) {
           throw "NuGet package file not found at ${{env.NUPKG_PATH}}"
         }
         Write-Host "NuGet package found at ${{env.NUPKG_PATH}}"
@@ -123,7 +123,7 @@ jobs:
         $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -ErrorAction Stop
         $certificateFingerprint = $certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256)
 
-        dotnet nuget sign ${{env.NUPKG_PATH}} `
+        dotnet nuget sign "${{env.NUPKG_PATH}}" `
           --certificate-fingerprint $certificateFingerprint `
           --certificate-store-location CurrentUser `
           --certificate-store-name My `
@@ -138,7 +138,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{env.NUPKG_PATH}}
+        path: "${{env.NUPKG_PATH}}"
         if-no-files-found: error
         retention-days: 30
         overwrite: true
@@ -148,6 +148,7 @@ jobs:
     needs: [build, codesign]
     runs-on: windows-latest
     permissions:
+      contents: write  # Create the GitHub prerelease
       id-token: write  # OIDC for NuGet.org
     env:
       NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
@@ -173,7 +174,7 @@ jobs:
         user: lancewmccarthy
 
     - name: Publish CommonHelpers to NuGet.org
-      run: dotnet nuget push ${{env.NUPKG_PATH}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
+      run: dotnet nuget push "${{env.NUPKG_PATH}}" --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3.0.3
@@ -182,4 +183,4 @@ jobs:
         name: "CommonHelpers v${{needs.build.outputs.app_version}}"
         draft: false
         prerelease: false
-        files: ${{env.NUPKG_PATH}}
+        files: "${{env.NUPKG_PATH}}"

@@ -169,7 +169,7 @@ jobs:
 
     - name: Confirm packages exist
       run: |
-        $packagePaths = @(${{env.NUPKG_PATH}}, ${{env.NUPKG_PATH_MAUI}})
+        $packagePaths = @("${{env.NUPKG_PATH}}", "${{env.NUPKG_PATH_MAUI}}")
         foreach ($packagePath in $packagePaths) {
           if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
             throw "NuGet package file not found at $packagePath"
@@ -187,7 +187,7 @@ jobs:
         $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -ErrorAction Stop
         $certificateFingerprint = $certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256)
 
-        dotnet nuget sign ${{env.NUPKG_PATH}} ${{env.NUPKG_PATH_MAUI}} `
+        dotnet nuget sign "${{env.NUPKG_PATH}}" "${{env.NUPKG_PATH_MAUI}}" `
           --certificate-fingerprint $certificateFingerprint `
           --certificate-store-location CurrentUser `
           --certificate-store-name My `
@@ -211,7 +211,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{env.NUPKG_PATH_MAUI}}
+        path: "${{env.NUPKG_PATH_MAUI}}"
         if-no-files-found: error
         retention-days: 30
         overwrite: true
@@ -254,7 +254,7 @@ jobs:
 
     - name: Confirm packages exist
       run: |
-        $packagePaths = @(${{env.NUPKG_PATH}}, ${{env.NUPKG_PATH_MAUI}})
+        $packagePaths = @("${{env.NUPKG_PATH}}", "${{env.NUPKG_PATH_MAUI}}")
         foreach ($packagePath in $packagePaths) {
           if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
             throw "NuGet package file not found at $packagePath"
@@ -270,8 +270,8 @@ jobs:
 
     - name: Publish packages to NuGet.org
       run: |
-        dotnet nuget push ${{env.NUPKG_PATH}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
-        dotnet nuget push ${{env.NUPKG_PATH_MAUI}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
+        dotnet nuget push "${{env.NUPKG_PATH}}" --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
+        dotnet nuget push "${{env.NUPKG_PATH_MAUI}}" --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3.0.3
@@ -281,5 +281,5 @@ jobs:
         draft: false
         prerelease: true
         files: |
-          ${{env.NUPKG_PATH}}
-          ${{env.NUPKG_PATH_MAUI}}
+          "${{env.NUPKG_PATH}}"
+          "${{env.NUPKG_PATH_MAUI}}"
