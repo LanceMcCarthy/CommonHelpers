@@ -113,7 +113,7 @@ jobs:
 
     - name: Run Tests
       working-directory: src/CommonHelpers.Tests
-      run: dotnet test --runtime any -c Release --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      run: dotnet test --runtime any -c Release --no-build --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
     - name: Upload CommonHelpers.Maui NuGet package artifact
       uses: actions/upload-artifact@v7
