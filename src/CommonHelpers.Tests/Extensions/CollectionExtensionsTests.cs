@@ -18,7 +18,7 @@ public class CollectionExtensionsTests
         target.AddRange(source);
 
         Assert.IsTrue(target.Count == expectedCount);
-        Assert.AreEqual(target[3], "Four");
+        Assert.AreEqual("Four", target[3]);
     }
 
     [TestMethod]

@@ -83,7 +83,7 @@ public class ColorExtensionsTests
         Assert.IsInstanceOfType(hsvColor, typeof(Tuple<double, double, double>));
         Assert.AreNotEqual(r, h);
         Assert.AreNotEqual(g, s);
-        Assert.AreNotEqual(v, b);
+        Assert.AreNotEqual(b, v);
     }
 
     [TestMethod]
