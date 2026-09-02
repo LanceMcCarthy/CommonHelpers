@@ -107,7 +107,7 @@ jobs:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
     - name: Clean bundle workspace
-      run: Remove-Item -Recurse -Force $env:NUPKG_PATH -ErrorAction SilentlyContinue
+      run: Remove-Item -Recurse -Force "${{github.workspace}}/*.nupkg" -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
       id: dl-commonhelpers-nupkg
