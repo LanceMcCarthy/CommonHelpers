@@ -70,11 +70,11 @@ jobs:
       working-directory: src/CommonHelpers.Tests
       run: |
         dotnet restore --runtime any --ignore-failed-sources
-        dotnet build -c Release --no-restore
+        dotnet build -c Release --no-restore --no-dependencies
 
     - name: Run Tests
       working-directory: src/CommonHelpers.Tests
-      run: dotnet test --runtime any -c Release --no-build --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      run: dotnet test -c Release --no-build --logger GitHubActions --blame-crash --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
     - name: Upload CommonHelpers NuGet package artifact
       uses: actions/upload-artifact@v7
