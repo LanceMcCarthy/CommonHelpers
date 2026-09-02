@@ -117,10 +117,10 @@ jobs:
 
     - name: Confirm package exists
       run: |
-        if (-not (Test-Path -LiteralPath ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}} -PathType Leaf)) {
-          throw "NuGet package file not found at ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}"
+        if (-not (Test-Path -LiteralPath "${{steps.dl-commonhelpers-nupkg.outputs.download-path}}/${{env.PKG_NAME}}" -PathType Leaf)) {
+          throw "NuGet package file not found at ${{steps.dl-commonhelpers-nupkg.outputs.download-path}}/${{env.PKG_NAME}}"
         }
-        Write-Host "NuGet package found at ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}"
+        Write-Host "NuGet package found at ${{steps.dl-commonhelpers-nupkg.outputs.download-path}}/${{env.PKG_NAME}}"
 
     - name: Sign NuGet package
       run: |
@@ -132,7 +132,7 @@ jobs:
         $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -ErrorAction Stop
         $certificateFingerprint = $certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256)
 
-        dotnet nuget sign ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}} `
+        dotnet nuget sign "${{steps.dl-commonhelpers-nupkg.outputs.download-path}}/${{env.PKG_NAME}}" `
           --certificate-fingerprint $certificateFingerprint `
           --certificate-store-location CurrentUser `
           --certificate-store-name My `
@@ -147,7 +147,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: ${{env.PKG_NAME}}
-        path: ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}
+        path: "${{steps.dl-commonhelpers-nupkg.outputs.download-path}}/${{env.PKG_NAME}}"
         if-no-files-found: error
         retention-days: 30
         overwrite: true
