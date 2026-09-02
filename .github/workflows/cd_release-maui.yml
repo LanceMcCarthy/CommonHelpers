@@ -20,7 +20,7 @@ jobs:
       app_version_maui: ${{steps.get-version-maui.outputs.package-version}}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@v2.21.1 #immutable
       with:
         egress-policy: audit
 
@@ -180,7 +180,7 @@ jobs:
       NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@v2.21.1 #immutable
       with:
         egress-policy: audit
 
@@ -191,16 +191,16 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{env.NUPKG_PATH_MAUI}}
+        path: "${{env.NUPKG_PATH_MAUI}}"
 
     - name: NuGet login
       uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841  #v1.2.0
       id: ngt-login
       with:
-        user: lancewmccarthy
+        user: LancelotSoftware
 
     - name: Publish CommonHelpers.Maui to NuGet.org
-      run: dotnet nuget push ${{env.NUPKG_PATH_MAUI}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
+      run: dotnet nuget push "${{env.NUPKG_PATH_MAUI}}" --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3.0.3

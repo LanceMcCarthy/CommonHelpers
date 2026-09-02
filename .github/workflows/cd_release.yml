@@ -20,7 +20,7 @@ jobs:
       app_version: ${{steps.get-version.outputs.package-version}}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@v2.21.1 #immutable
       with:
         egress-policy: audit
 
@@ -154,7 +154,7 @@ jobs:
       NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@v2.21.1 #immutable
       with:
         egress-policy: audit
 
@@ -171,7 +171,7 @@ jobs:
       uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841  #v1.2.0
       id: ngt-login
       with:
-        user: lancewmccarthy
+        user: LancelotSoftware
 
     - name: Publish CommonHelpers to NuGet.org
       run: dotnet nuget push "${{env.NUPKG_PATH}}" --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}

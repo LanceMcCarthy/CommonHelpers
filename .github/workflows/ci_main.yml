@@ -22,7 +22,7 @@ jobs:
       app_version: ${{steps.get-version.outputs.package-version}}
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@v2.21.1 #immutable
       with:
         egress-policy: audit
 
@@ -98,11 +98,6 @@ jobs:
     env:
       NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
     steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
-      with:
-        egress-policy: audit
-
     - name: Checkout
       uses: actions/checkout@v7
 

@@ -139,11 +139,6 @@ jobs:
       NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
       NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
-      with:
-        egress-policy: audit
-
     - name: Checkout
       uses: actions/checkout@v7
 
@@ -228,7 +223,7 @@ jobs:
       NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+      uses: step-security/harden-runner@v2.21.1 #immutable
       with:
         egress-policy: audit
 
@@ -266,7 +261,7 @@ jobs:
       uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841  # v1.2.0
       id: ngt-login
       with:
-        user: lancewmccarthy
+        user: LancelotSoftware
 
     - name: Publish packages to NuGet.org
       run: |
