@@ -136,8 +136,8 @@ jobs:
     needs: [build]
     runs-on: [self-hosted, x64, digicert-enabled]
     env:
-      NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-      NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+      PKG_NAME: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+      PKG_NAME_MAUI: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -148,23 +148,23 @@ jobs:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
     - name: Clean bundle workspace
-      run: Remove-Item -Recurse -Force ${{env.NUPKG_PATH}}, ${{env.NUPKG_PATH_MAUI}} -ErrorAction SilentlyContinue
+      run: Remove-Item -Recurse -Force "${{github.workspace}}/*.nupkg" -ErrorAction SilentlyContinue
 
     - name: Download nupkg artifact
+      id: dl-commonhelpers-nupkg
       uses: actions/download-artifact@v8
       with:
-        name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{github.workspace}}
+        name: ${{env.PKG_NAME}}
 
     - name: Download nupkg artifact
+      id: dl-commonhelpers-maui-nupkg
       uses: actions/download-artifact@v8
       with:
-        name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{github.workspace}}
+        name: ${{env.PKG_NAME_MAUI}}
 
     - name: Confirm packages exist
       run: |
-        $packagePaths = @("${{env.NUPKG_PATH}}", "${{env.NUPKG_PATH_MAUI}}")
+        $packagePaths = @("${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}", "${{steps.dl-commonhelpers-maui-nupkg.outputs.artifact-path}}")
         foreach ($packagePath in $packagePaths) {
           if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
             throw "NuGet package file not found at $packagePath"
@@ -182,7 +182,7 @@ jobs:
         $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -ErrorAction Stop
         $certificateFingerprint = $certificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256)
 
-        dotnet nuget sign "${{env.NUPKG_PATH}}" "${{env.NUPKG_PATH_MAUI}}" `
+        dotnet nuget sign "${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}" "${{steps.dl-commonhelpers-maui-nupkg.outputs.artifact-path}}" `
           --certificate-fingerprint $certificateFingerprint `
           --certificate-store-location CurrentUser `
           --certificate-store-name My `
@@ -196,8 +196,8 @@ jobs:
     - name: Upload signed NuGet package
       uses: actions/upload-artifact@v7
       with:
-        name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{env.NUPKG_PATH}}
+        name: ${{env.PKG_NAME}}
+        path: ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}
         if-no-files-found: error
         retention-days: 30
         overwrite: true
@@ -205,8 +205,8 @@ jobs:
     - name: Upload signed NuGet package
       uses: actions/upload-artifact@v7
       with:
-        name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: "${{env.NUPKG_PATH_MAUI}}"
+        name: ${{env.PKG_NAME_MAUI}}
+        path: ${{steps.dl-commonhelpers-maui-nupkg.outputs.artifact-path}}
         if-no-files-found: error
         retention-days: 30
         overwrite: true
@@ -219,8 +219,8 @@ jobs:
       contents: write  # Create the GitHub prerelease
       id-token: write  # OIDC for NuGet.org
     env:
-      NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-      NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
+      PKG_NAME: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
+      PKG_NAME_MAUI: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@v2.21.1 #immutable
@@ -236,20 +236,20 @@ jobs:
         dotnet-version: ${{env.DOTNET_SDK_VERSION}}
 
     - name: Download nupkg artifact
+      id: dl-commonhelpers-nupkg
       uses: actions/download-artifact@v8
       with:
-        name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{github.workspace}}
+        name: ${{env.PKG_NAME}}
 
     - name: Download nupkg artifact
+      id: dl-commonhelpers-maui-nupkg
       uses: actions/download-artifact@v8
       with:
-        name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{github.workspace}}
+        name: ${{env.PKG_NAME_MAUI}}
 
     - name: Confirm packages exist
       run: |
-        $packagePaths = @("${{env.NUPKG_PATH}}", "${{env.NUPKG_PATH_MAUI}}")
+        $packagePaths = @("${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}", "${{steps.dl-commonhelpers-maui-nupkg.outputs.artifact-path}}")
         foreach ($packagePath in $packagePaths) {
           if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
             throw "NuGet package file not found at $packagePath"
@@ -265,8 +265,8 @@ jobs:
 
     - name: Publish packages to NuGet.org
       run: |
-        dotnet nuget push "${{env.NUPKG_PATH}}" --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
-        dotnet nuget push "${{env.NUPKG_PATH_MAUI}}" --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
+        dotnet nuget push ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
+        dotnet nuget push ${{steps.dl-commonhelpers-maui-nupkg.outputs.artifact-path}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3.0.3
@@ -276,5 +276,5 @@ jobs:
         draft: false
         prerelease: true
         files: |
-          "${{env.NUPKG_PATH}}"
-          "${{env.NUPKG_PATH_MAUI}}"
+          ${{steps.dl-commonhelpers-nupkg.outputs.artifact-path}}
+          ${{steps.dl-commonhelpers-maui-nupkg.outputs.artifact-path}}
