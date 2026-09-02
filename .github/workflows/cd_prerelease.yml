@@ -36,7 +36,7 @@ jobs:
     # Remove nuget.config now, and only add project bin package sources later after they're created
     - name: Update package sources for CI
       run: rm ${{github.workspace}}/src/nuget.config
-    
+
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
 
@@ -68,10 +68,6 @@ jobs:
       with:
         proj-path: ${{env.PROJ_PATH_MAUI}}
 
-    - name: Install .NET Workload (maui)
-      shell: pwsh
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
-
     - name: Restore & Build CommonHelpers
       working-directory: src/CommonHelpers
       run: |
@@ -88,6 +84,7 @@ jobs:
     - name: Restore & Build CommonHelpers.Maui
       working-directory: src/CommonHelpers.Maui
       run: |
+        dotnet add package "CommonHelpers" --version "${{steps.get-version.outputs.package-version}}"
         dotnet restore --runtime any --ignore-failed-sources
         dotnet build -c Release --no-restore
 
@@ -116,7 +113,7 @@ jobs:
       working-directory: src/CommonHelpers.Tests
       run: |
         dotnet restore --runtime any --ignore-failed-sources
-        dotnet build --configuration Release
+        dotnet build -c Release --no-restore
 
     - name: Run Tests
       working-directory: src/CommonHelpers.Tests
@@ -223,6 +220,9 @@ jobs:
     name: Push Releases
     needs: [build, codesign]
     runs-on: windows-latest
+    permissions:
+      contents: write  # Create the GitHub prerelease
+      id-token: write  # OIDC for NuGet.org
     env:
       NUPKG_PATH: "${{github.workspace}}/CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
       NUPKG_PATH_MAUI: "${{github.workspace}}/CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
@@ -235,17 +235,43 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v7
 
+    - name: Install .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{env.DOTNET_SDK_VERSION}}
+
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
       with:
         name: "CommonHelpers.${{needs.build.outputs.app_version}}.nupkg"
-        path: ${{env.NUPKG_PATH}}
+        path: ${{github.workspace}}
 
     - name: Download nupkg artifact
       uses: actions/download-artifact@v8
       with:
         name: "CommonHelpers.Maui.${{needs.build.outputs.app_version_maui}}.nupkg"
-        path: ${{env.NUPKG_PATH_MAUI}}
+        path: ${{github.workspace}}
+
+    - name: Confirm packages exist
+      run: |
+        $packagePaths = @(${{env.NUPKG_PATH}}, ${{env.NUPKG_PATH_MAUI}})
+        foreach ($packagePath in $packagePaths) {
+          if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
+            throw "NuGet package file not found at $packagePath"
+          }
+          Write-Host "NuGet package found at $packagePath"
+        }
+
+    - name: NuGet login
+      uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841  # v1.2.0
+      id: ngt-login
+      with:
+        user: lancewmccarthy
+
+    - name: Publish packages to NuGet.org
+      run: |
+        dotnet nuget push ${{env.NUPKG_PATH}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
+        dotnet nuget push ${{env.NUPKG_PATH_MAUI}} --source https://api.nuget.org/v3/index.json --api-key ${{steps.ngt-login.outputs.NUGET_API_KEY}}
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3.0.3
