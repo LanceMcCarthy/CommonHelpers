@@ -31,9 +31,9 @@
     <RepositoryUrl>https://github.com/LanceMcCarthy/CommonHelpers</RepositoryUrl>
     <PackageTags>dotnetmaui maui C#</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>0.6.0.0</AssemblyVersion>
-    <Version>0.6.0</Version>
-    <FileVersion>0.6.0.0</FileVersion>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
+    <Version>0.7.0</Version>
+    <FileVersion>0.7.0.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>CommonHelpersMauiIcon.png</PackageIcon>
     <SignAssembly>false</SignAssembly>
@@ -54,16 +54,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Sbom.Targets" Version="4.1.5">
+    <PackageReference Include="Microsoft.Sbom.Targets" Version="4.1.13">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.100" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.130" />
     <PackageReference Include="CommonHelpers" Version="[1.6.0-alpha,)" />
   </ItemGroup>
 
